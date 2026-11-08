@@ -1,0 +1,9 @@
+[package]
+name = "tt-isa"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+description = "Blackhole ISA: instruction encoders, register maps, coordinate spaces. no_std, no dependencies."
+
+[dependencies]
