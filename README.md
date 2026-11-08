@@ -10,9 +10,9 @@ This crate is the `tt-isa` crate of **metalium-rs**, written by its authors:
 It is published here as a standalone crate so that projects can depend on it
 from crates.io. All credit for the design, the generated encodings, the
 documentation and the tests belongs to the metalium-rs authors. This repository
-is a fork, maintained by zyx (https://github.com/zk4x/zyx); it exists because
-the upstream crate is not published and a path dependency blocks publication of
-downstream crates.
+is a fork maintained by **zk4x** (https://github.com/zk4x), the author of zyx
+(https://github.com/zk4x/zyx); it exists because the upstream crate is not
+published and a path dependency blocks publication of downstream crates.
 
 The upstream authors were asked on 2026-11-04 (issue
 https://github.com/Knight-Ops/metalium-rs/issues/31) whether they want to

@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 license = "Apache-2.0"
+repository = "https://github.com/zk4x/tt-isa"
+homepage = "https://github.com/Knight-Ops/metalium-rs"
+documentation = "https://docs.rs/tt-isa"
 description = "Blackhole ISA: instruction encoders, register maps, coordinate spaces. no_std, no dependencies."
 
 [dependencies]
