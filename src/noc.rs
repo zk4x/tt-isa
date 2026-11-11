@@ -523,7 +523,10 @@ pub mod niu {
     }
 
     impl Endpoint {
-        pub(crate) const fn hi(self) -> u32 {
+        /// The endpoint's high address word: the tile coordinate packed as
+        /// `x | y << 6`, which is what an initiator's `TARG_ADDR_HI` or
+        /// `RET_ADDR_HI` carries.
+        pub const fn hi(self) -> u32 {
             (self.x as u32 & 0x3F) | ((self.y as u32 & 0x3F) << 6)
         }
     }
@@ -600,16 +603,22 @@ pub mod niu {
         PortNoc,
     }
 
-    pub(crate) const CMD_WR: u32 = 2;
-    pub(crate) const CMD_RD: u32 = 0;
-    pub(crate) const CMD_AT: u32 = 1;
+    /// `NOC_CTRL`'s command field: a write (`MemoryMap.md`, `NOC_CTRL`).
+    pub const CMD_WR: u32 = 2;
+    /// `NOC_CTRL`'s command field: a read.
+    pub const CMD_RD: u32 = 0;
+    /// `NOC_CTRL`'s command field: an atomic.
+    pub const CMD_AT: u32 = 1;
     /// `NOC_AT_LEN_BE`'s opcode for an increment (`Bits32.lua`,
     /// `NOC_AT_LEN_BE_Increment`: bits 12..16 = 1).
     const AT_INCREMENT: u32 = 1 << 12;
     const WR_INLINE: u32 = 1 << 3;
-    pub(crate) const RESP_MARKED: u32 = 1 << 4;
+    /// `NOC_CTRL`'s response-marked bit: the request counts in the NIU's
+    /// outstanding counter. Reads always respond; ttsim refuses one without it
+    /// (divergence row 61), so it is set on every request.
+    pub const RESP_MARKED: u32 = 1 << 4;
     /// `NOC_CMD_VC_STATIC` with `NOC_CMD_STATIC_VC` = class `0b00`, buddy 1.
-    pub(crate) const STATIC_VC_1: u32 = (1 << 7) | (1 << 13);
+    pub const STATIC_VC_1: u32 = (1 << 7) | (1 << 13);
 
     impl Command {
         /// The initiator registers to write, in order, before `CMD_CTRL`, for

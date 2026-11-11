@@ -120,8 +120,13 @@ pub const MOP_CFG_VALID: u64 = MAILBOX_BASE + 0x48;
 /// written to the thread's `TENSIX_MOP_CFG_BASE` once its expander is idle.
 pub const MOP_CFG: u64 = MAILBOX_BASE + 0x4C;
 
+/// The arguments base an executor hands its program in `a0`: the launch's
+/// `u32` array in L1. tt-metal's launch message carries the same word
+/// (`rta_l1_base`, `firmware_common.h`).
+pub const ARGS: u64 = MAILBOX_BASE + 0x70;
+
 /// Total size the firmware may assume is its own.
-pub const MAILBOX_SIZE: u64 = 0x70;
+pub const MAILBOX_SIZE: u64 = 0x74;
 
 /// A program's block repeats: with [`loops::LOOPED`] set in its length
 /// ([`PROGRAM_LEN`], a `KERNEL` entry's), the program's first word is how
@@ -316,10 +321,44 @@ const _: () = assert!(TRACE + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(PUSH_WINDOW + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(ACK + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(PROGRAM_ADDR + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
+const _: () = assert!(ARGS + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(UNWEDGE + 4 <= MOP_CFG_VALID);
 const _: () = assert!(MOP_CFG + 9 * 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(TRACE_BUFFER + TRACE_BUFFER_BYTES <= crate::tensix::L1_SIZE);
 const _: () = assert!(TRACE_BUFFER % 16 == 0);
+
+/// The staged-program control block: the host writes a program's address,
+/// length and args, bumps `SEQ`; the resident core runs it and writes `DONE`.
+///
+/// One block per core that executes a program this way (RISCV B first). It is
+/// the host/firmware contract for "run this code", the way tt-metal's launch
+/// message is, without the launch-message ring: a word per field and a
+/// generation.
+pub mod exec {
+    /// After the three role mailboxes, before the program slots.
+    pub const BASE: u64 = super::role::BASE + 3 * super::role::STRIDE;
+
+    /// Address of the program's first word, in L1.
+    pub const PROGRAM: u64 = BASE;
+    /// Program length in words.
+    pub const LEN: u64 = BASE + 4;
+    /// Arguments base (`a0` at entry); the launch's `u32` array.
+    pub const ARGS: u64 = BASE + 8;
+    /// Written by the host to start a run; skips zero.
+    pub const SEQ: u64 = BASE + 12;
+    /// Written by the core when the run has finished, equal to `SEQ`.
+    pub const DONE: u64 = BASE + 16;
+    /// The value the program returned in `a0`.
+    pub const RET: u64 = BASE + 20;
+    /// Non-zero when the core refused the run.
+    pub const ERROR: u64 = BASE + 24;
+
+    /// Most words a staged program may hold.
+    pub const MAX_WORDS: u64 = 8192;
+
+    const _: () = assert!(BASE % 16 == 0);
+    const _: () = assert!(BASE + 0x100 <= super::PROGRAM_REGION);
+}
 
 /// One mailbox per Tensix thread, for the three-role datapath.
 ///
@@ -409,6 +448,14 @@ pub mod role {
         pub const fn program_addr(self) -> u64 {
             self.base + (super::PROGRAM_ADDR - super::MAILBOX_BASE)
         }
+        /// The arguments base for a program called with `a0`.
+        pub const fn args(self) -> u64 {
+            self.base + (super::ARGS - super::MAILBOX_BASE)
+        }
+        /// Where an executor leaves the program's return value.
+        pub const fn result(self) -> u64 {
+            self.base + (super::RESULT - super::MAILBOX_BASE)
+        }
         /// This mailbox's program slot in [`super::PROGRAM_REGION`].
         pub const fn program(self) -> u64 {
             self.program
@@ -449,6 +496,9 @@ pub struct Descriptor {
     pub push_window: u32,
     /// Zero: the fixed slot ([`PROGRAM_ADDR`]).
     pub program_addr: u32,
+    /// The arguments base the program is called with (`a0`), zero if it takes
+    /// none.
+    pub args: u32,
     /// [`UNWEDGE`].
     pub unwedge: u32,
     /// [`MOP_CFG`], if this run loads a MOP Expander configuration.
@@ -456,7 +506,7 @@ pub struct Descriptor {
 }
 
 /// Words a [`Descriptor`] writes.
-pub const DESCRIPTOR_WORDS: usize = 19;
+pub const DESCRIPTOR_WORDS: usize = 20;
 
 impl Descriptor {
     /// `(address, value)` for every field, in `mb`. The MOP words are written
@@ -476,6 +526,7 @@ impl Descriptor {
             (mb.trace(), self.trace),
             (mb.push_window(), self.push_window),
             (mb.program_addr(), self.program_addr),
+            (mb.args(), self.args),
             (mb.unwedge(), self.unwedge),
             (mb.mop_cfg_valid(), valid),
             (mb.mop_cfg(0), cfg[0]),
@@ -574,6 +625,7 @@ mod tests {
             TRACE,
             PUSH_WINDOW,
             PROGRAM_ADDR,
+            ARGS,
             UNWEDGE,
             MOP_CFG_VALID,
             MOP_CFG,
