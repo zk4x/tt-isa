@@ -176,10 +176,14 @@ pub const fn endpoint_tile_index(endpoint_id: u32) -> u8 {
     (endpoint_id & 0xFF) as u8
 }
 
-pub mod atomic;
-pub mod multicast;
 pub mod probe;
 pub mod read_loop;
+
+/// The word to write to [`niu::CLEAR_OUTSTANDING`] once a multicast's acks are
+/// counted: `1 << id` zeroes that transaction ID's counter.
+pub const fn clear_outstanding(txn: niu::TxnId) -> u32 {
+    1 << txn.index()
+}
 
 #[cfg(test)]
 mod tests {

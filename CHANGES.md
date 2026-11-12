@@ -2,6 +2,17 @@
 
 The base is `Knight-Ops/metalium-rs` at `b22a245` (`crates/tt-isa`).
 
+## Unreleased — 2026-11-12
+
+- Deleted the modules nothing in this repository or in skamandros imports:
+  `matrix` (1,025 lines), `matrix::debug` (1,278), `sfpu::load_macro` (1,520),
+  `scalar` (244), `scalar::atomic` (589), `scalar::mmio` (306), `numerics`
+  (523), `numerics::sfpu` (354), `numerics::stochastic` (81), `hazard` (563),
+  `packer` (395), `unpacker` (176), `adc` (338), `sync::mutex` (204),
+  `noc::atomic` (389) and `noc::multicast` (485). 8,478 lines, 44,719 → 36,241.
+- `noc::multicast::clear_outstanding` was the one thing used from those 16 files
+  (by `tt-firmware`'s `noc_probe_b`); it moves to `noc::clear_outstanding`.
+
 ## 0.1.0 — 2026-11-08
 
 - Forked from upstream to publish the crate standalone (the upstream path

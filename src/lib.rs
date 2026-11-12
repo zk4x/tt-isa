@@ -11,7 +11,6 @@
 #![no_std]
 #![forbid(unsafe_code)]
 
-pub mod adc;
 pub mod arc;
 pub mod backend;
 pub mod cfg;
@@ -20,19 +19,12 @@ pub mod dm;
 pub mod dram;
 pub mod eth;
 pub mod frontend;
-pub mod hazard;
 pub mod isa;
 pub mod l1;
 pub mod mailbox;
-pub mod matrix;
 pub mod noc;
-pub mod numerics;
-pub mod packer;
-/// Checked thread-local scalar register arithmetic.
-pub mod scalar;
 pub mod sfpu;
 pub mod sync;
 pub mod tag_search;
 pub mod tensix;
 pub mod tile;
-pub mod unpacker;
