@@ -27,4 +27,3 @@ pub mod sfpu;
 pub mod sync;
 pub mod tag_search;
 pub mod tensix;
-pub mod tile;

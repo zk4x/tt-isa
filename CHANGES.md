@@ -4,6 +4,12 @@ The base is `Knight-Ops/metalium-rs` at `b22a245` (`crates/tt-isa`).
 
 ## Unreleased — 2026-11-12
 
+- Deleted `tile` (1,362 lines) after the L1 tile library and every FP16/BF16
+  conversion in it turned out to have no caller: `TileImage`, the `bfp*`/`fp*`
+  conversion family and the `TileDescriptor` builder chain. The four-word
+  unpacker descriptor it was built around lives in the consumer now, laid out as
+  tt-metal's `unpack_tile_descriptor_t`, and the `InDataFormat` codes
+  (`MEASURED`, ttsim-divergence rows G/H) travel with them.
 - Deleted the modules nothing in this repository or in skamandros imports:
   `matrix` (1,025 lines), `matrix::debug` (1,278), `sfpu::load_macro` (1,520),
   `scalar` (244), `scalar::atomic` (589), `scalar::mmio` (306), `numerics`
