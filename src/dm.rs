@@ -23,9 +23,9 @@ pub mod encoded;
 pub mod record;
 
 /// The mover's mailbox: the slot after the three role mailboxes
-/// ([`crate::mailbox::role`]), which ends exactly where the program region begins.
-pub const MAILBOX_BASE: u64 = crate::mailbox::role::BASE + 3 * crate::mailbox::role::STRIDE;
-const _: () = assert!(MAILBOX_BASE + 0x100 <= crate::mailbox::PROGRAM_REGION);
+/// ([`crate::mailbox::launch`]), which ends exactly where the program region begins.
+pub const MAILBOX_BASE: u64 = crate::mailbox::launch::BASE + 3 * crate::mailbox::launch::STRIDE;
+const _: () = assert!(MAILBOX_BASE + 0x100 <= crate::mailbox::TRACE_BUFFER);
 const _: () = assert!(MAILBOX_BASE % 16 == 0);
 
 /// Where the image is linked and loaded: RISCV B has no reset-PC override and
@@ -276,7 +276,7 @@ pub mod op {
     /// role `t` whose `at` is non-zero, writes `at` and `lt` to its mailbox's
     /// `PROGRAM_ADDR` and `PROGRAM_LEN` -- a program resident in the program
     /// cache (`crate::l1::PROGRAM_CACHE`) -- and then `generation` to all three
-    /// `GENERATION`s (`crate::mailbox::role`), and waits until each has
+    /// `GENERATION`s (`crate::mailbox::launch`), and waits until each has
     /// acknowledged it, or reports [`super::error::ROLE`] if one panics. With
     /// every `at` zero the roles run what the host staged. So a whole op, of
     /// any number of block shapes, is one list and one host round trip. Only in
@@ -316,7 +316,7 @@ pub mod op {
     /// call is refused. Only in a list entry.
     pub const CALL: u32 = 10;
     /// Write one word of a role's mailbox: `[POKE, address, value, 0, ...]`,
-    /// the address a word of `crate::mailbox::role`'s three mailboxes. A
+    /// the address a word of `crate::mailbox::launch`'s three mailboxes. A
     /// trace's role descriptors, which the host writes for an ordinary list
     /// and cannot write during a replay. Only in a list entry.
     pub const POKE: u32 = 11;
@@ -438,12 +438,12 @@ pub struct Mover {
 /// inside one of the three role mailboxes. Shared so the host's check, the entry decode
 /// and the firmware's run of a record agree on what is pokeable.
 pub const fn is_role_mailbox_word(address: u32) -> bool {
-    let base = crate::mailbox::role::BASE;
-    let end = base + 3 * crate::mailbox::role::STRIDE;
+    let base = crate::mailbox::launch::BASE;
+    let end = base + 3 * crate::mailbox::launch::STRIDE;
     address % 4 == 0
         && (address as u64) >= base
         && (address as u64) < end
-        && (address as u64 - base) % crate::mailbox::role::STRIDE < crate::mailbox::MAILBOX_SIZE
+        && (address as u64 - base) % crate::mailbox::launch::STRIDE < crate::mailbox::MAILBOX_SIZE
 }
 
 impl Mover {
@@ -531,7 +531,7 @@ pub mod nc {
     );
     /// NC's list ring, as [`super::LIST`] is B's: in the mailbox region, past
     /// the single-core mailbox's `Dst` dump (`crate::mailbox::DUMP`) and
-    /// before the role mailboxes (`crate::mailbox::role::BASE`).
+    /// before the role mailboxes (`crate::mailbox::launch::BASE`).
     pub const LIST: u64 = crate::mailbox::MAILBOX_BASE + 0x4000;
     const _: () = assert!(
         LIST >= crate::mailbox::DUMP
@@ -546,8 +546,8 @@ pub mod nc {
     /// NC's mover mailbox: B's layout ([`super::SEQ`] and on, offset by
     /// `MAILBOX_BASE - super::MAILBOX_BASE`), one page after B's.
     pub const MAILBOX_BASE: u64 = super::MAILBOX_BASE + 0x1000;
-    const _: () = assert!(MAILBOX_BASE + 0x100 <= crate::mailbox::PROGRAM_REGION);
-    const _: () = assert!(END <= crate::mailbox::role::BASE);
+    const _: () = assert!(MAILBOX_BASE + 0x100 <= crate::mailbox::TRACE_BUFFER);
+    const _: () = assert!(END <= crate::mailbox::launch::BASE);
     const _: () = assert!(STUB_AT + 8 <= super::LIST);
 
     /// The two instructions at [`STUB_AT`]: `lui t0, %hi(target)` and
@@ -873,7 +873,7 @@ impl Entry {
                 let words = len & crate::dataflow::LENGTH_MASK;
                 let bytes = words as u64 * 4;
                 if at % 16 != 0
-                    || words > crate::mailbox::PROGRAM_MAX
+                    || words > crate::mailbox::MAX_WORDS
                     || !cache.contains(at as u64, bytes)
                 {
                     return Err(error::PROGRAM);
@@ -1565,7 +1565,7 @@ mod tests {
                 op::KERNEL,
                 7,
                 at,
-                crate::mailbox::PROGRAM_MAX + 1,
+                crate::mailbox::MAX_WORDS + 1,
                 0,
                 0,
                 0,

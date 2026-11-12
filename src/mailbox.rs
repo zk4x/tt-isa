@@ -90,12 +90,13 @@ pub const GENERATION: u64 = MAILBOX_BASE + 0x38;
 /// runs.
 pub const ACK: u64 = MAILBOX_BASE + 0x3C;
 
-/// Zero: the runner pushes its program from its fixed slot ([`PROGRAM`], or
-/// its role's). Non-zero: from this address -- a resident program in the
-/// program cache (`crate::l1::PROGRAM_CACHE`), placed there by the host and
-/// named, with [`PROGRAM_LEN`], by whoever starts the run: the host, or the
-/// data mover's `KERNEL` entry (`crate::dm::op::KERNEL`). The runner refuses an
-/// address outside the cache region.
+/// The program's first word: an L1 address in the program cache
+/// (`crate::l1::PROGRAM_CACHE`), placed there by the host and named, with
+/// [`PROGRAM_LEN`], by whoever starts the run -- the host, or the data mover's
+/// `KERNEL` entry (`crate::dm::op::KERNEL`). There is no fixed slot: the runner
+/// refuses a zero address, or one outside the cache region. This is tt-metal's
+/// `kernel_text_offset`: the launch message names the text, it does not carry
+/// it.
 pub const PROGRAM_ADDR: u64 = MAILBOX_BASE + 0x40;
 
 /// The [`PUSH_WINDOW`] the host uses on the simulator: well under the 28
@@ -173,11 +174,13 @@ pub mod loops {
     }
 }
 
-/// Where the host points the timestamper's event buffer: after the program
-/// slots, 1024 events. Sized for a profiled list (`trace`): the mover records
-/// two events per list entry or record, never per expanded move, and each
-/// role three per run, so a full list of records with a kernel apiece fits.
-pub const TRACE_BUFFER: u64 = PROGRAM_REGION_END;
+/// Where the host points the timestamper's event buffer, 1024 events. Sized
+/// for a profiled list (`trace`): the mover records two events per list entry
+/// or record, never per expanded move, and each role three per run, so a full
+/// list of records with a kernel apiece fits. Programs live above it in
+/// [`crate::l1::PROGRAM_CACHE`], named by their launch message, not staged in a
+/// mailbox (tt-metal's `kernel_text_offset`).
+pub const TRACE_BUFFER: u64 = 0x0014_0000;
 /// Bytes in [`TRACE_BUFFER`].
 pub const TRACE_BUFFER_BYTES: u64 = 1024 * crate::tensix::timestamper::EVENT_BYTES;
 
@@ -267,30 +270,9 @@ pub mod trace {
     }
 }
 
-/// Where Tensix instruction streams are staged by the host: one fixed slot per
-/// mailbox, the single-core one first and then one per role.
-///
-/// The descriptor lives in the mailbox; the program itself does not, because it is
-/// unbounded in a way the mailbox is not. Putting it here is what makes the corpus
-/// firmware generic: the host encodes a program with `tt_isa::isa`, writes the
-/// words, and the same image runs it. Adding an instruction to the corpus is then a
-/// host-side test case rather than a firmware change.
-///
-/// The slots are fixed rather than named by an address the host writes, so the
-/// firmware never pushes from wherever a stale or corrupt pointer says. They were
-/// once 256 words inside each mailbox, which a 32x32 matmul outgrows several times
-/// over: its flushed configuration alone is a hundred-odd.
-pub const PROGRAM_REGION: u64 = 0x0012_0000;
-/// Bytes in one program slot.
-pub const PROGRAM_SLOT: u64 = 0x8000;
-/// Slots: the single-core mailbox's, then one per Tensix thread.
-pub const PROGRAM_SLOTS: u64 = 4;
-/// End of the program region.
-pub const PROGRAM_REGION_END: u64 = PROGRAM_REGION + PROGRAM_SLOTS * PROGRAM_SLOT;
-/// The single-core mailbox's program.
-pub const PROGRAM: u64 = PROGRAM_REGION;
-/// Most instructions a program may hold.
-pub const PROGRAM_MAX: u32 = (PROGRAM_SLOT / 4) as u32;
+/// Most instructions a role program may hold. The runner also checks that the
+/// named range is inside [`crate::l1::PROGRAM_CACHE`].
+pub const MAX_WORDS: u32 = 8192;
 
 /// Where the firmware copies `Dst` rows for the host to read.
 ///
@@ -311,8 +293,6 @@ pub const fn dump_offset(row: u32, column: u32) -> u64 {
 // every access to it would be out of bounds, and that should stop the build rather
 // than fail a test run.
 const _: () = assert!(MAILBOX_BASE + MAILBOX_SIZE <= crate::tensix::L1_SIZE);
-const _: () = assert!(PROGRAM_REGION_END <= crate::tensix::L1_SIZE);
-const _: () = assert!(PROGRAM_REGION % 16 == 0 && PROGRAM_SLOT % 16 == 0);
 const _: () =
     assert!(dump_offset(DUMP_MAX_ROWS - 1, DUMP_ROW_WORDS - 1) + 4 <= crate::tensix::L1_SIZE);
 // The descriptor words have to stay inside the mailbox the firmware owns.
@@ -327,39 +307,6 @@ const _: () = assert!(MOP_CFG + 9 * 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(TRACE_BUFFER + TRACE_BUFFER_BYTES <= crate::tensix::L1_SIZE);
 const _: () = assert!(TRACE_BUFFER % 16 == 0);
 
-/// The staged-program control block: the host writes a program's address,
-/// length and args, bumps `SEQ`; the resident core runs it and writes `DONE`.
-///
-/// One block per core that executes a program this way (RISCV B first). It is
-/// the host/firmware contract for "run this code", the way tt-metal's launch
-/// message is, without the launch-message ring: a word per field and a
-/// generation.
-pub mod exec {
-    /// After the three role mailboxes, before the program slots.
-    pub const BASE: u64 = super::role::BASE + 3 * super::role::STRIDE;
-
-    /// Address of the program's first word, in L1.
-    pub const PROGRAM: u64 = BASE;
-    /// Program length in words.
-    pub const LEN: u64 = BASE + 4;
-    /// Arguments base (`a0` at entry); the launch's `u32` array.
-    pub const ARGS: u64 = BASE + 8;
-    /// Written by the host to start a run; skips zero.
-    pub const SEQ: u64 = BASE + 12;
-    /// Written by the core when the run has finished, equal to `SEQ`.
-    pub const DONE: u64 = BASE + 16;
-    /// The value the program returned in `a0`.
-    pub const RET: u64 = BASE + 20;
-    /// Non-zero when the core refused the run.
-    pub const ERROR: u64 = BASE + 24;
-
-    /// Most words a staged program may hold.
-    pub const MAX_WORDS: u64 = 8192;
-
-    const _: () = assert!(BASE % 16 == 0);
-    const _: () = assert!(BASE + 0x100 <= super::PROGRAM_REGION);
-}
-
 /// One mailbox per Tensix thread, for the three-role datapath.
 ///
 /// tt-metal's LLK splits a kernel across the three Tensix threads -- thread 0
@@ -369,7 +316,7 @@ pub mod exec {
 /// `docs/learnings/ttsim-divergence.md` row 45). Each role image runs its own program and
 /// reports through its own mailbox, laid out like the single-core one above:
 /// the same offsets, from a per-thread base.
-pub mod role {
+pub mod launch {
     /// First role mailbox, clear of the single-core mailbox, program and dump.
     pub const BASE: u64 = 0x0011_0000;
     /// Distance between role mailboxes: room for the program and the dump.
@@ -379,7 +326,6 @@ pub mod role {
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
     pub struct Mailbox {
         base: u64,
-        program: u64,
     }
 
     impl Mailbox {
@@ -388,14 +334,16 @@ pub mod role {
         pub const fn single_core() -> Mailbox {
             Mailbox {
                 base: super::MAILBOX_BASE,
-                program: super::PROGRAM,
             }
+        }
+        /// The mailbox of the core that launches programs on RISCV B.
+        pub const fn b() -> Mailbox {
+            Mailbox::single_core()
         }
         pub const fn of(thread: u32) -> Mailbox {
             assert!(thread < 3, "there are three Tensix threads");
             Mailbox {
                 base: BASE + thread as u64 * STRIDE,
-                program: super::PROGRAM_REGION + (1 + thread as u64) * super::PROGRAM_SLOT,
             }
         }
         pub const fn base(self) -> u64 {
@@ -456,10 +404,6 @@ pub mod role {
         pub const fn result(self) -> u64 {
             self.base + (super::RESULT - super::MAILBOX_BASE)
         }
-        /// This mailbox's program slot in [`super::PROGRAM_REGION`].
-        pub const fn program(self) -> u64 {
-            self.program
-        }
         pub const fn dump_offset(self, row: u32, column: u32) -> u64 {
             self.base + (super::dump_offset(row, column) - super::MAILBOX_BASE)
         }
@@ -470,76 +414,10 @@ pub mod role {
         Mailbox::of(2).dump_offset(super::DUMP_MAX_ROWS - 1, super::DUMP_ROW_WORDS - 1) + 4
             <= crate::tensix::L1_SIZE
     );
-    // The role mailboxes end before the program region begins, and the last
-    // role's slot is the region's last.
-    const _: () = assert!(BASE + 3 * STRIDE <= super::PROGRAM_REGION);
-    const _: () =
-        assert!(Mailbox::of(2).program() + super::PROGRAM_SLOT == super::PROGRAM_REGION_END);
+    // The role mailboxes end before the trace buffer begins.
+    const _: () = assert!(BASE + 3 * STRIDE <= super::TRACE_BUFFER);
     const _: () =
         assert!(super::dump_offset(super::DUMP_MAX_ROWS, 0) - super::MAILBOX_BASE <= STRIDE);
-}
-
-/// Everything a runner reads from its mailbox at the start of a run, written
-/// whole ([`Descriptor::writes`]) so no field is left as an earlier run left
-/// it. L1 survives between processes on silicon, so a field one writer forgets
-/// is whatever the last process put there: a stale [`PROGRAM_ADDR`] once
-/// pointed a tile reset's runner into the program cache, and it hung. ttsim
-/// starts every process from zeroed L1, which is why it hid there.
-#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
-pub struct Descriptor {
-    pub thread_index: u32,
-    pub dst_access_fmt: u32,
-    pub program_len: u32,
-    pub dump_row_first: u32,
-    pub dump_row_count: u32,
-    pub trace: u32,
-    pub push_window: u32,
-    /// Zero: the fixed slot ([`PROGRAM_ADDR`]).
-    pub program_addr: u32,
-    /// The arguments base the program is called with (`a0`), zero if it takes
-    /// none.
-    pub args: u32,
-    /// [`UNWEDGE`].
-    pub unwedge: u32,
-    /// [`MOP_CFG`], if this run loads a MOP Expander configuration.
-    pub mop_cfg: Option<[u32; 9]>,
-}
-
-/// Words a [`Descriptor`] writes.
-pub const DESCRIPTOR_WORDS: usize = 20;
-
-impl Descriptor {
-    /// `(address, value)` for every field, in `mb`. The MOP words are written
-    /// whether or not the run loads them, so two descriptors compare word by
-    /// word (a queued kernel's configuration must not change under it).
-    pub const fn writes(&self, mb: role::Mailbox) -> [(u64, u32); DESCRIPTOR_WORDS] {
-        let (valid, cfg) = match self.mop_cfg {
-            Some(c) => (1, c),
-            None => (0, [0; 9]),
-        };
-        [
-            (mb.thread_index(), self.thread_index),
-            (mb.dst_access_fmt(), self.dst_access_fmt),
-            (mb.program_len(), self.program_len),
-            (mb.dump_row_first(), self.dump_row_first),
-            (mb.dump_row_count(), self.dump_row_count),
-            (mb.trace(), self.trace),
-            (mb.push_window(), self.push_window),
-            (mb.program_addr(), self.program_addr),
-            (mb.args(), self.args),
-            (mb.unwedge(), self.unwedge),
-            (mb.mop_cfg_valid(), valid),
-            (mb.mop_cfg(0), cfg[0]),
-            (mb.mop_cfg(1), cfg[1]),
-            (mb.mop_cfg(2), cfg[2]),
-            (mb.mop_cfg(3), cfg[3]),
-            (mb.mop_cfg(4), cfg[4]),
-            (mb.mop_cfg(5), cfg[5]),
-            (mb.mop_cfg(6), cfg[6]),
-            (mb.mop_cfg(7), cfg[7]),
-            (mb.mop_cfg(8), cfg[8]),
-        ]
-    }
 }
 
 /// Values written to [`STATUS`].
@@ -590,56 +468,21 @@ mod tests {
     }
 
     #[test]
-    fn every_mailbox_has_its_own_program_slot() {
+    fn the_mailboxes_do_not_overlap_and_their_dumps_stay_in_l1() {
         let all = [
-            role::Mailbox::single_core(),
-            role::Mailbox::of(0),
-            role::Mailbox::of(1),
-            role::Mailbox::of(2),
+            launch::Mailbox::single_core(),
+            launch::Mailbox::of(0),
+            launch::Mailbox::of(1),
+            launch::Mailbox::of(2),
         ];
         for (i, a) in all.iter().enumerate() {
-            let a_end = a.program() + PROGRAM_SLOT;
-            assert!(a.program() >= PROGRAM_REGION && a_end <= PROGRAM_REGION_END);
+            assert!(a.dump_offset(DUMP_MAX_ROWS - 1, DUMP_ROW_WORDS - 1) < TRACE_BUFFER);
             for b in &all[i + 1..] {
-                assert!(a_end <= b.program() || b.program() + PROGRAM_SLOT <= a.program());
+                assert!(
+                    a.base() + launch::STRIDE <= b.base() || b.base() + launch::STRIDE <= a.base()
+                );
             }
-            // Nothing else the host stages lands in a slot.
-            assert!(a.dump_offset(DUMP_MAX_ROWS - 1, DUMP_ROW_WORDS - 1) < PROGRAM_REGION);
         }
-    }
-
-    /// A descriptor names every word the runner reads before pushing: the
-    /// ones from [`THREAD_INDEX`] to [`PUSH_WINDOW`], [`PROGRAM_ADDR`],
-    /// [`UNWEDGE`] and the MOP configuration.
-    #[test]
-    fn a_descriptor_writes_every_word_the_runner_reads() {
-        let mb = role::Mailbox::single_core();
-        let mut at = Descriptor::default().writes(mb).map(|w| w.0);
-        at.sort_unstable();
-        let mut want = [
-            THREAD_INDEX,
-            DST_ACCESS_FMT,
-            PROGRAM_LEN,
-            DUMP_ROW_COUNT,
-            DUMP_ROW_FIRST,
-            TRACE,
-            PUSH_WINDOW,
-            PROGRAM_ADDR,
-            ARGS,
-            UNWEDGE,
-            MOP_CFG_VALID,
-            MOP_CFG,
-            MOP_CFG + 4,
-            MOP_CFG + 8,
-            MOP_CFG + 12,
-            MOP_CFG + 16,
-            MOP_CFG + 20,
-            MOP_CFG + 24,
-            MOP_CFG + 28,
-            MOP_CFG + 32,
-        ];
-        want.sort_unstable();
-        assert_eq!(at, want);
     }
 
     #[test]

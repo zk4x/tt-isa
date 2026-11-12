@@ -49,7 +49,7 @@ pub const END: u64 = TRANSFER + 8;
 pub const OUTER_CHUNK: u64 = 0x1_3000;
 const _: () = assert!(OUTER_CHUNK >= dm::nc::STUB_AT + 8);
 const _: () = assert!(OUTER_CHUNK + dm::TRACE_CHUNK_ENTRIES as u64 * dm::ENTRY_BYTES <= dm::LIST);
-const _: () = assert!(END <= mailbox::PROGRAM_REGION);
+const _: () = assert!(END <= mailbox::TRACE_BUFFER);
 
 /// Which credit channel a `CB` entry names (`dm::op::CB` word 1).
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -210,7 +210,7 @@ pub fn program(address: u32, length: u32) -> bool {
     let words = length & !mailbox::loops::LOOPED;
     length & STREAMED == 0
         && address % 16 == 0
-        && words <= mailbox::PROGRAM_MAX
+        && words <= mailbox::MAX_WORDS
         && l1::PROGRAM_CACHE.contains(address as u64, words as u64 * 4)
 }
 pub fn packet_length(header: [u32; 8]) -> Result<usize, u32> {

@@ -18,12 +18,12 @@
 //! the gates use a semaphore per thread as a "this thread got here" marker.
 //!
 //! The block sits at a fixed offset inside each role mailbox, away from every
-//! word [`crate::mailbox::Descriptor`] writes. It is **one-shot**: the runner
+//! word the launch message writes. It is **one-shot**: the runner
 //! clears the arming word as soon as it reads it, so a stale arming word left by
 //! an earlier process (L1 survives on silicon) can never turn a later ordinary
 //! run into a guarded one.
 
-use crate::mailbox::role::Mailbox;
+use crate::mailbox::launch::Mailbox;
 
 /// Offset of the guard block from a role mailbox's base.
 pub const OFFSET: u64 = 0x100;
@@ -253,14 +253,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn guard_block_stays_clear_of_the_descriptor() {
-        use crate::mailbox::Descriptor;
+    fn guard_block_stays_clear_of_the_mailbox_words() {
         for t in 0..3 {
             let mb = Mailbox::of(t);
             let g = Guard::of(mb);
-            for (at, _) in Descriptor::default().writes(mb) {
-                assert!(at < g.arm() || at >= g.arm() + Guard::BYTES);
-            }
+            // The launch message's words all live below the guard block.
+            assert!(mb.args() < g.arm());
             assert!(g.released() + 4 <= g.arm() + Guard::BYTES);
             assert!(g.arm() + Guard::BYTES < mb.dump_offset(0, 0));
             // The arm write is last, so a half-written block is never read,

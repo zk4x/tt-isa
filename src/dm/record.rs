@@ -720,7 +720,7 @@ mod tests {
 
     /// The mailbox of role 1, whose words are the ones a trace pokes.
     fn mailbox_word(k: u32) -> u32 {
-        (crate::mailbox::role::Mailbox::of(1).base() + 0x1C + 4 * k as u64) as u32
+        (crate::mailbox::launch::Mailbox::of(1).base() + 0x1C + 4 * k as u64) as u32
     }
 
     #[test]
@@ -770,7 +770,7 @@ mod tests {
         };
         // The last word of role 2's mailbox: in, and one word past it: out.
         let last =
-            (crate::mailbox::role::Mailbox::of(2).base() + crate::mailbox::MAILBOX_SIZE - 4) as u32;
+            (crate::mailbox::launch::Mailbox::of(2).base() + crate::mailbox::MAILBOX_SIZE - 4) as u32;
         assert!(decode(&poke_run(last, &[7])).is_ok());
         assert!(decode(&poke_run(last + 4, &[7])).is_err());
         // A run that starts inside and runs past the end is refused, though its

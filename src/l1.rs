@@ -83,14 +83,7 @@ pub const DATA: Region = Region {
 pub const MAILBOXES: Region = Region {
     name: "mailboxes",
     base: mailbox::MAILBOX_BASE,
-    end: mailbox::PROGRAM_REGION,
-};
-
-/// The four fixed program slots the role runners push from.
-pub const PROGRAMS: Region = Region {
-    name: "program slots",
-    base: mailbox::PROGRAM_REGION,
-    end: mailbox::PROGRAM_REGION_END,
+    end: mailbox::TRACE_BUFFER,
 };
 
 /// The timestamper's event buffer.
@@ -117,13 +110,12 @@ pub const NC_IMAGE: Region = Region {
 
 /// Every region, in address order. The sliver between [`MOVER`] and
 /// [`NC_IMAGE`] is unused.
-pub const REGIONS: [Region; 8] = [
+pub const REGIONS: [Region; 7] = [
     IMAGES,
     MOVER,
     NC_IMAGE,
     DATA,
     MAILBOXES,
-    PROGRAMS,
     TRACE,
     PROGRAM_CACHE,
 ];
