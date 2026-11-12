@@ -73,46 +73,6 @@ pub const fn is_within_csm(addr: u64, len: u64) -> bool {
     addr >= CSM_BASE && addr <= (CSM_BASE + CSM_SIZE).saturating_sub(len)
 }
 
-/// The ARC firmware's message queues: how software asks the ARC to change the
-/// chip's operating point, among other things.
-///
-/// Not in the ISA documentation; transcribed from UMD, which is how tt-metal
-/// talks to it (`umd/device/arc/blackhole_arc_message_queue.cpp`,
-/// `blackhole_implementation.hpp`, `types/blackhole_arc.hpp`). The one message
-/// this crate needs is [`msg::AICLK_GO_BUSY`], which UMD sends whenever it brings
-/// a chip up: without it the chip stays at its idle operating point, where the
-/// Matrix Unit's reads of `SrcA`/`SrcB` are not reliable -- see
-/// `docs/learnings/ttsim-divergence.md` row 48.
-pub mod queue {
-    /// Holds the CSM address of the queue control block (`SCRATCH_RAM_11`).
-    pub const CONTROL_PTR: u64 = super::reset_scratch(11);
-    /// Writing [`FW_INT_VAL`] here tells the ARC a request is waiting.
-    pub const FW_INT: u64 = 0x8003_0100;
-    pub const FW_INT_VAL: u32 = 1 << 16;
-    /// Words in each queue's header: request write pointer at 0, response read
-    /// pointer at 1, request read pointer at 4, response write pointer at 5.
-    pub const HEADER_WORDS: u64 = 8;
-    /// Words in one request or response entry: the message code (or status),
-    /// then up to seven arguments (or return values).
-    pub const ENTRY_WORDS: u64 = 8;
-    pub const REQUEST_WPTR: u64 = 0;
-    pub const RESPONSE_RPTR: u64 = 1;
-    pub const REQUEST_RPTR: u64 = 4;
-    pub const RESPONSE_WPTR: u64 = 5;
-    /// Which queue application software uses (`BlackholeArcMessageQueueIndex`).
-    pub const APPLICATION: u64 = 3;
-    /// A response status below this is success.
-    pub const RESPONSE_OK_LIMIT: u32 = 240;
-}
-
-/// ARC message codes (`types/blackhole_arc.hpp`, `ArcMessageType`).
-pub mod msg {
-    /// Raise AICLK (and the voltage with it) to the busy operating point.
-    pub const AICLK_GO_BUSY: u32 = 0x52;
-    /// Return to the idle operating point.
-    pub const AICLK_GO_LONG_IDLE: u32 = 0x54;
-}
-
 /// Upper bound on telemetry table entries (`telemetry.h:87`).
 pub const TELEMETRY_MAX_ENTRIES: u32 = 1 << 16;
 
@@ -126,16 +86,12 @@ pub const TELEMETRY_MAX_MAJOR_VERSION: u32 = 1;
 /// (`umd/device/types/telemetry.hpp:11-75`).
 ///
 /// Only the tags this workspace reads are listed. The driver's own enumeration
-/// (`telemetry.h:20-46`) is a strict subset of UMD's and omits every tag here
-/// except [`TIMER_HEARTBEAT`], which is why the driver's sysfs cannot answer the
-/// harvesting question: `tt_telemetry_probe` builds its address cache only for
-/// tags backing a sysfs or hwmon attribute (`telemetry.c:42-77`), so a lookup of
-/// any other tag returns `TELEM_ADDR_INVALID`.
+/// (`telemetry.h:20-46`) is a strict subset of UMD's, which is why the driver's
+/// sysfs cannot answer the harvesting question: `tt_telemetry_probe` builds its
+/// address cache only for tags backing a sysfs or hwmon attribute
+/// (`telemetry.c:42-77`), so a lookup of any other tag returns
+/// `TELEM_ADDR_INVALID`.
 pub mod tag {
-    /// Core voltage in mV (UMD `TelemetryTag::VCORE`).
-    pub const VCORE: u16 = 6;
-    /// AI clock in MHz (UMD `TelemetryTag::AICLK`).
-    pub const AICLK: u16 = 14;
     /// Bitmask of *enabled* Tensix columns.
     ///
     /// Enabled rather than harvested, so a firmware that does not publish the tag
@@ -143,37 +99,6 @@ pub mod tag {
     /// the all-harvested mask are both zero, and zero enabled columns is
     /// self-evidently not a usable chip.
     pub const ENABLED_TENSIX_COL: u16 = 34;
-    /// Bitmask of *enabled* Ethernet tiles, bit `i` for endpoint `Ei`.
-    ///
-    /// `MEASURED`, not from UMD: `0x3edf` on both p150a cards, and its two clear
-    /// bits are exactly the tiles whose `NIU_CFG_0` says harvested
-    /// (`silicon_eth_survey`). See [`crate::eth::Ethernet`].
-    pub const ENABLED_ETH: u16 = 35;
-    /// Nonzero when the NoC translates coordinates.
-    pub const NOC_TRANSLATION: u16 = 40;
-    /// Per-channel GDDR training and BIST state. See [`crate::dram::Training`]
-    /// for the layout; `MEASURED` `0x5555_5555` on both cards.
-    pub const GDDR_STATUS: u16 = 22;
-    /// GDDR data rate in MT/s (`WormholeB0/ARCTile/Telemetry.md:54`).
-    /// `MEASURED` `0x3e80` = 16000 on both cards.
-    pub const GDDR_SPEED: u16 = 23;
-    /// Bitmask of *enabled* DRAM channels, bit `c` for channel `c` (UMD
-    /// `blackhole_tt_device.cpp:155-157` reads its complement as the harvesting
-    /// mask). `MEASURED` `0xff` on both cards, as a p150 should be.
-    pub const ENABLED_GDDR: u16 = 36;
-    /// Packed harvesting state. **Published and empty — do not use.**
-    ///
-    /// Measured `0x00000000` on both p150a cards here (firmware bundle 19.14.0.0),
-    /// each of which has two Tensix columns fused off. The tag appears in the
-    /// directory, so it is not absent, it just carries nothing; read as a source
-    /// or even as a cross-check it reports an unharvested chip and sends you back
-    /// into a 140-tile sweep. Kept named so a reader who finds it in UMD's tag list
-    /// learns that here rather than by crashing a host, and so the probe can keep
-    /// printing it in case a later firmware fills it in.
-    pub const HARVESTING_STATE: u16 = 4;
-    /// Firmware heartbeat counter; changes while the ARC is alive
-    /// (`docs/sysfs-attributes.md:68`).
-    pub const TIMER_HEARTBEAT: u16 = 32;
 }
 
 #[cfg(test)]

@@ -38,48 +38,12 @@ pub const CHANNEL_BYTES: u64 = 0xFF00_0000;
 /// stricter rule is followed on both targets. L1-to-DRAM writes need C16.
 pub const ALIGN: u64 = 64;
 
-/// One channel's training state, two bits of `GDDR_STATUS` (ARC tag 22).
+/// The DRAM channels of one chip: which ones may be stored in.
 ///
-/// Layout from UMD (`firmware_info_provider.cpp:502-551`): bit `2c` is "done",
-/// bit `2c + 1` "failed", for channel `c`; firmware 19.7 and later put the
-/// channel's BIST result in the same layout at bit 16. `MEASURED`: both p150a
-/// cards here (firmware 19.14.0.0) read `0x5555_5555`, every channel trained
-/// and BIST-passed.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum Training {
-    InProgress,
-    Passed,
-    Failed,
-}
-
-impl Training {
-    const fn decode(two_bits: u32) -> Self {
-        match two_bits & 3 {
-            0b01 => Training::Passed,
-            0b00 => Training::InProgress,
-            _ => Training::Failed,
-        }
-    }
-}
-
-/// Why a chip's DRAM cannot be described.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum DramError {
-    /// `ENABLED_GDDR` has bits above channel 7.
-    UnknownChannels { enabled: u32 },
-    /// A channel is fused off. The translated numbering then depends on which
-    /// one (`NoC/Coordinates.md:60`, UMD `fill_dram_noc0_translated_mapping`),
-    /// and no card here has that shape to measure it against, so it is refused
-    /// rather than guessed. p100 boards are the case.
-    Harvested { enabled: u32 },
-}
-
-/// The DRAM channels of one chip that are present, trained and BIST-clean.
-///
-/// Built from ARC telemetry: `ENABLED_GDDR` (tag 36, `MEASURED` `0xff` on both
-/// cards, bit `c` for channel `c`, as UMD reads it) and `GDDR_STATUS` (tag 22).
-/// As with [`crate::noc::grid::Tensix`] and [`crate::eth::Ethernet`], there is no
-/// constructor that does not start from a chip, except [`Dram::FULL`] for ttsim.
+/// The mask is the one thing a chip has to be asked for (`ENABLED_GDDR` tag 36
+/// and `GDDR_STATUS` tag 22, read through [`crate::arc`]); a host that has done
+/// that hands it down with [`Dram::from_usable_mask`], which is also the shape
+/// the data mover receives. [`Dram::FULL`] is ttsim's chip.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct Dram {
     usable: u8,
@@ -90,51 +54,16 @@ impl Dram {
     /// all 24 endpoints answer and alias in threes (`probe_dram`).
     pub const FULL: Dram = Dram { usable: 0xFF };
 
-    /// From `ENABLED_GDDR` and `GDDR_STATUS`. A channel that is enabled but has
-    /// not passed training (and, where reported, BIST) is left out: it exists,
-    /// but nothing may be stored in it.
-    pub const fn from_telemetry(enabled: u32, status: u32) -> Result<Self, DramError> {
-        if enabled & !0xFF != 0 {
-            return Err(DramError::UnknownChannels { enabled });
-        }
-        if enabled != 0xFF {
-            return Err(DramError::Harvested { enabled });
-        }
-        let mut usable = 0u8;
-        let mut c = 0;
-        while c < CHANNELS {
-            let trained = Training::decode(status >> (2 * c));
-            // Zero BIST bits are "not run", which firmware before 19.7 always
-            // reports; only a completed-and-failed BIST disqualifies.
-            let bist = Training::decode(status >> (16 + 2 * c));
-            if matches!(trained, Training::Passed) && !matches!(bist, Training::Failed) {
-                usable |= 1 << c;
-            }
-            c += 1;
-        }
-        Ok(Dram { usable })
-    }
-
-    /// The training state of channel `c` as `GDDR_STATUS` reports it, for a
-    /// diagnostic. Not a way to name the channel.
-    pub const fn training(status: u32, c: u8) -> (Training, Training) {
-        (
-            Training::decode(status >> (2 * c as u32)),
-            Training::decode(status >> (16 + 2 * c as u32)),
-        )
-    }
-
-    /// The usable-channel mask, bit `c` for channel `c`: what the host hands a
-    /// data mover, which cannot read the ARC itself.
-    pub const fn usable_mask(&self) -> u8 {
-        self.usable
-    }
-
-    /// A grid from a mask a host already derived from the chip
-    /// ([`Dram::usable_mask`]). For firmware, which receives it in a mailbox;
-    /// host code starts from [`Dram::from_telemetry`].
+    /// A grid from a mask a host derived from the chip. For firmware, which
+    /// receives it in a mailbox.
     pub const fn from_usable_mask(mask: u8) -> Self {
         Dram { usable: mask }
+    }
+
+    /// Channel `c`, if this chip can store data in it. The only way to obtain a
+    /// [`DramChannel`].
+    pub fn channel(&self, c: u8) -> Option<DramChannel> {
+        (c < CHANNELS && self.usable & (1 << c) != 0).then_some(DramChannel { index: c })
     }
 
     /// Every usable channel, ascending.
@@ -142,16 +71,6 @@ impl Dram {
         (0..CHANNELS)
             .filter(|c| self.usable & (1 << c) != 0)
             .map(|index| DramChannel { index })
-    }
-
-    pub fn channel_count(&self) -> u8 {
-        self.usable.count_ones() as u8
-    }
-
-    /// Channel `c`, if this chip can store data in it. The only way to obtain a
-    /// [`DramChannel`].
-    pub fn channel(&self, c: u8) -> Option<DramChannel> {
-        (c < CHANNELS && self.usable & (1 << c) != 0).then_some(DramChannel { index: c })
     }
 }
 
@@ -282,48 +201,6 @@ impl DramRange {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn both_cards_measured_status_makes_every_channel_usable() {
-        let d = Dram::from_telemetry(0xFF, 0x5555_5555).unwrap();
-        assert_eq!(d.channel_count(), 8);
-    }
-
-    #[test]
-    fn an_untrained_or_failed_channel_cannot_be_named() {
-        // Channel 1 in progress, channel 2 failed training, channel 3 failed BIST.
-        let status = 0x5555_5555 & !(0b11 << 2) & !(0b11 << 4) | (0b10 << 4);
-        let status = status & !(0b11 << 22) | (0b11 << 22);
-        let d = Dram::from_telemetry(0xFF, status).unwrap();
-        let mut named = [u8::MAX; 8];
-        for (slot, c) in named.iter_mut().zip(d.channels()) {
-            *slot = c.index();
-        }
-        assert_eq!(named[..d.channel_count() as usize], [0, 4, 5, 6, 7]);
-        assert!(d.channel(1).is_none() && d.channel(2).is_none() && d.channel(3).is_none());
-        assert_eq!(
-            Dram::training(status, 2),
-            (Training::Failed, Training::Passed)
-        );
-    }
-
-    #[test]
-    fn pre_bist_firmware_is_not_mistaken_for_a_failure() {
-        let d = Dram::from_telemetry(0xFF, 0x5555).unwrap();
-        assert_eq!(d.channel_count(), 8);
-    }
-
-    #[test]
-    fn harvested_and_unknown_channels_are_refused() {
-        assert_eq!(
-            Dram::from_telemetry(0x7F, 0x5555_5555),
-            Err(DramError::Harvested { enabled: 0x7F })
-        );
-        assert_eq!(
-            Dram::from_telemetry(0x1FF, 0x5555_5555),
-            Err(DramError::UnknownChannels { enabled: 0x1FF })
-        );
-    }
 
     #[test]
     fn endpoints_are_umd_translated_coordinates() {
