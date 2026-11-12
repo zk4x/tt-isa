@@ -11,7 +11,7 @@
 //! repetition has to land its own data.
 //!
 //! The control block sits in the sliver between B's mover area and NC's image
-//! ([`crate::l1::REGIONS`]: unused), the table in the mover's list ring, which
+//! (unused), the table in the mover's list ring, which
 //! nothing uses while this image runs instead of the mover.
 
 /// The control block: `u32` words at these offsets.

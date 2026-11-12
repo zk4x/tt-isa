@@ -172,7 +172,7 @@ pub mod niu {
     /// `NIU_MST_WR_ACK_RECEIVED` (`Counters.md`, index 1): one per write
     /// acknowledgement that reaches this NIU, 32 bits, wraps. A broadcast write
     /// with `NOC_CMD_RESP_MARKED` is acknowledged by *every* recipient, so this
-    /// is the counter that sees a multicast complete ([`super::multicast::AckCount`]).
+    /// is the counter that sees a multicast complete.
     pub const WR_ACK_RECEIVED: u64 = 0x0204;
     /// Write `1 << id` to zero `NIU_MST_REQS_OUTSTANDING_ID(id)`
     /// (`Counters.md`, "Clear NIU transaction ID counters"). A broadcast with
@@ -313,7 +313,7 @@ pub mod niu {
     /// A run of requests charged to one [`InFlight`] together: the issue path keeps the room in a register,
     /// `InFlight` is updated when the batch ends or its room runs out, and the fence that orders the issue
     /// stores before a counter read (`NoC/Counters.md`) is made once per batch, not once per request.
-    /// The protocol, for each request: [`Batch::before_issue`], the issue, [`Batch::issued`]; at the end
+    /// The protocol, for each request: [`Batch::refill`], the issue, [`Batch::issued`]; at the end
     /// [`Batch::end`], which says whether to fence (any request issued). Every exit from the run, an error
     /// included, ends it, or the requests it issued are not counted.
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -1343,9 +1343,9 @@ pub mod niu {
 /// varies per ASIC and cannot be measured by probing, because probing a fused-off
 /// tile is the hang described in [`crate::arc`].
 ///
-/// The geometry below is therefore split in two. [`is_tensix_geometry`] answers
+/// The geometry below is therefore split in two. `is_tensix_geometry` answers
 /// "could this coordinate ever hold a Tensix tile", which is a property of the
-/// part. [`Tensix`] answers "does *this* chip have a Tensix tile there", which is
+/// part. `Tensix` answers "does *this* chip have a Tensix tile there", which is
 /// a property of one ASIC and has to come from its ARC.
 pub mod grid {
     use super::NocCoord;

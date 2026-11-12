@@ -1,8 +1,7 @@
 //! Layout of the NoC probe (`tt-firmware/src/bin/noc_probe_b.rs`), shared by the
 //! image and the host gates (`step115`-`step117`).
 //!
-//! The image replays requests the host encoded with the typed encoders
-//! ([`super::atomic::AtomicRequest`], [`super::multicast::MulticastWrite`]): it
+//! The image replays requests the host encoded with the typed encoders: it
 //! owns no encoding of its own, so what the probe sends is exactly what the host
 //! gates model. For each request it waits for the initiator, writes the register
 //! values, issues, then waits for completion the way the request class needs and

@@ -60,13 +60,13 @@ pub const DATA_QUEUE: u8 = 2;
 ///
 /// 1. The host writes a send descriptor into the sending E1's mailbox, `SEQ`
 ///    last.
-/// 2. The sender pulls the data from a Tensix tile into [`TX_STAGE`] (or takes
+/// 2. The sender pulls the data from a Tensix tile into [`mover::TX_STAGE`] (or takes
 ///    it as the host staged it), TT-link-writes it to the partner's
-///    [`RX_LAND`], and then TT-link-writes an [`INBOX`] record: sequence number,
+///    [`mover::RX_LAND`], and then TT-link-writes an [`mover::INBOX`] record: sequence number,
 ///    length and destination.
 /// 3. The receiver sees a new record, waits until its RX queue has no writes
-///    outstanding, NoC-writes [`RX_LAND`] into the destination Tensix tile (or
-///    leaves it), and TT-link-writes an [`ACK`] back into the sender's mailbox.
+///    outstanding, NoC-writes [`mover::RX_LAND`] into the destination Tensix tile (or
+///    leaves it), and TT-link-writes an [`mover::ACK`] back into the sender's mailbox.
 ///
 /// The wait is what makes step 3 safe. TT-link delivers one queue's packets in
 /// order -- the receiver discards anything out of sequence -- so every data
@@ -74,7 +74,7 @@ pub const DATA_QUEUE: u8 = 2;
 /// *committed to L1* before the record was, but `ETH_RXQ_OUTSTANDING_WR_CNT`
 /// counts exactly the accepted-but-uncommitted writes (`EthernetTxRx.md`). Once
 /// the record is visible and that count is zero, everything before it is in L1.
-/// The host, on the sending chip, learns of delivery from [`ACKED`], and never
+/// The host, on the sending chip, learns of delivery from [`mover::ACKED`], and never
 /// has to talk to the other chip.
 pub mod mover {
     use super::MAILBOX_BASE as M;

@@ -8,13 +8,13 @@
 //! no software timeout. A **guarded** run therefore replaces that wait with a
 //! bounded poll of a **completion semaphore** that the program's own last
 //! instruction posts (`SyncUnit.md`: a RISC-V core can `lw` any semaphore),
-//! reports [`BLOCKED`] when the bound expires, and keeps polling for a release
-//! request ([`Guard::release`]) and the completion. A semaphore rather than an
+//! reports `BLOCKED` when the bound expires, and keeps polling for a release
+//! request (`Guard::release`) and the completion. A semaphore rather than an
 //! L1 word because the program has no store ttsim runs (`STOREIND`, divergence
 //! row 77's neighbour) and a post is the Sync Unit's own ordered completion.
 //!
 //! Each poll also publishes a snapshot of all eight semaphores
-//! ([`Guard::snapshot`]), so the host can observe what the threads have posted:
+//! (`Guard::snapshot`), so the host can observe what the threads have posted:
 //! the gates use a semaphore per thread as a "this thread got here" marker.
 //!
 //! The block sits at a fixed offset inside each role mailbox, away from every

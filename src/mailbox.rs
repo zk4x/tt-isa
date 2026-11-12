@@ -46,7 +46,7 @@ pub const THREAD_INDEX: u64 = MAILBOX_BASE + 0x1C;
 /// Requested `RISC_DEST_ACCESS_CTRL_SEC*.fmt`, so a test can vary it.
 pub const DST_ACCESS_FMT: u64 = MAILBOX_BASE + 0x20;
 
-/// How many instruction words the host has staged at [`PROGRAM`].
+/// How many instruction words the host has staged at [`PROGRAM_ADDR`].
 pub const PROGRAM_LEN: u64 = MAILBOX_BASE + 0x24;
 /// How many `Dst` rows the firmware should copy to [`DUMP`] afterwards.
 pub const DUMP_ROW_COUNT: u64 = MAILBOX_BASE + 0x28;

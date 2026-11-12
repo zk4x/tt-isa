@@ -82,99 +82,6 @@ impl Core {
         }
     }
 
-    /// Address of this core's `pc` snapshot (`BabyRISCV/README.md:163-169`).
-    ///
-    /// The snapshot is taken as instructions leave the frontend, so it is
-    /// speculative: it may name an instruction that never executes. Good for
-    /// liveness and sampling, useless as a precise fault PC.
-    pub const fn pc_snapshot(self) -> u64 {
-        match self {
-            Core::B => 0xFFB1_3138,
-            Core::NC => 0xFFB1_313C,
-            Core::T0 => 0xFFB1_3140,
-            Core::T1 => 0xFFB1_3144,
-            Core::T2 => 0xFFB1_3148,
-        }
-    }
-
-    /// Size of this core's local data RAM (`BabyRISCV/README.md:146`).
-    pub const fn local_data_ram_size(self) -> u32 {
-        match self {
-            Core::B | Core::NC => 8 * 1024,
-            Core::T0 | Core::T1 | Core::T2 => 4 * 1024,
-        }
-    }
-
-    /// Base of this core's local data RAM in the NoC-visible *slow access path*
-    /// (`BabyRISCV/README.md:109-116`).
-    ///
-    /// Each local data RAM appears twice. At `MEM_LOCAL_BASE` it is reachable
-    /// only by its own core, with two-cycle loads and no contention. Here it is
-    /// reachable from any core **and over the NoC**, at eight cycles or worse —
-    /// new in Blackhole, and explicitly intended so that "the host [can] more
-    /// easily initialize the local data RAM, and [debuggers can] more easily
-    /// inspect it" (`README.md:157`).
-    ///
-    /// For RISC-V memory ordering the two mappings are *separate memory
-    /// regions* (`README.md:154`), so a core must reach its own RAM through
-    /// `MEM_LOCAL_BASE` and use this address only for another core's.
-    pub const fn local_data_ram_noc_address(self) -> u64 {
-        // A uniform 0x2000 stride from LOCAL_DATA_RAM_NOC_BASE, in hardware core
-        // order -- the same order as `pc_snapshot`, and deliberately derived from
-        // the same index so the two cannot drift apart.
-        LOCAL_DATA_RAM_NOC_BASE + (self.hardware_index() as u64) * LOCAL_DATA_RAM_NOC_STRIDE
-    }
-
-    /// Address space the slow access path reserves for this core: always 8 KiB.
-    ///
-    /// Kept distinct from [`local_data_ram_size`](Self::local_data_ram_size)
-    /// because for T0/T1/T2 they differ: the memory map gives each T-core *two*
-    /// 4 KiB rows with the same label while the RAM is only 4 KiB, and the
-    /// specification does not say what the upper half is. Anything staging into
-    /// this aperture must bound itself by the size, not by the window.
-    pub const fn local_data_ram_noc_window(self) -> u64 {
-        LOCAL_DATA_RAM_NOC_STRIDE
-    }
-
-    /// Position of this core in the hardware ordering B, NC, T0, T1, T2.
-    ///
-    /// Private because it is not meaningful on its own — it exists so that the
-    /// `pc` snapshot block and the local-RAM aperture, which share this order,
-    /// are generated from one place. Note that neither the soft-reset bits nor
-    /// the `DISABLE_RESET` bits follow it.
-    const fn hardware_index(self) -> u32 {
-        match self {
-            Core::B => 0,
-            Core::NC => 1,
-            Core::T0 => 2,
-            Core::T1 => 3,
-            Core::T2 => 4,
-        }
-    }
-
-    /// Bits of [`DISABLE_RESET`] for this core: the local-data-RAM bit, then the
-    /// debug `DR` register bit (`SoftReset.md:42-54`).
-    ///
-    /// With the local-data-RAM bit set, leaving soft reset does not start the
-    /// zeroing described at [`LOCAL_RAM_ZEROING_CYCLES`] at all — the window is
-    /// abolished rather than shortened. **A fourth core ordering**: T0 = 0,
-    /// T1 = 2, T2 = 4, B = 6, NC = 8, matching neither the soft-reset bits, nor
-    /// the `pc` snapshot order, nor the I-cache invalidate mask.
-    pub const fn disable_reset_bits(self) -> (u32, u32) {
-        match self {
-            Core::T0 => (0, 1),
-            Core::T1 => (2, 3),
-            Core::T2 => (4, 5),
-            Core::B => (6, 7),
-            Core::NC => (8, 9),
-        }
-    }
-
-    /// Can this core push Tensix instructions? (`PushTensixInstruction.md:3`)
-    pub const fn can_push_tensix(self) -> bool {
-        !matches!(self, Core::NC)
-    }
-
     pub const fn name(self) -> &'static str {
         match self {
             Core::B => "B",
@@ -579,108 +486,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn local_ram_apertures_tile_the_documented_range() {
-        for (i, core) in Core::ALL.iter().enumerate() {
-            let base = core.local_data_ram_noc_address();
-            let end = base + core.local_data_ram_noc_window();
-            assert!(
-                base >= LOCAL_DATA_RAM_NOC_BASE && end <= LOCAL_DATA_RAM_NOC_END,
-                "{} sits outside the documented aperture",
-                core.name()
-            );
-            for other in &Core::ALL[..i] {
-                let o_base = other.local_data_ram_noc_address();
-                let o_end = o_base + other.local_data_ram_noc_window();
-                assert!(
-                    end <= o_base || base >= o_end,
-                    "{} overlaps {}",
-                    core.name(),
-                    other.name()
-                );
-            }
-        }
-        // Five cores at 0x2000 apiece exactly fill 0xFFB1_4000..0xFFB1_E000.
-        assert_eq!(
-            LOCAL_DATA_RAM_NOC_END - LOCAL_DATA_RAM_NOC_BASE,
-            Core::ALL.len() as u64 * LOCAL_DATA_RAM_NOC_STRIDE
-        );
-        // The memory map's first row, spelled out rather than derived.
-        assert_eq!(Core::B.local_data_ram_noc_address(), 0xFFB1_4000);
-        assert_eq!(Core::NC.local_data_ram_noc_address(), 0xFFB1_6000);
-        assert_eq!(Core::T0.local_data_ram_noc_address(), 0xFFB1_8000);
-        assert_eq!(Core::T1.local_data_ram_noc_address(), 0xFFB1_A000);
-        assert_eq!(Core::T2.local_data_ram_noc_address(), 0xFFB1_C000);
-    }
-
-    #[test]
-    fn local_ram_never_fills_more_than_its_aperture() {
-        for core in Core::ALL {
-            let size = core.local_data_ram_size() as u64;
-            assert!(size <= core.local_data_ram_noc_window());
-            // B and NC fill theirs; the T-cores are given twice the window they
-            // back, and what occupies the upper half is undocumented. Anything
-            // staging here must bound itself by the size.
-            let exact = matches!(core, Core::B | Core::NC);
-            assert_eq!(size == core.local_data_ram_noc_window(), exact);
-        }
-    }
-
-    #[test]
-    fn disable_reset_bits_are_ten_distinct_bits_below_ten() {
-        let mut mask = 0u32;
-        for core in Core::ALL {
-            let (ram, dr) = core.disable_reset_bits();
-            assert_eq!(
-                dr,
-                ram + 1,
-                "{}'s DR bit must follow its RAM bit",
-                core.name()
-            );
-            for bit in [ram, dr] {
-                // SoftReset.md:54: bits >= 10 have no effect.
-                assert!(bit < 10, "{} names bit {bit}", core.name());
-                assert_eq!(mask & (1 << bit), 0, "{} reuses bit {bit}", core.name());
-                mask |= 1 << bit;
-            }
-        }
-        assert_eq!(mask, 0x3FF, "the ten documented bits must all be claimed");
-    }
-
-    #[test]
-    fn the_per_core_orderings_really_are_different() {
-        // Blackhole numbers the five cores four different ways. Each of these
-        // tables is transcribed from a different page, and the failure mode of
-        // copying one into another is a hung core rather than a compile error --
-        // so the difference is asserted rather than left as a comment.
-        let mut soft_reset = [0u32; 5];
-        let mut disable_reset = [0u32; 5];
-        let mut hardware = [0u32; 5];
-        for (i, core) in Core::ALL.iter().enumerate() {
-            soft_reset[i] = core.soft_reset_bit();
-            disable_reset[i] = core.disable_reset_bits().0;
-            hardware[i] = core.hardware_index();
-        }
-
-        assert_eq!(soft_reset, [11, 12, 13, 14, 18]);
-        assert_eq!(disable_reset, [6, 0, 2, 4, 8]);
-        assert_eq!(hardware, [0, 2, 3, 4, 1]);
-        assert_ne!(soft_reset, disable_reset);
-        assert_ne!(disable_reset, hardware);
-
-        // The `pc` snapshot block and the local-RAM aperture share the hardware
-        // ordering, which is why both are generated from `hardware_index`.
-        for core in Core::ALL {
-            let i = core.hardware_index() as u64;
-            assert_eq!(core.pc_snapshot(), 0xFFB1_3138 + i * 4);
-            assert_eq!(
-                core.local_data_ram_noc_address(),
-                LOCAL_DATA_RAM_NOC_BASE + i * LOCAL_DATA_RAM_NOC_STRIDE
-            );
-        }
-    }
-
-    #[test]
-    fn reset_bits_are_distinct_and_match_the_named_masks() {
+    fn soft_reset_bits_and_masks() {
         let mut mask = 0u32;
         for core in Core::ALL {
             let m = core.soft_reset_mask();
@@ -733,14 +539,6 @@ mod tests {
     }
 
     #[test]
-    fn pc_snapshots_are_four_bytes_apart_in_core_order() {
-        assert_eq!(Core::B.pc_snapshot(), 0xFFB1_3138);
-        assert_eq!(Core::NC.pc_snapshot(), Core::B.pc_snapshot() + 4);
-        assert_eq!(Core::T0.pc_snapshot(), Core::B.pc_snapshot() + 8);
-        assert_eq!(Core::T2.pc_snapshot(), Core::B.pc_snapshot() + 16);
-    }
-
-    #[test]
     fn backend_reset_mask_excludes_every_riscv_core() {
         for core in Core::ALL {
             assert_eq!(
@@ -769,34 +567,6 @@ mod tests {
             "after one padding word"
         );
         assert_eq!(MOP_EXPANDER_DONE_CHECK - COPROCESSOR_DONE_CHECK, 4);
-    }
-
-    #[test]
-    fn only_nc_cannot_push_tensix_instructions() {
-        assert!(!Core::NC.can_push_tensix());
-        assert!(Core::ALL.iter().filter(|c| c.can_push_tensix()).count() == 4);
-    }
-
-    /// Every type that can push names a core that [`Core::can_push_tensix`] agrees
-    /// can push.
-    ///
-    /// This is what keeps the runtime enum and the type-level table from drifting.
-    /// `RiscvNc` cannot appear here: it implements neither trait. That absence is
-    /// gated by the `compile_fail` example on [`PushCore`], which rustdoc runs --
-    /// this module is `cfg(test)`, so an example placed here would never run at all.
-    #[test]
-    fn every_pushing_core_type_agrees_with_the_enum() {
-        fn check<C: PushCore>() {
-            assert!(
-                C::CORE.can_push_tensix(),
-                "{} implements PushCore but the enum says it cannot push",
-                C::CORE.name()
-            );
-        }
-        check::<RiscvB>();
-        check::<RiscvT0>();
-        check::<RiscvT1>();
-        check::<RiscvT2>();
     }
 
     /// The buffer address for each legal `(core, thread)` pair, against the table in

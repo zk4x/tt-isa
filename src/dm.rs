@@ -64,8 +64,8 @@ pub const LEN: u64 = MAILBOX_BASE + 0x40;
 pub const MY_X: u64 = MAILBOX_BASE + 0x44;
 pub const MY_Y: u64 = MAILBOX_BASE + 0x48;
 /// The chip's usable-channel mask, as the host read it from the ARC
-/// ([`Dram::usable_mask`]). Written once, before start: the mover can only
-/// name channels the chip said it has.
+/// ([`crate::dram::Dram::from_usable_mask`]). Written once, before start: the
+/// mover can only name channels the chip said it has.
 pub const USABLE: u64 = MAILBOX_BASE + 0x4C;
 /// Host -> mover: non-zero, record each list's entries and records through
 /// the tile's timestamper (`crate::mailbox::trace`), which the host has
