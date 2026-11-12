@@ -327,38 +327,6 @@ pub const fn write_span(gpr: u32, span: ConfigSpan) -> Result<Instruction, Encod
     }
 }
 
-/// The four `set_gpr` pairs plus the 128-bit [`write_span`] that stage `words` into
-/// `span`, in push order. Nine instructions.
-///
-/// `gpr` is the first of four consecutive GPRs and must be a multiple of four.
-pub const fn write_span_words(
-    gpr: u32,
-    span: ConfigSpan,
-    words: [u32; 4],
-) -> Result<[Instruction; 9], EncodeError> {
-    let a = match set_gpr(gpr, words[0]) {
-        Ok(v) => v,
-        Err(e) => return Err(e),
-    };
-    let b = match set_gpr(gpr + 1, words[1]) {
-        Ok(v) => v,
-        Err(e) => return Err(e),
-    };
-    let c = match set_gpr(gpr + 2, words[2]) {
-        Ok(v) => v,
-        Err(e) => return Err(e),
-    };
-    let d = match set_gpr(gpr + 3, words[3]) {
-        Ok(v) => v,
-        Err(e) => return Err(e),
-    };
-    let w = match write_span(gpr, span) {
-        Ok(v) => v,
-        Err(e) => return Err(e),
-    };
-    Ok([a[0], a[1], b[0], b[1], c[0], c[1], d[0], d[1], w])
-}
-
 /// `SETC16`: write one whole 16-bit `ThreadConfig` entry of the issuing thread.
 ///
 /// Entry-level rather than field-level on purpose. `SETC16` has no mask, so it
@@ -394,11 +362,6 @@ impl ThreadConfigEntry {
     /// An entry whose every bit is zero.
     pub const fn zeroed(addr32: u16) -> Self {
         ThreadConfigEntry { addr32, value: 0 }
-    }
-
-    /// An entry starting from a value read from the hardware.
-    pub const fn from_value(addr32: u16, value: u16) -> Self {
-        ThreadConfigEntry { addr32, value }
     }
 
     pub const fn addr32(self) -> u16 {
@@ -601,19 +564,8 @@ pub mod cond {
     pub const PACKER_BUSY: u32 = 1 << 3;
     /// C4 — this thread has an instruction anywhere in the Matrix Unit pipeline.
     pub const MATRIX_BUSY: u32 = 1 << 4;
-    /// C5 — `SrcA[Unpackers[0].SrcBank].AllowedClient != Unpackers`.
-    pub const SRCA_NOT_UNPACKER: u32 = 1 << 5;
-    /// C6 — `SrcB[Unpackers[1].SrcBank].AllowedClient != Unpackers`.
-    pub const SRCB_NOT_UNPACKER: u32 = 1 << 6;
-    /// C7 — `SrcA[MatrixUnit.SrcABank].AllowedClient != MatrixUnit`.
-    pub const SRCA_NOT_MATRIX: u32 = 1 << 7;
-    /// C8 — `SrcB[MatrixUnit.SrcBBank].AllowedClient != MatrixUnit`.
-    pub const SRCB_NOT_MATRIX: u32 = 1 << 8;
     /// C9 — the Mover has memory requests outstanding, from any thread.
     pub const MOVER_OUTSTANDING: u32 = 1 << 9;
-    /// C10 — this thread's RISC-V core has a request against GPRs, configuration
-    /// or TDMA-RISC that has been emitted but not processed.
-    pub const RISCV_REQUEST_PENDING: u32 = 1 << 10;
     /// C11 — this thread has an instruction anywhere in the SFPU pipeline.
     pub const SFPU_BUSY: u32 = 1 << 11;
     /// C12 — *any* thread has an instruction in the Configuration Unit pipeline.
@@ -678,18 +630,6 @@ impl Before {
     pub const fn mask(self) -> u32 {
         self.0
     }
-}
-
-/// Drain this thread's scalar memory requests (Blackhole C0), blocking scalar
-/// issue and the selected consumers. This does not drain another thread.
-pub const fn wait_for_scalar(before: Before) -> Result<Instruction, EncodeError> {
-    stallwait(block::SCALAR | before.0, cond::SCALAR_OUTSTANDING)
-}
-
-/// Drain the shared hardware mover (Blackhole C9), blocking mover issue and
-/// selected consumers. The caller must own mover configuration until completion.
-pub const fn wait_for_mover(before: Before) -> Result<Instruction, EncodeError> {
-    stallwait(block::MOVER | before.0, cond::MOVER_OUTSTANDING)
 }
 
 /// Wait until this thread has drained unpacker 0 (C1), holding back its own
@@ -981,96 +921,4 @@ mod tests {
             "C12 is the highest condition bit"
         );
     }
-}
-
-/// CFGSHIFTMASK ALU operations, in specification order.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(u32)]
-pub enum ConfigOperation {
-    Or,
-    And,
-    Xor,
-    Add,
-    OrNot,
-    AndNot,
-    XorNot,
-    Sub,
-}
-/// Replace clears the rotated mask before applying the ALU operation;
-/// Preserve applies the operation directly to the existing destination.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(u32)]
-pub enum MaskMode {
-    Replace,
-    Preserve,
-}
-/// Scratch words are global across banks. CurrentThread selects slot 0/1/2
-/// by issuing thread, not a bank-local value. Serialize shared scratch use.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-#[repr(u32)]
-pub enum Scratch {
-    Slot0,
-    Slot1,
-    Slot2,
-    CurrentThread,
-}
-
-/// Read a whole Config word from the issuing thread's selected bank.
-/// The wait blocks every subsequent consumer until the Configuration Unit retires.
-/// This accepts word indices, never ThreadConfig fields.
-pub fn read_word(result_gpr: u32, addr32: u16) -> Result<[Instruction; 2], EncodeError> {
-    check_gpr(result_gpr)?;
-    if u32::from(addr32) >= CONFIG_INDEX_LIMIT {
-        return Err(EncodeError::ConfigIndexOutOfBounds {
-            index: addr32.into(),
-        });
-    }
-    Ok([
-        encode::rdcfg(result_gpr, addr32.into()).map_err(EncodeError::from_isa)?,
-        stallwait(Before::EVERYTHING.mask(), cond::CONFIG_BUSY)?,
-    ])
-}
-
-/// Mutate only scratch words or THCON_SEC0/1_REG3_Base_address.
-/// Drain active unpackers before changing base addresses. Scratch is shared
-/// across both banks and all threads, so callers must serialize its use.
-/// Width is 1–32 bits; rotation is a right rotation of 0–31 bits.
-pub fn modify_word(
-    target: u16,
-    scratch: Scratch,
-    operation: ConfigOperation,
-    mask_mode: MaskMode,
-    width: u32,
-    rotation: u32,
-) -> Result<[Instruction; 2], EncodeError> {
-    use crate::cfg::generated::{global, thcon};
-    if ![
-        global::SCRATCH_SEC0_val.addr32(),
-        global::SCRATCH_SEC1_val.addr32(),
-        global::SCRATCH_SEC2_val.addr32(),
-        thcon::THCON_SEC0_REG3_Base_address.addr32(),
-        thcon::THCON_SEC1_REG3_Base_address.addr32(),
-    ]
-    .contains(&target)
-    {
-        return Err(EncodeError::InvalidMutationTarget { index: target });
-    }
-    if !(1..=32).contains(&width) {
-        return Err(EncodeError::BadMaskWidth { width });
-    }
-    if rotation > 31 {
-        return Err(EncodeError::BadRotation { rotation });
-    }
-    Ok([
-        encode::Cfgshiftmask::ZERO
-            .cfg_index(target.into())
-            .scratch_index(scratch as u32)
-            .alu_mode(operation as u32)
-            .mask_mode(mask_mode as u32)
-            .mask_width(width - 1)
-            .rotate_amt(rotation)
-            .encode()
-            .map_err(EncodeError::from_isa)?,
-        stallwait(Before::EVERYTHING.mask(), cond::CONFIG_BUSY)?,
-    ])
 }

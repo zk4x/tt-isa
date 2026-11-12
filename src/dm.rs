@@ -95,13 +95,6 @@ pub const THROTTLE_CYCLES: u64 = MAILBOX_BASE + 0x58;
 /// `crate::noc::niu::MAX_IN_FLIGHT`. Read at the start of every list. Lower
 /// caps are for the gates that force the throttle.
 pub const IN_FLIGHT_CAP: u64 = MAILBOX_BASE + 0x5C;
-/// The in-flight cap a tile's mover starts with (`tt_kernels::dm::DataMover::
-/// start`), against `MAX_IN_FLIGHT` (128) for 0: with every tile reading, eight
-/// requests in flight each spread the NoC's service evenly between tiles, and
-/// the card's reads rise from 425 to 467 GB/s at 64 KiB entries and to 496 at
-/// 16 KiB, against 3-4% off one tile's small reads
-/// (`docs/learnings/performance-log.md`, "What holds card reads").
-pub const TILE_IN_FLIGHT_CAP: u32 = 8;
 /// The NoC transaction ID RISCV B's requests carry (`PACKET_TAG` bits 10..14),
 /// and NC's: the mover's `TXN`.
 pub const TXN_B: u8 = 2;
@@ -202,11 +195,6 @@ pub mod write_noc {
     /// GDDR share no links -- NoC #0's run down the two DRAM columns, NoC
     /// #1's along port 1's rows into them -- so their bandwidths can add.
     pub const ALTERNATE: u32 = 2;
-}
-
-/// A queue slot's word: a list of `entries` from ring entry `first`.
-pub const fn queue_slot(first: u32, entries: u32) -> u32 {
-    first | (entries << 16)
 }
 
 pub mod op {
