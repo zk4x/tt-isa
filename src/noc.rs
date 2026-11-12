@@ -1,71 +1,35 @@
-//! NoC coordinate spaces.
+//! NoC coordinates and the NIU register block.
 //!
-//! Blackhole has four distinct hardware coordinate spaces plus one software label,
-//! all of which are a pair of small integers and none of which are interchangeable.
-//! Mixing them silently addresses the wrong tile, so they are separate types rather
-//! than a convention.
+//! A coordinate is a pair of small integers, raw (untranslated) unless a caller
+//! says otherwise; which NoC a request travels is chosen by its base address
+//! ([`niu::NOC0_BASE`]/[`niu::NOC1_BASE`]), as in tt-metal's
+//! `noc_parameters.h`.
 //!
-//! Spec: `BlackholeA0/NoC/Coordinates.md`.
-
-use core::fmt;
-use core::marker::PhantomData;
-
-/// Which of the two NoCs a raw coordinate belongs to.
-///
-/// The two NoCs are mirrored, not merely offset: NoC #0's origin is top-left and
-/// increments rightwards and downwards (`Coordinates.md:7`), NoC #1's origin is
-/// bottom-right and increments leftwards and upwards (`Coordinates.md:13`). A NoC
-/// #0 coordinate reinterpreted as NoC #1 names a different tile.
-pub trait NocId: Copy + Clone + fmt::Debug + Eq + PartialEq {
-    /// 0 or 1, as written into the TLB `noc_sel` field.
-    const INDEX: u8;
-    const NAME: &'static str;
-}
-
-/// NoC #0: origin top-left, increasing rightwards and downwards.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct Noc0;
-impl NocId for Noc0 {
-    const INDEX: u8 = 0;
-    const NAME: &'static str = "NoC0";
-}
-
-/// NoC #1: origin bottom-right, increasing leftwards and upwards.
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub struct Noc1;
-impl NocId for Noc1 {
-    const INDEX: u8 = 1;
-    const NAME: &'static str = "NoC1";
-}
+//! Spec: `BlackholeA0/NoC/Coordinates.md`, `MemoryMap.md`.
 
 /// The NoC grid is 17 tiles wide and 12 tall (`NoC/MemoryMap.md:183-184`).
 pub const GRID_WIDTH: u8 = 17;
-/// See [`GRID_WIDTH`].
-pub const GRID_HEIGHT: u8 = 12;
 
-/// A raw NoC coordinate, tagged with which NoC it addresses.
+/// A raw NoC coordinate.
 ///
 /// "Raw" means untranslated — what the hardware uses when coordinate translation
 /// (`NIU_CFG_0` bit 14) is off, and what the TLB `strided`/exclude fields always
-/// take regardless of translation.
-#[derive(Copy, Clone, Eq, PartialEq, Hash)]
-pub struct NocCoord<N: NocId> {
+/// take regardless of translation. Which NoC a request goes through is chosen by
+/// its base address ([`niu::NOC0_BASE`]/[`niu::NOC1_BASE`]), not by the
+/// coordinate, as tt-metal's `noc_parameters.h` has it.
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
+pub struct NocCoord {
     x: u8,
     y: u8,
-    _noc: PhantomData<N>,
 }
 
-impl<N: NocId> NocCoord<N> {
+impl NocCoord {
     /// Both axes are 6-bit fields in every register that carries a coordinate
     /// (`NoC/MemoryMap.md:110-115`), so anything wider is a programming error
     /// rather than an out-of-range tile.
     pub const fn new(x: u8, y: u8) -> Option<Self> {
         if x < 64 && y < 64 {
-            Some(NocCoord {
-                x,
-                y,
-                _noc: PhantomData,
-            })
+            Some(NocCoord { x, y })
         } else {
             None
         }
@@ -86,96 +50,6 @@ impl<N: NocId> NocCoord<N> {
     }
 }
 
-impl<N: NocId> fmt::Debug for NocCoord<N> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}({}, {})", N::NAME, self.x, self.y)
-    }
-}
-
-/// A coordinate in the translated space used when `NIU_CFG_0` bit 14 is set.
-///
-/// Blackhole's translation is a *combined* X/Y table — the Y value selects which X
-/// table applies (`Coordinates.md:26`) — unlike Wormhole's separable per-axis
-/// tables. So a translated coordinate cannot be decomposed and re-translated
-/// axis-by-axis, and it is not interchangeable with either raw space.
-///
-/// Note also that Blackhole, unlike Wormhole, does **not** write translated
-/// coordinates back into MMIO registers (`NoC/MemoryMap.md:158-166`), so read-back
-/// code must not expect to recover one.
-#[derive(Copy, Clone, Eq, PartialEq, Hash)]
-pub struct Translated {
-    x: u8,
-    y: u8,
-}
-
-impl Translated {
-    pub const fn new(x: u8, y: u8) -> Option<Self> {
-        if x < 64 && y < 64 {
-            Some(Translated { x, y })
-        } else {
-            None
-        }
-    }
-
-    pub const fn x(self) -> u8 {
-        self.x
-    }
-
-    pub const fn y(self) -> u8 {
-        self.y
-    }
-
-    pub const fn packed(self) -> u16 {
-        (self.x as u16) | ((self.y as u16) << 6)
-    }
-}
-
-impl fmt::Debug for Translated {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Translated({}, {})", self.x, self.y)
-    }
-}
-
-/// Which chip a coordinate refers to.
-///
-/// Present from the first commit even though the baseline is single-chip: the
-/// alternative is threading it through every signature later.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
-pub struct ChipId(pub u16);
-
-/// Tile type, decoded from `NOC_ENDPOINT_ID` bits 8..=23 (`NoC/MemoryMap.md:196-200`).
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum TileType {
-    Tensix,
-    Ethernet,
-    Pcie,
-    Arc,
-    Dram,
-    L2Cpu,
-    Security,
-    Unknown(u16),
-}
-
-impl TileType {
-    pub const fn from_endpoint_id(endpoint_id: u32) -> Self {
-        match ((endpoint_id >> 8) & 0xFFFF) as u16 {
-            0x0100 => TileType::Tensix,
-            0x0200 => TileType::Ethernet,
-            0x0300 => TileType::Pcie,
-            0x0500 => TileType::Arc,
-            0x0800 => TileType::Dram,
-            0x0901 => TileType::L2Cpu,
-            0x0A00 => TileType::Security,
-            other => TileType::Unknown(other),
-        }
-    }
-}
-
-/// Tile index within its type, from `NOC_ENDPOINT_ID` bits 0..=7.
-pub const fn endpoint_tile_index(endpoint_id: u32) -> u8 {
-    (endpoint_id & 0xFF) as u8
-}
-
 pub mod probe;
 pub mod read_loop;
 
@@ -191,25 +65,17 @@ mod tests {
 
     #[test]
     fn coords_reject_out_of_range() {
-        assert!(NocCoord::<Noc0>::new(63, 63).is_some());
-        assert!(NocCoord::<Noc0>::new(64, 0).is_none());
-        assert!(NocCoord::<Noc0>::new(0, 64).is_none());
+        assert!(NocCoord::new(63, 63).is_some());
+        assert!(NocCoord::new(64, 0).is_none());
+        assert!(NocCoord::new(0, 64).is_none());
     }
 
     #[test]
     fn packing_matches_ethdump() {
         // ethdump.c:440 hardcodes BH_PCIE_XY as `19 + (24 << 6)` for the
         // host-connected PCIe tile in translated space.
-        let pcie = Translated::new(19, 24).unwrap();
+        let pcie = NocCoord::new(19, 24).unwrap();
         assert_eq!(pcie.packed(), 19 + (24 << 6));
-    }
-
-    #[test]
-    fn endpoint_id_decodes() {
-        // Tile type 0x0100 (Tensix), tile index 0x07.
-        assert_eq!(TileType::from_endpoint_id(0x0001_0007), TileType::Tensix);
-        assert_eq!(endpoint_tile_index(0x0001_0007), 7);
-        assert_eq!(TileType::from_endpoint_id(0x0002_0000), TileType::Ethernet);
     }
 }
 
@@ -227,9 +93,8 @@ pub mod niu {
     pub const NOC_SELECT: u64 = NOC0_BASE ^ NOC1_BASE;
     const _: () = assert!(NOC_SELECT.count_ones() == 1 && NOC0_BASE & NOC_SELECT == 0);
 
-    /// Which of a tile's two NIUs a request leaves through: the run-time
-    /// counterpart of [`super::NocId`]. Requests to GDDR are bound to it
-    /// ([`crate::dram::DramChannel::owns`]).
+    /// Which of a tile's two NIUs a request leaves through. Requests to GDDR
+    /// are bound to it ([`crate::dram::DramChannel::owns`]).
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
     pub enum Niu {
         Noc0,
@@ -1483,12 +1348,7 @@ pub mod niu {
 /// part. [`Tensix`] answers "does *this* chip have a Tensix tile there", which is
 /// a property of one ASIC and has to come from its ARC.
 pub mod grid {
-    use super::{NocCoord, NocId};
-
-    /// L1 per Tensix tile (`BabyRISCV/README.md:102`).
-    pub const TENSIX_L1_SIZE: u64 = 1536 * 1024;
-    /// L1 per Ethernet tile (`EthernetTile/README.md`).
-    pub const ETHERNET_L1_SIZE: u64 = 512 * 1024;
+    use super::NocCoord;
 
     /// Columns carrying DRAM tiles rather than compute.
     pub const DRAM_COLUMNS: [u8; 2] = [0, 9];
@@ -1633,22 +1493,20 @@ pub mod grid {
         }
 
         /// Every Tensix tile this chip has, in row-major order.
-        pub fn tiles<N: NocId>(&self) -> impl Iterator<Item = NocCoord<N>> + '_ {
-            TENSIX_ROWS
-                .flat_map(move |y| self.columns().filter_map(move |x| NocCoord::<N>::new(x, y)))
+        pub fn tiles(&self) -> impl Iterator<Item = NocCoord> + '_ {
+            TENSIX_ROWS.flat_map(move |y| self.columns().filter_map(move |x| NocCoord::new(x, y)))
         }
     }
 
     #[cfg(test)]
     mod tests {
         use super::*;
-        use crate::noc::Noc0;
 
         #[test]
         fn a_full_part_matches_the_documented_count() {
             assert_eq!(FULL_TENSIX_TILE_COUNT, 140);
             assert_eq!(Tensix::FULL.tile_count(), 140);
-            assert_eq!(Tensix::FULL.tiles::<Noc0>().count(), 140);
+            assert_eq!(Tensix::FULL.tiles().count(), 140);
             assert_eq!(Tensix::FULL.harvested_columns().count(), 0);
         }
 
@@ -1676,7 +1534,7 @@ pub mod grid {
             // so 15 and 16 are the ones that must never be addressed.
             let t = Tensix::from_enabled_column_count(12).unwrap();
             assert_eq!(t.tile_count(), 120);
-            assert_eq!(t.tiles::<Noc0>().count(), 120);
+            assert_eq!(t.tiles().count(), 120);
             assert!(t.harvested_columns().eq([15u8, 16].iter().copied()));
             assert!(t.contains(14, 11));
             assert!(!t.contains(15, 11));

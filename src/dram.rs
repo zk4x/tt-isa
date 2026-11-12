@@ -7,8 +7,8 @@
 //! fused off or failed training must not be nameable, and nothing here can be
 //! obtained except from the chip's own answer.
 
+use crate::noc::NocCoord;
 use crate::noc::niu::Niu;
-use crate::noc::{Noc0, NocCoord};
 
 /// Channels on a full Blackhole (UMD `blackhole::NUM_DRAM_BANKS`).
 pub const CHANNELS: u8 = 8;
@@ -154,7 +154,7 @@ impl DramChannel {
     ///
     /// Only for the NIU that owns the port ([`DramChannel::owns`]): `None` for
     /// any other, as for a port past the three.
-    pub fn endpoint(self, niu: Niu, port: u8) -> Option<NocCoord<Noc0>> {
+    pub fn endpoint(self, niu: Niu, port: u8) -> Option<NocCoord> {
         if port >= PORTS || !self.owns(niu, port) {
             return None;
         }

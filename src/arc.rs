@@ -23,7 +23,7 @@
 //! module this host binds — with tag numbers from UMD's `TelemetryTag`
 //! (`umd/device/types/telemetry.hpp`), the only published enumeration of them.
 
-use crate::noc::{Noc0, NocCoord};
+use crate::noc::NocCoord;
 
 /// The ARC tile's coordinate.
 ///
@@ -41,7 +41,7 @@ pub const ARC_X: u8 = 8;
 pub const ARC_Y: u8 = 0;
 
 /// The ARC tile on NoC #0.
-pub fn arc_tile() -> NocCoord<Noc0> {
+pub fn arc_tile() -> NocCoord {
     // Both axes are in range by construction, so the Option cannot be None.
     NocCoord::new(ARC_X, ARC_Y).expect("the ARC coordinate is within the grid")
 }
