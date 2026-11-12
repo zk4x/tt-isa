@@ -111,12 +111,11 @@ pub const SIM_PUSH_WINDOW: u32 = 16;
 pub const UNWEDGE: u64 = MAILBOX_BASE + 0x44;
 
 /// Non-zero: [`MOP_CFG`] holds this role's MOP Expander configuration, which
-/// the runner loads before pushing (`crate::frontend::mop`). Zero: the
-/// expander is left as it is.
+/// the runner loads before pushing. Zero: the expander is left as it is.
 pub const MOP_CFG_VALID: u64 = MAILBOX_BASE + 0x48;
 
-/// The nine `MopCfg` words ([`crate::frontend::mop::MopConfig::config_words`]),
-/// written to the thread's `TENSIX_MOP_CFG_BASE` once its expander is idle.
+/// The nine `MopCfg` words, written to the thread's `TENSIX_MOP_CFG_BASE` once
+/// its expander is idle.
 pub const MOP_CFG: u64 = MAILBOX_BASE + 0x4C;
 
 /// The arguments base an executor hands its program in `a0`: the launch's
@@ -140,7 +139,7 @@ pub const MAILBOX_SIZE: u64 = 0x78;
 /// many entries follow ([`loops::entry`], at most [`loops::MAX`]), and the
 /// code after them; the test corpus's pusher expands each `[start, start +
 /// len)` of the code `count` times where it is stored once -- how an SFPU row
-/// loop too long for the replay buffer (`frontend::REPLAY_BUFFER`) is pushed
+/// loop too long for the replay buffer's 32 instructions is pushed
 /// without being unrolled. Metadata stored with the program, not instructions:
 /// it travels with the program through the program cache and a `KERNEL` entry.
 /// A compiler no longer emits it: its loops are RISC-V branches.
