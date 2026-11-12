@@ -124,8 +124,16 @@ pub const MOP_CFG: u64 = MAILBOX_BASE + 0x4C;
 /// (`rta_l1_base`, `firmware_common.h`).
 pub const ARGS: u64 = MAILBOX_BASE + 0x70;
 
+/// Which processors the launch enables, one bit each, in tt-metal's
+/// `TensixProcessorTypes` order: B is bit 0, NC bit 1, T0/T1/T2 bits 2..4
+/// (`kernel_config_msg_t::enables`).
+///
+/// RISCV B reads this word: it dispatches the launch to every enabled
+/// subordinate, then joins them. Only B's copy is read.
+pub const ENABLES: u64 = MAILBOX_BASE + 0x74;
+
 /// Total size the firmware may assume is its own.
-pub const MAILBOX_SIZE: u64 = 0x74;
+pub const MAILBOX_SIZE: u64 = 0x78;
 
 /// A program's block repeats: with [`loops::LOOPED`] set in its length
 /// ([`PROGRAM_LEN`], a `KERNEL` entry's), the program's first word is how
@@ -298,6 +306,7 @@ const _: () = assert!(TRACE + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(PUSH_WINDOW + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(ACK + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(PROGRAM_ADDR + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
+const _: () = assert!(ENABLES + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(ARGS + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(UNWEDGE + 4 <= MOP_CFG_VALID);
 const _: () = assert!(MOP_CFG + 9 * 4 <= MAILBOX_BASE + MAILBOX_SIZE);
@@ -318,6 +327,19 @@ pub mod launch {
     pub const BASE: u64 = 0x0011_0000;
     /// Distance between launch mailboxes: room for the message and the dump.
     pub const STRIDE: u64 = 0x4000;
+
+    /// [`super::ENABLES`] bit for RISCV B.
+    pub const ENABLE_B: u32 = 1 << 0;
+    /// [`super::ENABLES`] bit for RISCV NC.
+    pub const ENABLE_NC: u32 = 1 << 1;
+    /// [`super::ENABLES`] bit for Tensix thread 0.
+    pub const ENABLE_T0: u32 = 1 << 2;
+    /// [`super::ENABLES`] bit for Tensix thread 1.
+    pub const ENABLE_T1: u32 = 1 << 3;
+    /// [`super::ENABLES`] bit for Tensix thread 2.
+    pub const ENABLE_T2: u32 = 1 << 4;
+    /// Every processor.
+    pub const ENABLE_ALL: u32 = ENABLE_B | ENABLE_NC | ENABLE_T0 | ENABLE_T1 | ENABLE_T2;
 
     /// The mailbox of the role that runs on Tensix thread `thread` (0, 1 or 2).
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -341,6 +363,12 @@ pub mod launch {
             assert!(thread < 3, "there are three Tensix threads");
             Mailbox {
                 base: BASE + thread as u64 * STRIDE,
+            }
+        }
+        /// RISCV NC's mailbox, the fourth launch mailbox.
+        pub const fn nc() -> Mailbox {
+            Mailbox {
+                base: BASE + 3 * STRIDE,
             }
         }
         pub const fn base(self) -> u64 {
@@ -397,6 +425,10 @@ pub mod launch {
         pub const fn args(self) -> u64 {
             self.base + (super::ARGS - super::MAILBOX_BASE)
         }
+        /// The [`super::ENABLES`] word: which processors this launch starts.
+        pub const fn enables(self) -> u64 {
+            self.base + (super::ENABLES - super::MAILBOX_BASE)
+        }
         /// Where an executor leaves the program's return value.
         pub const fn result(self) -> u64 {
             self.base + (super::RESULT - super::MAILBOX_BASE)
@@ -411,8 +443,8 @@ pub mod launch {
         Mailbox::of(2).dump_offset(super::DUMP_MAX_ROWS - 1, super::DUMP_ROW_WORDS - 1) + 4
             <= crate::tensix::L1_SIZE
     );
-    // The role mailboxes end before the trace buffer begins.
-    const _: () = assert!(BASE + 3 * STRIDE <= super::TRACE_BUFFER);
+    // The launch mailboxes end before the trace buffer begins.
+    const _: () = assert!(BASE + 4 * STRIDE <= super::TRACE_BUFFER);
     const _: () =
         assert!(super::dump_offset(super::DUMP_MAX_ROWS, 0) - super::MAILBOX_BASE <= STRIDE);
 }
@@ -468,6 +500,7 @@ mod tests {
     fn the_mailboxes_do_not_overlap_and_their_dumps_stay_in_l1() {
         let all = [
             launch::Mailbox::single_core(),
+            launch::Mailbox::nc(),
             launch::Mailbox::of(0),
             launch::Mailbox::of(1),
             launch::Mailbox::of(2),

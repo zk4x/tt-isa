@@ -22,9 +22,9 @@ use crate::dram::{Dram, DramRange};
 pub mod encoded;
 pub mod record;
 
-/// The mover's mailbox: the slot after the three role mailboxes
-/// ([`crate::mailbox::launch`]), which ends exactly where the program region begins.
-pub const MAILBOX_BASE: u64 = crate::mailbox::launch::BASE + 3 * crate::mailbox::launch::STRIDE;
+/// The mover's mailbox: the slot after the four launch mailboxes
+/// ([`crate::mailbox::launch`]).
+pub const MAILBOX_BASE: u64 = crate::mailbox::launch::BASE + 4 * crate::mailbox::launch::STRIDE;
 const _: () = assert!(MAILBOX_BASE + 0x100 <= crate::mailbox::TRACE_BUFFER);
 const _: () = assert!(MAILBOX_BASE % 16 == 0);
 
