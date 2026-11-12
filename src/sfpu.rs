@@ -23,13 +23,8 @@ pub use crate::isa::Instruction;
 pub mod loadi_mode {
     /// Immediate is BF16; widened to FP32 by `imm << 16`.
     pub const FLOATB: u32 = 0;
-    /// Immediate is FP16-ish: the exponent is widened and rebiased, with no
-    /// handling of denormals, NaNs or infinities.
-    pub const FLOATA: u32 = 1;
     /// Immediate is UINT16, zero-extended.
     pub const USHORT: u32 = 2;
-    /// Immediate is INT16, sign-extended.
-    pub const SHORT: u32 = 4;
     /// Overwrite the high 16 bits, preserving the low 16.
     pub const UPPER: u32 = 8;
     /// Overwrite the low 16 bits, preserving the high 16.
@@ -45,27 +40,11 @@ pub mod loadi_mode {
 /// but the *numbering* is shared, so duplicating it would be two places to get
 /// wrong.
 pub mod mod0_fmt {
-    /// Resolved at execution time against `ALU_FORMAT_SPEC_REG*` backend
-    /// configuration. Avoid unless that configuration has been set up.
-    pub const SRCB: u32 = 0;
     pub const FP16: u32 = 1;
     pub const BF16: u32 = 2;
     pub const FP32: u32 = 3;
     pub const INT32: u32 = 4;
-    pub const INT8: u32 = 5;
-    pub const UINT16: u32 = 6;
-    pub const HI16: u32 = 7;
-    pub const INT16: u32 = 8;
-    pub const LO16: u32 = 9;
-    /// Blackhole overhauled this mode's addressing; it is not a plain `INT32`.
-    pub const INT32_ALL: u32 = 10;
     pub const ZERO: u32 = 11;
-    /// Deprecated on Blackhole: no longer performs a data type conversion.
-    pub const INT32_SM: u32 = 12;
-    /// Deprecated on Blackhole: no longer performs a data type conversion.
-    pub const INT8_COMP: u32 = 13;
-    pub const LO16_ONLY: u32 = 14;
-    pub const HI16_ONLY: u32 = 15;
 }
 
 /// The spelling [`store`] was written against, kept so existing call sites read
@@ -74,14 +53,8 @@ pub use mod0_fmt as store_format;
 
 /// `SFPMAD` / `SFPMUL` modifier bits (`SFPMAD.md`).
 pub mod mad_mod1 {
-    /// Negate the first multiplicand.
-    pub const NEGATE_VA: u32 = 1;
     /// Negate the addend.
     pub const NEGATE_VC: u32 = 2;
-    /// Take the `VA` index from the low four bits of `LReg[7]`, per lane.
-    pub const INDIRECT_VA: u32 = 4;
-    /// Take the `VD` index from the low four bits of `LReg[7]`, per lane.
-    pub const INDIRECT_VD: u32 = 8;
 }
 
 /// Modifier bits named by `SFPMAD.md`'s list of cases automatic stalling misses.
@@ -124,20 +97,9 @@ pub struct LReg(u8);
 impl LReg {
     pub const L0: LReg = LReg(0);
     pub const L1: LReg = LReg(1);
-    pub const L2: LReg = LReg(2);
-    pub const L3: LReg = LReg(3);
-    pub const L4: LReg = LReg(4);
-    pub const L5: LReg = LReg(5);
-    pub const L6: LReg = LReg(6);
     pub const L7: LReg = LReg(7);
-    /// Read-only: `0.8373` in every lane.
-    pub const C0_8373: LReg = LReg(8);
     /// Read-only: zero in every lane, the same bits for every type.
     pub const ZERO: LReg = LReg(LREG_ZERO as u8);
-    /// Read-only: `1.0` in every lane.
-    pub const ONE: LReg = LReg(LREG_ONE as u8);
-    /// Read-only: lane `i` holds the integer `2 * i`.
-    pub const LANE_X2: LReg = LReg(15);
 
     /// General-purpose register `i`, if `i < 8`.
     pub const fn general(i: u32) -> Option<LReg> {
@@ -164,11 +126,6 @@ impl LReg {
 pub struct ConfigLReg(u8);
 
 impl ConfigLReg {
-    pub const L11: ConfigLReg = ConfigLReg(11);
-    pub const L12: ConfigLReg = ConfigLReg(12);
-    pub const L13: ConfigLReg = ConfigLReg(13);
-    pub const L14: ConfigLReg = ConfigLReg(14);
-
     /// The register, to read.
     pub const fn lreg(self) -> LReg {
         LReg(self.0)
