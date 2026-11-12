@@ -1535,8 +1535,10 @@ pub mod grid {
     /// Which Tensix tiles one particular chip actually has.
     ///
     /// Obtained from the chip's ARC telemetry, never assumed. Construct it with
-    /// [`Tensix::from_enabled_column_mask`] on silicon; [`Tensix::FULL`] is correct
-    /// for the simulator, which models an unharvested chip.
+    /// [`Tensix::from_enabled_column_mask`]; [`Tensix::FULL`] is the population
+    /// of the part, not of any given chip. ttsim models a harvested chip too
+    /// (a P150 has two columns fused off), so not even a simulator can be
+    /// assumed to have every column.
     #[derive(Clone, Copy, PartialEq, Eq, Debug)]
     pub struct Tensix {
         /// How many of [`TENSIX_COLUMNS`] survive, counting from the front.
@@ -1544,7 +1546,9 @@ pub mod grid {
     }
 
     impl Tensix {
-        /// Every column present: a full Blackhole, and what ttsim models.
+        /// Every column present: the population of the part, not of a chip.
+        /// Nothing in the crate may hand this to a device; ask the chip (see
+        /// [`Tensix`]).
         pub const FULL: Tensix = Tensix {
             enabled_columns: TENSIX_COLUMNS.len() as u8,
         };
