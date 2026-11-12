@@ -24,9 +24,9 @@
 //! count the host derived from the rectangle, after which the ID's counter is
 //! cleared with `niu::CLEAR_OUTSTANDING`.
 
-use super::grid::{Tensix, TENSIX_ROWS};
+use super::grid::{TENSIX_ROWS, Tensix};
 use super::niu::{
-    check_copy, initiator::*, Endpoint, Niu, RequestError, TxnId, CMD_WR, RESP_MARKED,
+    CMD_WR, Endpoint, Niu, RESP_MARKED, RequestError, TxnId, check_copy, initiator::*,
 };
 
 /// `NOC_CMD_BRCST_PACKET`.

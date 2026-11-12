@@ -147,7 +147,7 @@ fn release(flip_a: bool, flip_b: bool) -> Result<Instruction, EncodeError> {
 }
 
 fn handover(which: u32) -> Result<[Instruction; 3], EncodeError> {
-    use crate::backend::{self, cond, Before};
+    use crate::backend::{self, Before, cond};
     let (busy, owner) = if which == 0 {
         (cond::UNPACKER0_BUSY, cond::SRCA_NOT_UNPACKER)
     } else {

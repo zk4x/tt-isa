@@ -27,7 +27,7 @@
 
 use crate::{
     backend::{self, Before, EncodeError},
-    isa::{generated::encode, Instruction},
+    isa::{Instruction, generated::encode},
     scalar::{OffsetHalf, OffsetIncrement},
 };
 

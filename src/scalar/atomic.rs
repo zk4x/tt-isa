@@ -37,8 +37,8 @@
 //! program can be built.
 
 use crate::backend::{self, Before};
-use crate::isa::generated::encode;
 use crate::isa::Instruction;
+use crate::isa::generated::encode;
 use crate::tensix::L1_SIZE;
 
 /// Why an operand was refused.
@@ -501,13 +501,15 @@ mod tests {
         assert_eq!(i.word(), 0x64 << 24 | 0xa << 18 | 0x5 << 14 | 3 << 12 | 9);
         assert!(Nibble::new(16).is_err());
         assert!(Word::new(4).is_err());
-        assert!(compare_and_set(
-            Nibble::new(0).unwrap(),
-            Nibble::new(0).unwrap(),
-            Word::W0,
-            64
-        )
-        .is_err());
+        assert!(
+            compare_and_set(
+                Nibble::new(0).unwrap(),
+                Nibble::new(0).unwrap(),
+                Word::W0,
+                64
+            )
+            .is_err()
+        );
     }
 
     #[test]

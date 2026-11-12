@@ -2,7 +2,7 @@
 //! and cursor anchors are thirteen bits; unpacker input addressing sees only
 //! the low eight bits. Counters are private to the issuing Tensix thread. The
 //! unsupported cross-thread override is deliberately absent from this API.
-use crate::isa::{generated::encode, EncodeError, Instruction};
+use crate::isa::{EncodeError, Instruction, generated::encode};
 
 /// One or more counter owners. A zero target mask cannot be constructed.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

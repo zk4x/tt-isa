@@ -24,7 +24,7 @@
 //! The compare and set values of CAS are four bits wide, as in the Tensix `ATCAS`
 //! instruction the page compares it to.
 
-use super::niu::{initiator::*, Endpoint, TxnId, CMD_AT, MMIO_START, RESP_MARKED, STATIC_VC_1};
+use super::niu::{CMD_AT, Endpoint, MMIO_START, RESP_MARKED, STATIC_VC_1, TxnId, initiator::*};
 
 /// Opcode (`NOC_AT_LEN_BE[12..16]`) of each form.
 mod opcode {

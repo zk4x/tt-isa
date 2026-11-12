@@ -77,13 +77,11 @@ pub const TRACE: u64 = MAILBOX_BASE + 0x30;
 /// other threads push before theirs, in program order.
 pub const PUSH_WINDOW: u64 = MAILBOX_BASE + 0x34;
 
-/// Non-zero: the runner is **resident**. It runs the staged program, writes
-/// this value to [`ACK`], and then, instead of stopping, waits for the host to
-/// write a different non-zero value here, re-reads its descriptor, and runs
-/// again. Zero at start: one run, then `DONE` and a spin, as before.
-///
-/// Phase 9: loading three images and releasing three cores per run cost more
-/// than most runs. A resident runner is loaded once per session.
+/// The launch's go signal: the host writes a new non-zero value after the
+/// launch message (text, length, args) is in place. The resident runner waits
+/// for a value different from the one it last acknowledged, runs the named
+/// program, and writes the value to [`ACK`] -- tt-metal's `go_msg` GO/DONE.
+/// Zero: nothing to run.
 pub const GENERATION: u64 = MAILBOX_BASE + 0x38;
 /// The last [`GENERATION`] the resident runner finished. The host waits on this
 /// rather than on [`STATUS`], which a resident runner leaves at `DONE` between
@@ -132,13 +130,12 @@ pub const MAILBOX_SIZE: u64 = 0x74;
 /// A program's block repeats: with [`loops::LOOPED`] set in its length
 /// ([`PROGRAM_LEN`], a `KERNEL` entry's), the program's first word is how
 /// many entries follow ([`loops::entry`], at most [`loops::MAX`]), and the
-/// code after them; the runner pushes each `[start, start + len)` of the code
-/// `count` times where it is stored once -- how an SFPU row loop too long for
-/// the replay buffer (`frontend::REPLAY_BUFFER`) runs without being unrolled
-/// into the program slot. Metadata stored with the program, not instructions,
-/// and not a descriptor word: it travels with the program through the
-/// program cache and a `KERNEL` entry, so kernels with different loops queue
-/// back to back under one descriptor.
+/// code after them; the test corpus's pusher expands each `[start, start +
+/// len)` of the code `count` times where it is stored once -- how an SFPU row
+/// loop too long for the replay buffer (`frontend::REPLAY_BUFFER`) is pushed
+/// without being unrolled. Metadata stored with the program, not instructions:
+/// it travels with the program through the program cache and a `KERNEL` entry.
+/// A compiler no longer emits it: its loops are RISC-V branches.
 pub mod loops {
     /// Set in a program length: a loop header leads the program.
     pub const LOOPED: u32 = 1 << 31;
@@ -195,8 +192,8 @@ pub mod trace {
     pub const PUSHED: u32 = 2;
     /// The coprocessor has retired the program.
     pub const RETIRED: u32 = 3;
-    /// A resident runner saw a new generation, before reading its
-    /// descriptor. Only on a resident run after the first.
+    /// A resident runner saw a new generation, before reading its launch
+    /// message. Only on a resident run after the first.
     pub const WOKE: u32 = 4;
     /// A resident runner acknowledged its generation (`Dst` dumped, `DONE`
     /// about to be stored).
@@ -295,7 +292,7 @@ pub const fn dump_offset(row: u32, column: u32) -> u64 {
 const _: () = assert!(MAILBOX_BASE + MAILBOX_SIZE <= crate::tensix::L1_SIZE);
 const _: () =
     assert!(dump_offset(DUMP_MAX_ROWS - 1, DUMP_ROW_WORDS - 1) + 4 <= crate::tensix::L1_SIZE);
-// The descriptor words have to stay inside the mailbox the firmware owns.
+// The launch-message words have to stay inside the mailbox the firmware owns.
 const _: () = assert!(DUMP_ROW_FIRST + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(TRACE + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(PUSH_WINDOW + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
@@ -317,9 +314,9 @@ const _: () = assert!(TRACE_BUFFER % 16 == 0);
 /// reports through its own mailbox, laid out like the single-core one above:
 /// the same offsets, from a per-thread base.
 pub mod launch {
-    /// First role mailbox, clear of the single-core mailbox, program and dump.
+    /// First role launch mailbox, clear of the single-core mailbox and its dump.
     pub const BASE: u64 = 0x0011_0000;
-    /// Distance between role mailboxes: room for the program and the dump.
+    /// Distance between launch mailboxes: room for the message and the dump.
     pub const STRIDE: u64 = 0x4000;
 
     /// The mailbox of the role that runs on Tensix thread `thread` (0, 1 or 2).

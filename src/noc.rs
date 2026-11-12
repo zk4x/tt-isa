@@ -329,11 +329,7 @@ pub mod niu {
 
     impl TxnId {
         pub const fn new(id: u8) -> Option<Self> {
-            if id < 16 {
-                Some(TxnId(id))
-            } else {
-                None
-            }
+            if id < 16 { Some(TxnId(id)) } else { None }
         }
 
         /// The ID itself, `0..16`.

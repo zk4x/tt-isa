@@ -886,62 +886,76 @@ mod tests {
     #[test]
     fn unchecked_arguments_are_refused() {
         let ok = |rows, am| DebugMove::new(rows, am, fp32());
-        assert!(ok(
-            Rows::One {
-                src_row: 64,
-                dst_row: 0
-            },
-            0
-        )
-        .is_err());
-        assert!(ok(
-            Rows::One {
-                src_row: 0,
-                dst_row: 1024
-            },
-            0
-        )
-        .is_err());
-        assert!(ok(
-            Rows::One {
-                src_row: 63,
-                dst_row: 1023
-            },
-            7
-        )
-        .is_ok());
-        assert!(ok(
-            Rows::One {
-                src_row: 0,
-                dst_row: 0
-            },
-            8
-        )
-        .is_err());
-        assert!(ok(
-            Rows::Eight {
-                src_row: 4,
-                dst_row: 0
-            },
-            0
-        )
-        .is_err());
-        assert!(ok(
-            Rows::Eight {
-                src_row: 0,
-                dst_row: 12
-            },
-            0
-        )
-        .is_err());
-        assert!(ok(
-            Rows::Eight {
-                src_row: 56,
-                dst_row: 1016
-            },
-            0
-        )
-        .is_ok());
+        assert!(
+            ok(
+                Rows::One {
+                    src_row: 64,
+                    dst_row: 0
+                },
+                0
+            )
+            .is_err()
+        );
+        assert!(
+            ok(
+                Rows::One {
+                    src_row: 0,
+                    dst_row: 1024
+                },
+                0
+            )
+            .is_err()
+        );
+        assert!(
+            ok(
+                Rows::One {
+                    src_row: 63,
+                    dst_row: 1023
+                },
+                7
+            )
+            .is_ok()
+        );
+        assert!(
+            ok(
+                Rows::One {
+                    src_row: 0,
+                    dst_row: 0
+                },
+                8
+            )
+            .is_err()
+        );
+        assert!(
+            ok(
+                Rows::Eight {
+                    src_row: 4,
+                    dst_row: 0
+                },
+                0
+            )
+            .is_err()
+        );
+        assert!(
+            ok(
+                Rows::Eight {
+                    src_row: 0,
+                    dst_row: 12
+                },
+                0
+            )
+            .is_err()
+        );
+        assert!(
+            ok(
+                Rows::Eight {
+                    src_row: 56,
+                    dst_row: 1016
+                },
+                0
+            )
+            .is_ok()
+        );
     }
 
     #[test]
@@ -1158,15 +1172,16 @@ mod tests {
         assert_eq!(imm(&words[4]), 2);
         assert_eq!(imm(&words[5]), 0);
         assert!(t.with(8, e).is_err());
-        assert!(t
-            .with(
+        assert!(
+            t.with(
                 0,
                 AddrModEntry {
                     src_a_incr: 64,
                     dst_incr: 0
                 }
             )
-            .is_err());
+            .is_err()
+        );
         assert_eq!(t.mirrored().entry(5), e);
         assert_eq!(t.entry(5), AddrModEntry::default());
 
@@ -1245,7 +1260,7 @@ mod tests {
         assert_eq!(col0.len(), 8);
         assert_eq!(col0[0].0, 16);
         assert_eq!(col0[0].1 >> 16 & 0xff, 9); // source row 8, exponent 9
-                                               // One row: SrcRow 63 + RWC 2 wraps to 1.
+        // One row: SrcRow 63 + RWC 2 wraps to 1.
         let w = moved(&src, State { src_rwc: 2, ..st }, 63, 0, false, false).unwrap();
         assert!(
             matches!(w[0], Write::Dst32 { row: 0, column: 0, value } if value >> 16 & 0xff == 2)
@@ -1254,9 +1269,10 @@ mod tests {
         let mut blocked = st;
         blocked.block_columns[0] = 0b01;
         let w = moved(&src, blocked, 0, 0, false, false).unwrap();
-        assert!(!w
-            .iter()
-            .any(|w| matches!(w, Write::Dst32 { column: 0, .. })));
+        assert!(
+            !w.iter()
+                .any(|w| matches!(w, Write::Dst32 { column: 0, .. }))
+        );
         assert_eq!(w.len(), 15);
     }
 }

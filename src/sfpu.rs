@@ -724,21 +724,29 @@ mod tests {
 
         // Nothing this module's own wrappers emit is on the list, which is why the
         // step 4 firmware pushes SFPMUL straight into SFPSTORE with no SFPNOP.
-        assert!(store(2, store_format::FP32, 0, 0)
-            .unwrap()
-            .stalls_automatically_after_mad());
+        assert!(
+            store(2, store_format::FP32, 0, 0)
+                .unwrap()
+                .stalls_automatically_after_mad()
+        );
         assert!(nop().stalls_automatically_after_mad());
-        assert!(loadi(0, loadi_mode::UPPER, 0)
-            .unwrap()
-            .stalls_automatically_after_mad());
+        assert!(
+            loadi(0, loadi_mode::UPPER, 0)
+                .unwrap()
+                .stalls_automatically_after_mad()
+        );
 
         // Unconditional: the logic does not see that these read VD.
-        assert!(!encode::sfpiadd(0, 0, 1, 0)
-            .unwrap()
-            .stalls_automatically_after_mad());
-        assert!(!encode::sfpshft(0, 0, 1, 0)
-            .unwrap()
-            .stalls_automatically_after_mad());
+        assert!(
+            !encode::sfpiadd(0, 0, 1, 0)
+                .unwrap()
+                .stalls_automatically_after_mad()
+        );
+        assert!(
+            !encode::sfpshft(0, 0, 1, 0)
+                .unwrap()
+                .stalls_automatically_after_mad()
+        );
 
         // Conditional on Mod1: SFPAND is only a hazard with USE_VB.
         let and = |mod1| {

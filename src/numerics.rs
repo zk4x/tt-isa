@@ -483,35 +483,41 @@ mod elw_tests {
     fn exact_oracle_refuses_alignment_loss_and_exceptional_arithmetic() {
         let zero = [[0.0; 16]; 8];
         for a in [f32::NAN, f32::INFINITY, f32::from_bits(1)] {
-            assert!(elw_reference(
+            assert!(
+                elw_reference(
+                    &zero,
+                    &[[a; 16]; 8],
+                    &[[1.0; 16]; 8],
+                    MatrixEltwiseOp::Add,
+                    SrcBroadcast::None,
+                    &[0]
+                )
+                .is_none()
+            );
+        }
+        // This sum is exact in FP32 but loses the small operand on the
+        // matrix alignment datapath. Never assert its IEEE bits on hardware.
+        assert!(
+            elw_reference(
                 &zero,
-                &[[a; 16]; 8],
+                &[[f32::from_bits(107u32 << 23); 16]; 8],
                 &[[1.0; 16]; 8],
                 MatrixEltwiseOp::Add,
                 SrcBroadcast::None,
                 &[0]
             )
-            .is_none());
-        }
-        // This sum is exact in FP32 but loses the small operand on the
-        // matrix alignment datapath. Never assert its IEEE bits on hardware.
-        assert!(elw_reference(
-            &zero,
-            &[[f32::from_bits(107u32 << 23); 16]; 8],
-            &[[1.0; 16]; 8],
-            MatrixEltwiseOp::Add,
-            SrcBroadcast::None,
-            &[0]
-        )
-        .is_none());
-        assert!(elw_reference(
-            &zero,
-            &[[1.0; 16]; 8],
-            &[[2.0; 16]; 8],
-            MatrixEltwiseOp::Mul,
-            SrcBroadcast::None,
-            &[4]
-        )
-        .is_none());
+            .is_none()
+        );
+        assert!(
+            elw_reference(
+                &zero,
+                &[[1.0; 16]; 8],
+                &[[2.0; 16]; 8],
+                MatrixEltwiseOp::Mul,
+                SrcBroadcast::None,
+                &[4]
+            )
+            .is_none()
+        );
     }
 }

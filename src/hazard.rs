@@ -538,9 +538,10 @@ mod tests {
 
         let bare = std::vec![unpacr(), sync::post(s)];
         let f = misses(&bare, true);
-        assert!(f
-            .iter()
-            .any(|f| f.kind == Kind::PublishBeforeDrain && f.producer == Some(Unit::Unpacker0)));
+        assert!(
+            f.iter()
+                .any(|f| f.kind == Kind::PublishBeforeDrain && f.producer == Some(Unit::Unpacker0))
+        );
         assert!(f.iter().any(|f| f.kind == Kind::EndsBusy));
     }
 
@@ -553,8 +554,10 @@ mod tests {
             backend::stallwait(block::UNPACKER, cond::UNPACKER0_BUSY).unwrap(),
             sync::post(s),
         ];
-        assert!(misses(&weak, false)
-            .iter()
-            .any(|f| f.kind == Kind::PublishBeforeDrain));
+        assert!(
+            misses(&weak, false)
+                .iter()
+                .any(|f| f.kind == Kind::PublishBeforeDrain)
+        );
     }
 }

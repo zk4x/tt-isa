@@ -45,7 +45,7 @@
 //! measurement in this repository is that an unconfigured `SFPLOADMACRO` begins as
 //! an `SFPLOAD` (`step5_corpus::sfploadmacro_begins_as_an_sfpload_from_dst`).
 
-use crate::isa::generated::{defs, encode, ALL};
+use crate::isa::generated::{ALL, defs, encode};
 use crate::isa::{Instruction, InstructionDef};
 use crate::sfpu;
 
@@ -157,7 +157,10 @@ impl core::fmt::Display for MacroError {
                  so VD >= 4 needs an odd address and VD < 4 an even one"
             ),
             MacroError::UndefinedSource => {
-                write!(f, "sequence source 1 is UndefinedBehavior (SFPLOADMACRO.md)")
+                write!(
+                    f,
+                    "sequence source 1 is UndefinedBehavior (SFPLOADMACRO.md)"
+                )
             }
             MacroError::TemplateMissing {
                 macro_index,

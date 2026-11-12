@@ -33,8 +33,8 @@
 pub mod mutex;
 
 use crate::backend::{self, Before, EncodeError};
-use crate::isa::generated::encode;
 use crate::isa::Instruction;
+use crate::isa::generated::encode;
 
 /// One of the Sync Unit's eight semaphores.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]

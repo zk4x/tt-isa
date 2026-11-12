@@ -1032,10 +1032,16 @@ pub mod defs {
         "MULDMAREG",
         "MULDMAREG",
         0x5a,
-        &[Field::new("ResultReg", 12, 6, false, None), Field::new("RightReg", 6, 6, false, None), Field::new("LeftReg", 0, 6, false, None)],
+        &[
+            Field::new("ResultReg", 12, 6, false, None),
+            Field::new("RightReg", 6, 6, false, None),
+            Field::new("LeftReg", 0, 6, false, None),
+        ],
         &[(Field::new("", 23, 1, false, None), 0)],
         0x007c0000,
-        Provenance::Confirmed { evidence: "crates/tt-tests/tests/step100_scalar_config.rs::scalar_register_and_immediate_semantics" },
+        Provenance::Confirmed {
+            evidence: "crates/tt-tests/tests/step100_scalar_config.rs::scalar_register_and_immediate_semantics",
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/MULDMAREG.md",
     );
 
@@ -2041,7 +2047,12 @@ pub mod defs {
         &[Field::new("WhichUnpacker", 23, 1, false, None)],
         &[(Field::new("", 0, 9, false, None), 489)],
         0x007ffe00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step104_unpacker_handover.rs::llk_nonclearing_dvalid_a, crates/tt-tests/tests/step104_unpacker_handover.rs::llk_nonclearing_dvalid_b", moved: &[], dropped: &[], widened: &[] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step104_unpacker_handover.rs::llk_nonclearing_dvalid_a, crates/tt-tests/tests/step104_unpacker_handover.rs::llk_nonclearing_dvalid_b",
+            moved: &[],
+            dropped: &[],
+            widened: &[],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/UNPACR_NOP_SETDVALID.md",
     );
 
@@ -2050,10 +2061,23 @@ pub mod defs {
         "UNPACR_NOP_ZEROSRC_BH",
         "UNPACR_NOP",
         0x43,
-        &[Field::new("WhichUnpacker", 23, 1, false, None), Field::new("WaitLikeUnpacr", 5, 1, false, None), Field::new("BothBanks", 4, 1, false, None), Field::new("NegativeInfSrcA", 2, 2, false, None)],
-        &[(Field::new("", 0, 2, false, None), 1), (Field::new("", 6, 1, false, None), 0)],
+        &[
+            Field::new("WhichUnpacker", 23, 1, false, None),
+            Field::new("WaitLikeUnpacr", 5, 1, false, None),
+            Field::new("BothBanks", 4, 1, false, None),
+            Field::new("NegativeInfSrcA", 2, 2, false, None),
+        ],
+        &[
+            (Field::new("", 0, 2, false, None), 1),
+            (Field::new("", 6, 1, false, None), 0),
+        ],
         0x007fff80,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step103_source_banks.rs::unpacr_zero_blackhole_bank_and_clear_value_fields, crates/tt-tests/tests/step103_source_banks.rs::unpacr_zero_waits_on_current_unpacker_bank_with_matrix_bank_held", moved: &["BothBanks", "WaitLikeUnpacr"], dropped: &[], widened: &["NegativeInfSrcA"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step103_source_banks.rs::unpacr_zero_blackhole_bank_and_clear_value_fields, crates/tt-tests/tests/step103_source_banks.rs::unpacr_zero_waits_on_current_unpacker_bank_with_matrix_bank_held",
+            moved: &["BothBanks", "WaitLikeUnpacr"],
+            dropped: &[],
+            widened: &["NegativeInfSrcA"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/UNPACR_NOP_ZEROSRC.md",
     );
 
@@ -2062,10 +2086,21 @@ pub mod defs {
         "GMPOOL_BH",
         "GMPOOL",
         0x33,
-        &[Field::new("FlipSrcB", 23, 1, false, None), Field::new("FlipSrcA", 22, 1, false, None), Field::new("AddrMod", 15, 2, false, None), Field::new("ArgMax", 14, 1, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("FlipSrcB", 23, 1, false, None),
+            Field::new("FlipSrcA", 22, 1, false, None),
+            Field::new("AddrMod", 15, 2, false, None),
+            Field::new("ArgMax", 14, 1, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[(Field::new("", 19, 1, false, None), 1)],
         0x00363c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step75_fpu_pooling.rs::matrix_pooling_uses_explicit_weights_and_releases_banks", moved: &[], dropped: &[], widened: &[] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step75_fpu_pooling.rs::matrix_pooling_uses_explicit_weights_and_releases_banks",
+            moved: &[],
+            dropped: &[],
+            widened: &[],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/GMPOOL.md",
     );
 
@@ -2074,10 +2109,20 @@ pub mod defs {
         "GAPOOL_BH",
         "GAPOOL",
         0x34,
-        &[Field::new("FlipSrcB", 23, 1, false, None), Field::new("FlipSrcA", 22, 1, false, None), Field::new("AddrMod", 15, 2, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("FlipSrcB", 23, 1, false, None),
+            Field::new("FlipSrcA", 22, 1, false, None),
+            Field::new("AddrMod", 15, 2, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[(Field::new("", 19, 1, false, None), 1)],
         0x00367c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step75_fpu_pooling.rs::matrix_pooling_uses_explicit_weights_and_releases_banks", moved: &[], dropped: &[], widened: &[] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step75_fpu_pooling.rs::matrix_pooling_uses_explicit_weights_and_releases_banks",
+            moved: &[],
+            dropped: &[],
+            widened: &[],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/GAPOOL.md",
     );
 
@@ -2086,10 +2131,21 @@ pub mod defs {
         "MVMUL_BH",
         "MVMUL",
         0x26,
-        &[Field::new("FlipSrcB", 23, 1, false, None), Field::new("FlipSrcA", 22, 1, false, None), Field::new("BroadcastSrcBRow", 19, 1, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("FlipSrcB", 23, 1, false, None),
+            Field::new("FlipSrcA", 22, 1, false, None),
+            Field::new("BroadcastSrcBRow", 19, 1, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[],
         0x00363c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::mvmul_addr_mod_sits_one_bit_lower_on_blackhole", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::mvmul_addr_mod_sits_one_bit_lower_on_blackhole",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/MVMUL.md",
     );
 
@@ -2098,10 +2154,21 @@ pub mod defs {
         "MOVA2D_BH",
         "MOVA2D",
         0x12,
-        &[Field::new("UseDst32bLo", 23, 1, false, None), Field::new("SrcRow", 17, 6, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("Move8Rows", 13, 1, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("UseDst32bLo", 23, 1, false, None),
+            Field::new("SrcRow", 17, 6, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("Move8Rows", 13, 1, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[],
         0x00001c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/probe_src.rs::mov_to_dst_addr_mod_sits_one_bit_lower_on_blackhole", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/probe_src.rs::mov_to_dst_addr_mod_sits_one_bit_lower_on_blackhole",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/MOVA2D.md",
     );
 
@@ -2110,10 +2177,23 @@ pub mod defs {
         "MOVB2D_BH",
         "MOVB2D",
         0x13,
-        &[Field::new("UseDst32bLo", 23, 1, false, None), Field::new("SrcRow", 17, 6, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("Move4Rows", 13, 1, false, None), Field::new("Broadcast1RowTo8", 12, 1, false, None), Field::new("BroadcastCol0", 11, 1, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("UseDst32bLo", 23, 1, false, None),
+            Field::new("SrcRow", 17, 6, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("Move4Rows", 13, 1, false, None),
+            Field::new("Broadcast1RowTo8", 12, 1, false, None),
+            Field::new("BroadcastCol0", 11, 1, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[],
         0x00000400,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/probe_src.rs::movb2d_move4_rows_is_bit_13_on_blackhole, crates/tt-tests/tests/probe_src.rs::mov_to_dst_addr_mod_sits_one_bit_lower_on_blackhole", moved: &["BroadcastCol0", "Broadcast1RowTo8", "Move4Rows", "AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/probe_src.rs::movb2d_move4_rows_is_bit_13_on_blackhole, crates/tt-tests/tests/probe_src.rs::mov_to_dst_addr_mod_sits_one_bit_lower_on_blackhole",
+            moved: &["BroadcastCol0", "Broadcast1RowTo8", "Move4Rows", "AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/MOVB2D.md",
     );
 
@@ -2122,10 +2202,21 @@ pub mod defs {
         "MOVD2A_BH",
         "MOVD2A",
         0x08,
-        &[Field::new("UseDst32bLo", 23, 1, false, None), Field::new("SrcRow", 17, 6, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("Move4Rows", 13, 1, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("UseDst32bLo", 23, 1, false, None),
+            Field::new("SrcRow", 17, 6, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("Move4Rows", 13, 1, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[],
         0x00001c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::mov_to_src_addr_mod_sits_one_bit_lower_on_blackhole", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::mov_to_src_addr_mod_sits_one_bit_lower_on_blackhole",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/MOVD2A.md",
     );
 
@@ -2134,10 +2225,21 @@ pub mod defs {
         "MOVD2B_BH",
         "MOVD2B",
         0x0a,
-        &[Field::new("UseDst32bLo", 23, 1, false, None), Field::new("SrcRow", 17, 6, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("Move4Rows", 13, 1, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("UseDst32bLo", 23, 1, false, None),
+            Field::new("SrcRow", 17, 6, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("Move4Rows", 13, 1, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[],
         0x00001c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::mov_to_src_addr_mod_sits_one_bit_lower_on_blackhole", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::mov_to_src_addr_mod_sits_one_bit_lower_on_blackhole",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/MOVD2B.md",
     );
 
@@ -2146,10 +2248,20 @@ pub mod defs {
         "MOVB2A_BH",
         "MOVB2A",
         0x0b,
-        &[Field::new("SrcARow", 17, 6, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("Move4Rows", 13, 1, false, None), Field::new("SrcBRow", 0, 6, false, None)],
+        &[
+            Field::new("SrcARow", 17, 6, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("Move4Rows", 13, 1, false, None),
+            Field::new("SrcBRow", 0, 6, false, None),
+        ],
         &[],
         0x00801fc0,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::mov_to_src_addr_mod_sits_one_bit_lower_on_blackhole", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::mov_to_src_addr_mod_sits_one_bit_lower_on_blackhole",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/MOVB2A.md",
     );
 
@@ -2158,10 +2270,23 @@ pub mod defs {
         "ELWADD_BH",
         "ELWADD",
         0x28,
-        &[Field::new("FlipSrcB", 23, 1, false, None), Field::new("FlipSrcA", 22, 1, false, None), Field::new("AddDst", 21, 1, false, None), Field::new("BroadcastSrcBRow", 20, 1, false, None), Field::new("BroadcastSrcBCol0", 19, 1, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("FlipSrcB", 23, 1, false, None),
+            Field::new("FlipSrcA", 22, 1, false, None),
+            Field::new("AddDst", 21, 1, false, None),
+            Field::new("BroadcastSrcBRow", 20, 1, false, None),
+            Field::new("BroadcastSrcBCol0", 19, 1, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[],
         0x00063c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/ELWADD.md",
     );
 
@@ -2170,10 +2295,23 @@ pub mod defs {
         "ELWSUB_BH",
         "ELWSUB",
         0x30,
-        &[Field::new("FlipSrcB", 23, 1, false, None), Field::new("FlipSrcA", 22, 1, false, None), Field::new("AddDst", 21, 1, false, None), Field::new("BroadcastSrcBRow", 20, 1, false, None), Field::new("BroadcastSrcBCol0", 19, 1, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("FlipSrcB", 23, 1, false, None),
+            Field::new("FlipSrcA", 22, 1, false, None),
+            Field::new("AddDst", 21, 1, false, None),
+            Field::new("BroadcastSrcBRow", 20, 1, false, None),
+            Field::new("BroadcastSrcBCol0", 19, 1, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[],
         0x00063c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/ELWSUB.md",
     );
 
@@ -2182,10 +2320,22 @@ pub mod defs {
         "ELWMUL_BH",
         "ELWMUL",
         0x27,
-        &[Field::new("FlipSrcB", 23, 1, false, None), Field::new("FlipSrcA", 22, 1, false, None), Field::new("BroadcastSrcBRow", 20, 1, false, None), Field::new("BroadcastSrcBCol0", 19, 1, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("FlipSrcB", 23, 1, false, None),
+            Field::new("FlipSrcA", 22, 1, false, None),
+            Field::new("BroadcastSrcBRow", 20, 1, false, None),
+            Field::new("BroadcastSrcBCol0", 19, 1, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[],
         0x00263c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/ELWMUL.md",
     );
 
@@ -2194,10 +2344,20 @@ pub mod defs {
         "DOTPV_BH",
         "DOTPV",
         0x29,
-        &[Field::new("FlipSrcB", 23, 1, false, None), Field::new("FlipSrcA", 22, 1, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("FlipSrcB", 23, 1, false, None),
+            Field::new("FlipSrcA", 22, 1, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[],
         0x003e3c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/DOTPV.md",
     );
 
@@ -2206,10 +2366,21 @@ pub mod defs {
         "MOVDBGA2D_BH",
         "MOVDBGA2D",
         0x09,
-        &[Field::new("UseDst32bLo", 23, 1, false, None), Field::new("SrcRow", 17, 6, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("Move8Rows", 13, 1, false, None), Field::new("DstRow", 0, 10, false, None)],
+        &[
+            Field::new("UseDst32bLo", 23, 1, false, None),
+            Field::new("SrcRow", 17, 6, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("Move8Rows", 13, 1, false, None),
+            Field::new("DstRow", 0, 10, false, None),
+        ],
         &[],
         0x00001c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/MOVDBGA2D.md",
     );
 
@@ -2218,10 +2389,19 @@ pub mod defs {
         "SHIFTXB_BH",
         "SHIFTXB",
         0x18,
-        &[Field::new("AddrMod", 14, 3, false, None), Field::new("ShiftInZero", 10, 1, false, None), Field::new("SrcRow", 0, 6, false, None)],
+        &[
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("ShiftInZero", 10, 1, false, None),
+            Field::new("SrcRow", 0, 6, false, None),
+        ],
         &[],
         0x00fe3bc0,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::shiftxb_addr_mod_sits_one_bit_lower_on_blackhole", moved: &["AddrMod"], dropped: &[], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::shiftxb_addr_mod_sits_one_bit_lower_on_blackhole",
+            moved: &["AddrMod"],
+            dropped: &[],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/SHIFTXB.md",
     );
 
@@ -2230,10 +2410,20 @@ pub mod defs {
         "ZEROACC_BH",
         "ZEROACC",
         0x10,
-        &[Field::new("Mode", 19, 2, false, None), Field::new("UseDst32b", 18, 1, false, None), Field::new("AddrMod", 14, 3, false, None), Field::new("Imm10", 0, 10, false, None)],
+        &[
+            Field::new("Mode", 19, 2, false, None),
+            Field::new("UseDst32b", 18, 1, false, None),
+            Field::new("AddrMod", 14, 3, false, None),
+            Field::new("Imm10", 0, 10, false, None),
+        ],
         &[],
         0x00e23c00,
-        Provenance::Measured { evidence: "crates/tt-tests/tests/step9_matmul.rs::zeroacc_addr_mod_and_use_dst32b_on_blackhole", moved: &["AddrMod", "UseDst32b"], dropped: &["Revert"], widened: &["AddrMod"] },
+        Provenance::Measured {
+            evidence: "crates/tt-tests/tests/step9_matmul.rs::zeroacc_addr_mod_and_use_dst32b_on_blackhole",
+            moved: &["AddrMod", "UseDst32b"],
+            dropped: &["Revert"],
+            widened: &["AddrMod"],
+        },
         "WormholeB0/TensixTile/TensixCoprocessor/ZEROACC.md",
     );
 

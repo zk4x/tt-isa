@@ -15,7 +15,7 @@ pub mod mmio;
 
 use crate::{
     backend::EncodeError,
-    isa::{generated::encode, Instruction},
+    isa::{Instruction, generated::encode},
 };
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]

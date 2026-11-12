@@ -525,11 +525,7 @@ impl ConfigWords {
 
     /// Instructions [`Self::program`] will emit for the words staged so far.
     pub fn program_len(&self) -> usize {
-        if self.len == 0 {
-            0
-        } else {
-            self.len * 3 + 1
-        }
+        if self.len == 0 { 0 } else { self.len * 3 + 1 }
     }
 
     /// Emit `SETDMAREG` ×2 + `WRCFG` per staged word, then one `NOP`, into `out`.

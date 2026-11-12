@@ -190,11 +190,7 @@ impl DramChannel {
     /// on every channel; this departs from it, safely by the rule in
     /// [`DramChannel::owns`].
     pub const fn noc1_port(self) -> u8 {
-        if self.index < 4 {
-            1
-        } else {
-            0
-        }
+        if self.index < 4 { 1 } else { 0 }
     }
 
     /// Whether requests through `niu` may use this channel's endpoint `port`.

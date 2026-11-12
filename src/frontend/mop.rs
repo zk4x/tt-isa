@@ -18,8 +18,8 @@
 //! [`expand`] is the page's functional model, the oracle for every program
 //! that uses one.
 
-use crate::isa::generated::{defs, encode};
 use crate::isa::Instruction;
+use crate::isa::generated::{defs, encode};
 
 /// The largest template-1 loop count on Blackhole (ten bits).
 pub const COUNT_MAX: u32 = 1023;

@@ -475,7 +475,7 @@ impl Instruction {
 
 #[cfg(test)]
 mod tests {
-    use super::generated::{datum, defs, ALL, ALL_LAYOUTS};
+    use super::generated::{ALL, ALL_LAYOUTS, datum, defs};
     use super::*;
     extern crate std;
     use std::collections::BTreeMap;

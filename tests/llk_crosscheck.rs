@@ -321,8 +321,8 @@ fn the_datapath_encodings_agree_with_llk() {
 /// Pooling uses LLK's distinct two-bit pool_addr_mode at 15.
 #[test]
 fn every_measured_addr_mod_matches_llks_matrix_or_pooling_field() {
-    use tt_isa::isa::generated::ALL;
     use tt_isa::isa::Provenance;
+    use tt_isa::isa::generated::ALL;
     let measured: Vec<_> = ALL
         .iter()
         .filter(|d| {

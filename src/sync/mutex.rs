@@ -32,8 +32,8 @@
 //! holds completes without effect on the page's model; ttsim instead refuses
 //! it (divergence row 76), so [`check_scope`] rejects it too.
 
-use crate::isa::generated::encode;
 use crate::isa::Instruction;
+use crate::isa::generated::encode;
 
 /// One of the four Blackhole Tensix mutexes.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]

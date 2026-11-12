@@ -14,8 +14,8 @@
 //! must not itself contain a `REPLAY`: while recording, the expander takes
 //! the next `Count` instructions whatever they are.
 
-use crate::isa::generated::{defs, encode};
 use crate::isa::Instruction;
+use crate::isa::generated::{defs, encode};
 
 pub mod mop;
 

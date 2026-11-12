@@ -394,11 +394,7 @@ pub mod fill {
 
     /// The valid rows (or columns) a parameter field names: `0` is 32.
     pub const fn extent(field: u32) -> u32 {
-        if field == 0 {
-            32
-        } else {
-            field
-        }
+        if field == 0 { 32 } else { field }
     }
 }
 
@@ -1421,25 +1417,29 @@ mod tests {
             (0x2_0010, 0x1040)
         );
         // A transposed read is one whole slot, 64-aligned in DRAM (the scratch is).
-        assert!(Entry::decode(
-            ALL,
-            [op::READ_TRANSPOSED, 2, 0, 0x1040, 0x2_0000, 4096, 0, 0]
-        )
-        .is_err());
-        assert!(Entry::decode(
-            ALL,
-            [
-                op::READ_TRANSPOSED,
-                2,
-                0,
-                0x1010,
-                0x2_0000,
-                TILE_SLOT as u32,
-                0,
-                0
-            ]
-        )
-        .is_err());
+        assert!(
+            Entry::decode(
+                ALL,
+                [op::READ_TRANSPOSED, 2, 0, 0x1040, 0x2_0000, 4096, 0, 0]
+            )
+            .is_err()
+        );
+        assert!(
+            Entry::decode(
+                ALL,
+                [
+                    op::READ_TRANSPOSED,
+                    2,
+                    0,
+                    0x1010,
+                    0x2_0000,
+                    TILE_SLOT as u32,
+                    0,
+                    0
+                ]
+            )
+            .is_err()
+        );
         // No lists inside lists.
         assert_eq!(
             Entry::decode(ALL, [op::LIST, 0, 0, 0, 0, 1, 0, 0]),
@@ -1561,16 +1561,7 @@ mod tests {
         for bad in [
             [op::KERNEL, 7, 0x2_0000, 10, 0, 0, 0, 0],
             [op::KERNEL, 7, at + 4, 10, 0, 0, 0, 0],
-            [
-                op::KERNEL,
-                7,
-                at,
-                crate::mailbox::MAX_WORDS + 1,
-                0,
-                0,
-                0,
-                0,
-            ],
+            [op::KERNEL, 7, at, crate::mailbox::MAX_WORDS + 1, 0, 0, 0, 0],
             [
                 op::KERNEL,
                 7,

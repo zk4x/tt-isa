@@ -37,10 +37,10 @@
 //! One request per entry: a read longer than `MAX_REQUEST_BYTES` stays a plain entry
 //! (its decode is amortised over its requests anyway).
 
-use super::{error, op, Descriptor, MAILBOX_BASE, TXN_B};
-use crate::dram::{Dram, CHANNELS, PORTS};
+use super::{Descriptor, MAILBOX_BASE, TXN_B, error, op};
+use crate::dram::{CHANNELS, Dram, PORTS};
 use crate::noc::niu::{
-    DramMove, Endpoint, Niu, TxnId, CMD_RD, MAX_REQUEST_BYTES, MMIO_START, RESP_MARKED, STATIC_VC_1,
+    CMD_RD, DramMove, Endpoint, MAX_REQUEST_BYTES, MMIO_START, Niu, RESP_MARKED, STATIC_VC_1, TxnId,
 };
 
 /// The bitmap of valid read targets for [`guard`]: bit `hi` of 4,096 (`hi` is an

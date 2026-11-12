@@ -16,7 +16,7 @@
 //! below, followed by two entries per tensor; [`len`] says how many entries in
 //! all. Records sit in a list among plain entries, and a list never splits one.
 
-use super::{op, TILE_DATA, TILE_SLOT};
+use super::{TILE_DATA, TILE_SLOT, op};
 
 /// One matmul block's operands, GDDR -> L1: `[GATHER, flags, a_at, b_at, i0,
 /// rows, j0, cols]` + `A` + `B`. Row `i` of the block's `A` tiles, `K` tile
@@ -142,11 +142,7 @@ pub fn poke_run(address: u32, values: &[u32]) -> [[u32; 8]; 2] {
 /// The `k`th word a [`POKE_RUN`] carries, by the layout [`poke_run`] writes.
 #[inline(always)]
 pub const fn poke_run_word(rec: &[[u32; 8]], k: usize) -> u32 {
-    if k < 5 {
-        rec[0][3 + k]
-    } else {
-        rec[1][k - 5]
-    }
+    if k < 5 { rec[0][3 + k] } else { rec[1][k - 5] }
 }
 
 /// Does a record's expansion read GDDR (so B runs it) or write it (so NC
@@ -769,8 +765,8 @@ mod tests {
             expand(rec, |e| super::super::Entry::decode(usable, e).map(|_| ()))
         };
         // The last word of role 2's mailbox: in, and one word past it: out.
-        let last =
-            (crate::mailbox::launch::Mailbox::of(2).base() + crate::mailbox::MAILBOX_SIZE - 4) as u32;
+        let last = (crate::mailbox::launch::Mailbox::of(2).base() + crate::mailbox::MAILBOX_SIZE
+            - 4) as u32;
         assert!(decode(&poke_run(last, &[7])).is_ok());
         assert!(decode(&poke_run(last + 4, &[7])).is_err());
         // A run that starts inside and runs past the end is refused, though its

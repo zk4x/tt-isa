@@ -364,11 +364,7 @@ impl TileDescriptor {
     /// (`UNPACR_Regular.md:81`).
     pub const fn z_dim(self) -> u32 {
         let raw = self.get(48, 8);
-        if raw == 0 {
-            1
-        } else {
-            raw
-        }
+        if raw == 0 { 1 } else { raw }
     }
 
     /// `ZDim` exactly as stored, before the zero-means-one rule.
@@ -384,11 +380,7 @@ impl TileDescriptor {
     /// (`UNPACR_Regular.md:82`).
     pub const fn w_dim(self) -> u32 {
         let raw = self.get(64, 8);
-        if raw == 0 {
-            1
-        } else {
-            raw
-        }
+        if raw == 0 { 1 } else { raw }
     }
 
     /// `WDim` exactly as stored.
@@ -620,11 +612,7 @@ pub const fn bfp8_to_bf16(datum_bits: u8, exp_bits: u8) -> u16 {
     let sign = (datum_bits >> 7) as u16;
     let mag = datum_bits << 1;
     if mag == 0 {
-        if sign != 0 {
-            0xff80
-        } else {
-            0
-        }
+        if sign != 0 { 0xff80 } else { 0 }
     } else {
         let lz = mag.leading_zeros();
         let mag = mag << lz;
@@ -1100,11 +1088,13 @@ mod tests {
                 limit: 2048
             })
         );
-        assert!(TileImage::new(
-            TileDescriptor::zeroed().with_x_dim(2048).with_y_dim(1),
-            L1Format::Fp32
-        )
-        .is_ok());
+        assert!(
+            TileImage::new(
+                TileDescriptor::zeroed().with_x_dim(2048).with_y_dim(1),
+                L1Format::Fp32
+            )
+            .is_ok()
+        );
         // Same XDim is fine at 16 bits per datum.
         assert!(TileImage::new(too_wide, L1Format::Bf16).is_ok());
     }
@@ -1122,11 +1112,7 @@ mod tests {
             let sign = datum_bits >> 7;
             let mag = datum_bits.wrapping_shl(1);
             if mag == 0 {
-                if sign != 0 {
-                    0xff80
-                } else {
-                    0
-                }
+                if sign != 0 { 0xff80 } else { 0 }
             } else {
                 let lz = mag.leading_zeros();
                 let mag = mag.wrapping_shl(lz);

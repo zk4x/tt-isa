@@ -237,9 +237,11 @@ mod tests {
     #[test]
     fn seed_directive_opcode_is_unused() {
         let opcode = (SEED_DIRECTIVE >> 24) as u8;
-        assert!(crate::isa::generated::ALL
-            .iter()
-            .all(|def| def.opcode() != opcode));
+        assert!(
+            crate::isa::generated::ALL
+                .iter()
+                .all(|def| def.opcode() != opcode)
+        );
         assert_eq!(seed_directive(7), [SEED_DIRECTIVE, 7]);
     }
     #[test]
