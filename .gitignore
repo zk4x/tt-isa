@@ -1,1 +1,6 @@
 /target
+
+# Fetched by `cargo xtask`: the specification tree and `cfg_defines.h`, each
+# verified against the digest its generator pins (`xtask/src/pin.rs`). The
+# *generated* Rust is committed; the inputs are not.
+/vendor/

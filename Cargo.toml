@@ -10,3 +10,10 @@ documentation = "https://docs.rs/tt-isa"
 description = "Blackhole ISA: instruction encoders, register maps, coordinate spaces. no_std, no dependencies."
 
 [dependencies]
+
+# The two generated tables are produced by `cargo xtask`, not by a build script:
+# the crate stays buildable for `riscv32im` with nothing but rustc, and a pin bump
+# becomes a diff someone can read.
+[workspace]
+members = ["xtask"]
+resolver = "2"

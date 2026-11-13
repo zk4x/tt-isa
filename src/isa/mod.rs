@@ -1,8 +1,7 @@
 //! The Tensix instruction set, generated from the specification.
 //!
 //! [`generated`] is produced by `cargo xtask gen-isa` from `Diagrams/Src/Bits32.lua`
-//! at the revision `PINS.toml` pins, cross-checked against the `TT_*(…)` syntax
-//! block on the page that embeds each diagram. It is **generated, never
+//! at the revision pinned in `xtask/src/pin.rs`. It is **generated, never
 //! transcribed**: 145 encodings and 814 bit fields, and hand-copying them is a
 //! guaranteed bug source. The five SFPU encoders that predate it were hand-written,
 //! and the tests that pinned them are what now check the generator.
@@ -435,6 +434,35 @@ impl Instruction {
     #[doc(hidden)]
     pub const fn new(word: u32, def: &'static InstructionDef) -> Self {
         Instruction { word, def }
+    }
+
+    /// Place `values` into `def`'s operands, in diagram order — the high bits of the
+    /// word down.
+    ///
+    /// Called by generated encoders only. It is the one copy of the bounds check they
+    /// all need: writing it out per operand is how the generated table grew to
+    /// fourteen thousand lines of the same seven.
+    #[doc(hidden)]
+    pub const fn with_operands(
+        def: &'static InstructionDef,
+        values: &[u32],
+    ) -> Result<Self, EncodeError> {
+        let mut word = def.skeleton();
+        let mut i = 0;
+        while i < values.len() {
+            let field = def.fields()[i];
+            if !field.fits(values[i]) {
+                return Err(EncodeError::FieldTooLarge {
+                    instruction: def.key(),
+                    field: field.name(),
+                    value: values[i],
+                    width: field.width(),
+                });
+            }
+            word |= field.place(values[i]);
+            i += 1;
+        }
+        Ok(Instruction::new(word, def))
     }
 
     /// The raw instruction word, as pushed by a `sw` to `INSTRN_BUF_BASE`.

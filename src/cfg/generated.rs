@@ -1,24 +1,22 @@
 //! Tensix backend-configuration fields, generated from `cfg_defines.h`.
 //!
-//! **Do not edit.** Regenerate with `cargo xtask gen-cfg`; CI checks that this
-//! file matches the header pinned in `PINS.toml`.
+//! **Do not edit.** Regenerate with `cargo xtask gen-cfg`, which fetches the
+//! pinned header itself; `cargo xtask gen-cfg --check` fails when this file is
+//! out of date.
 //!
 //! Source: tt-metal `81989dcdb8f9b340c932ae7a71a346f4f08703eb`, `tt_metal/hw/inc/blackhole/cfg_defines.h`
 //! (820 fields across 7 sections).
 //!
-//! Field names are kept exactly as `cfg_defines.h` spells them, so that a
-//! name in the specification can be searched for here without translation.
-//! That is why this module allows non-upper-case globals.
+//! Field names are kept exactly as `cfg_defines.h` spells them, so that a name
+//! in the specification can be searched for here without translation.
 #![allow(non_upper_case_globals)]
 #![allow(clippy::unreadable_literal)]
 
 use super::{ConfigField, ConfigSpan, ThreadConfigField};
 
-/// `uint32_t Config[2][CFG_STATE_SIZE * 4]` — the multiplier is in the
-/// declaration, so one bank holds `CFG_STATE_SIZE * 4` words.
+/// `uint32_t Config[2][CFG_STATE_SIZE * 4]`
 pub const CFG_STATE_SIZE: u32 = 56;
-
-/// `struct {uint16_t Value, Padding;} ThreadConfig[3][THD_STATE_SIZE]`.
+/// `struct {uint16_t Value, Padding;} ThreadConfig[3][THD_STATE_SIZE]`
 pub const THD_STATE_SIZE: u32 = 68;
 
 /// `// Registers for ALU` — 49 fields, indexing `Config` (write with `WRCFG`).
@@ -1270,7 +1268,6 @@ pub mod unpack1 {
         ConfigField::new(63, 0, 0xffffffff);
 }
 
-/// Every `Config` bitfield, for table-wide invariant checks.
 pub static ALL_CONFIG_FIELDS: &[(&str, ConfigField)] = &[
     ("ALU_ACC_CTRL_Fp32_enabled", alu::ALU_ACC_CTRL_Fp32_enabled),
     (
@@ -3570,7 +3567,6 @@ pub static ALL_CONFIG_FIELDS: &[(&str, ConfigField)] = &[
     ),
 ];
 
-/// Every `ThreadConfig` bitfield, for table-wide invariant checks.
 pub static ALL_THREAD_CONFIG_FIELDS: &[(&str, ThreadConfigField)] = &[
     (
         "ADDR_MOD_AB2_SEC0_SrcAIncr",
@@ -4328,7 +4324,6 @@ pub static ALL_THREAD_CONFIG_FIELDS: &[(&str, ThreadConfigField)] = &[
     ),
 ];
 
-/// Every multi-word `Config` aggregate.
 pub static ALL_CONFIG_SPANS: &[(&str, ConfigSpan)] = &[
     (
         "THCON_SEC0_REG0_TileDescriptor",
@@ -4340,7 +4335,6 @@ pub static ALL_CONFIG_SPANS: &[(&str, ConfigSpan)] = &[
     ),
 ];
 
-/// Every `Config` bitfield in the `alu` section.
 pub static ALU_FIELDS: &[(&str, ConfigField)] = &[
     ("ALU_ACC_CTRL_Fp32_enabled", alu::ALU_ACC_CTRL_Fp32_enabled),
     (
@@ -4492,7 +4486,6 @@ pub static ALU_FIELDS: &[(&str, ConfigField)] = &[
     ("STATE_RESET_EN", alu::STATE_RESET_EN),
 ];
 
-/// Every `Config` bitfield in the `global` section.
 pub static GLOBAL_FIELDS: &[(&str, ConfigField)] = &[
     ("BRISC_END_PC_PC", global::BRISC_END_PC_PC),
     (
@@ -4721,7 +4714,6 @@ pub static GLOBAL_FIELDS: &[(&str, ConfigField)] = &[
     ("TRISC_END_PC_SEC2_PC", global::TRISC_END_PC_SEC2_PC),
 ];
 
-/// Every `Config` bitfield in the `pack0` section.
 pub static PACK0_FIELDS: &[(&str, ConfigField)] = &[
     (
         "PACK_CONCAT_MASK_SEC0_pack_concat_mask",
@@ -5422,7 +5414,6 @@ pub static PACK0_FIELDS: &[(&str, ConfigField)] = &[
     ),
 ];
 
-/// Every `Config` bitfield in the `thcon` section.
 pub static THCON_FIELDS: &[(&str, ConfigField)] = &[
     (
         "THCON_SEC0_REG10_Packer_Reg_Wr_Addr",
@@ -6540,7 +6531,6 @@ pub static THCON_FIELDS: &[(&str, ConfigField)] = &[
     ),
 ];
 
-/// Every `Config` bitfield in the `unpack0` section.
 pub static UNPACK0_FIELDS: &[(&str, ConfigField)] = &[
     (
         "UNP0_ADDR_BASE_REG_0_Base",
@@ -6604,7 +6594,6 @@ pub static UNPACK0_FIELDS: &[(&str, ConfigField)] = &[
     ),
 ];
 
-/// Every `Config` bitfield in the `unpack1` section.
 pub static UNPACK1_FIELDS: &[(&str, ConfigField)] = &[
     (
         "UNP0_ADDR_CTRL_XY_REG_1_Xstride",

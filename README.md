@@ -70,9 +70,10 @@ settling interval does restart it.
 ## Gotchas
 
 - Never edit `src/isa/generated.rs` or `src/cfg/generated.rs`. Regenerate with
-  `cargo xtask gen-isa` / `gen-cfg` (needs `cargo xtask fetch-spec`); CI runs both
-  with `--check`.
+  `cargo xtask gen-isa` / `gen-cfg`, which fetch their pinned input into
+  `vendor/` themselves; `--check` fails instead of rewriting when the committed
+  file is out of date.
 - A fact from a Wormhole page is a hypothesis on Blackhole. Several Matrix Unit
   fields sit one bit lower on Blackhole than Wormhole draws them; those are measured
-  layouts in `xtask/src/gen_isa/Bits32_BH.lua`.
+  layouts in `xtask/src/genisa/Bits32_BH.lua`.
 - Constants cite their specification page. Keep that when adding one.

@@ -1,27 +1,24 @@
 //! The Tensix instruction set, generated from `Diagrams/Src/Bits32.lua`.
 //!
-//! **Do not edit.** Regenerate with `cargo xtask gen-isa`; CI checks that this
-//! file matches the specification revision pinned in `PINS.toml`.
+//! **Do not edit.** Regenerate with `cargo xtask gen-isa`, which fetches the
+//! pinned specification itself; `cargo xtask gen-isa --check` fails when this
+//! file is out of date.
 //!
 //! Source: tt-isa-documentation `f848eb668c2aeae742a88a49a86157e24a0a20c6`,
-//! 165 instruction encodings and 19 datum layouts, each
-//! cross-checked against the `TT_*(…)` syntax block on the page that embeds
-//! its diagram — an independently written description of the same bits.
+//! 165 instruction encodings and 19 datum layouts.
 //!
 //! Provenance: 50 documented for Blackhole, 24 shared with Wormhole and stated
 //! to be identical, 28 superseded on Blackhole, 58 Wormhole-only and therefore
 //! **`UNVERIFIED`**, 17 **`MEASURED`** on ttsim or silicon where the specification
-//! draws only Wormhole's layout (`xtask/src/gen_isa/Bits32_BH.lua`), and 4
+//! draws only Wormhole's layout (`xtask/src/genisa/Bits32_BH.lua`), and 4
 //! Wormhole-only layouts **`CONFIRMED`** unchanged on Blackhole by a gate
-//! (`xtask/src/gen_isa/measured.rs`, `CONFIRMED`).
+//! (`xtask/src/genisa/measured.rs`).
 //!
 //! Names are the `Bits32.lua` diagram keys, so a name in the specification can
 //! be found here without translation — except that a Blackhole-specific form
 //! drops its `_BH` suffix and the Wormhole form it replaces moves into the
 //! `wormhole` submodule, so the plain name is always the one to use here.
-//! Names keep the specification's spelling, so a name in the documentation can
-//! be searched for here without translation. That is why this module allows
-//! globals that are not upper case.
+//! That is why this module allows globals that are not upper case.
 #![allow(non_upper_case_globals)]
 #![allow(clippy::unreadable_literal)]
 
@@ -2039,7 +2036,7 @@ pub mod defs {
         "WormholeB0/TensixTile/TensixCoprocessor/UNPACR_NOP_SETREG.md",
     );
 
-    /// `UNPACR_NOP_SETDVALID_BH`. **`MEASURED`** on Blackhole silicon by `crates/tt-tests/tests/step104_unpacker_handover.rs::llk_nonclearing_dvalid_a, crates/tt-tests/tests/step104_unpacker_handover.rs::llk_nonclearing_dvalid_b`. Replaces Wormhole fixed mode 7 with the bounded non-clearing publication profile 0x1e9; only WhichUnpacker varies. C1/C2 retirement and C5/C6 ownership waits remain required. ttsim refuses this format-selector flavor.
+    /// `UNPACR_NOP_SETDVALID_BH`. **`MEASURED`** on Blackhole silicon by `crates/tt-tests/tests/step104_unpacker_handover.rs::llk_nonclearing_dvalid_a, crates/tt-tests/tests/step104_unpacker_handover.rs::llk_nonclearing_dvalid_b`. Replaces Wormhole fixed mode 7 with the bounded non-clearing publication profile 0x1e9; only WhichUnpacker varies. ttsim refuses this format-selector flavor.
     pub static UNPACR_NOP_SETDVALID: InstructionDef = InstructionDef::new(
         "UNPACR_NOP_SETDVALID_BH",
         "UNPACR_NOP",
@@ -2265,7 +2262,7 @@ pub mod defs {
         "WormholeB0/TensixTile/TensixCoprocessor/MOVB2A.md",
     );
 
-    /// `ELWADD_BH`. **`MEASURED`** on ttsim or silicon by `crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts`, not documented: the only diagram is Wormhole's (`WormholeB0/TensixTile/TensixCoprocessor/ELWADD.md`), and on Blackhole `AddrMod` sits elsewhere. `AddrMod` has a different width on Blackhole. Other fields are carried from that diagram. Step9 and step90 validate broadcast, assignment, Dst addressing and repeated bank release on ttsim and both Blackhole cards; see silicon run 1791254100 and silicon-operating-notes.md. Floating arithmetic is not IEEE754.
+    /// `ELWADD_BH`. **`MEASURED`** on ttsim or silicon by `crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts`, not documented: the only diagram is Wormhole's (`WormholeB0/TensixTile/TensixCoprocessor/ELWADD.md`), and on Blackhole `AddrMod` sits elsewhere. `AddrMod` has a different width on Blackhole. Other fields are carried from that diagram. Step9 and step90 validate broadcast, assignment, Dst addressing and repeated bank release on ttsim and both Blackhole cards; floating arithmetic is not IEEE754.
     pub static ELWADD: InstructionDef = InstructionDef::new(
         "ELWADD_BH",
         "ELWADD",
@@ -2290,7 +2287,7 @@ pub mod defs {
         "WormholeB0/TensixTile/TensixCoprocessor/ELWADD.md",
     );
 
-    /// `ELWSUB_BH`. **`MEASURED`** on ttsim or silicon by `crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts`, not documented: the only diagram is Wormhole's (`WormholeB0/TensixTile/TensixCoprocessor/ELWSUB.md`), and on Blackhole `AddrMod` sits elsewhere. `AddrMod` has a different width on Blackhole. Other fields are carried from that diagram. Step9 and step90 validate broadcast, assignment, Dst addressing and repeated bank release on ttsim and both Blackhole cards; see silicon run 1791254100 and silicon-operating-notes.md. Floating arithmetic is not IEEE754.
+    /// `ELWSUB_BH`. **`MEASURED`** on ttsim or silicon by `crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts`, not documented: the only diagram is Wormhole's (`WormholeB0/TensixTile/TensixCoprocessor/ELWSUB.md`), and on Blackhole `AddrMod` sits elsewhere. `AddrMod` has a different width on Blackhole. Other fields are carried from that diagram. Step9 and step90 validate broadcast, assignment, Dst addressing and repeated bank release on ttsim and both Blackhole cards; floating arithmetic is not IEEE754.
     pub static ELWSUB: InstructionDef = InstructionDef::new(
         "ELWSUB_BH",
         "ELWSUB",
@@ -2315,7 +2312,7 @@ pub mod defs {
         "WormholeB0/TensixTile/TensixCoprocessor/ELWSUB.md",
     );
 
-    /// `ELWMUL_BH`. **`MEASURED`** on ttsim or silicon by `crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts`, not documented: the only diagram is Wormhole's (`WormholeB0/TensixTile/TensixCoprocessor/ELWMUL.md`), and on Blackhole `AddrMod` sits elsewhere. `AddrMod` has a different width on Blackhole. Other fields are carried from that diagram. Step9 and step90 validate broadcast, assignment, Dst addressing and repeated bank release on ttsim and both Blackhole cards; see silicon run 1791254100 and silicon-operating-notes.md. Floating arithmetic is not IEEE754.
+    /// `ELWMUL_BH`. **`MEASURED`** on ttsim or silicon by `crates/tt-tests/tests/step9_matmul.rs::matrix_unit_addr_mod_sits_one_bit_lower_on_blackhole, crates/tt-tests/tests/step9_matmul.rs::elw_broadcast_assignment_and_destination_fields, crates/tt-tests/tests/step90_matrix_eltwise.rs::resident_matrix_arithmetic_and_rhs_broadcasts`, not documented: the only diagram is Wormhole's (`WormholeB0/TensixTile/TensixCoprocessor/ELWMUL.md`), and on Blackhole `AddrMod` sits elsewhere. `AddrMod` has a different width on Blackhole. Other fields are carried from that diagram. Step9 and step90 validate broadcast, assignment, Dst addressing and repeated bank release on ttsim and both Blackhole cards; floating arithmetic is not IEEE754.
     pub static ELWMUL: InstructionDef = InstructionDef::new(
         "ELWMUL_BH",
         "ELWMUL",
@@ -3372,6 +3369,25 @@ pub static ALL_LAYOUTS: &[&DatumLayout] = &[
 pub mod encode {
     use super::*;
 
+    /// An encoder whose operands are too many to pass positionally without inviting a
+    /// transposition: `Ty::ZERO.a(1).b(2).encode()`.
+    macro_rules! builder {
+        ($(#[$meta:meta])* $ty:ident, $def:path, [$($field:ident),* $(,)?]) => {
+            $(#[$meta])*
+            #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+            pub struct $ty { $($field: u32,)* }
+            impl $ty {
+                /// Every operand zero. Fixed bits are added by [`Self::encode`].
+                pub const ZERO: Self = $ty { $($field: 0,)* };
+                $(pub const fn $field(mut self, value: u32) -> Self { self.$field = value; self })
+*
+                pub const fn encode(self) -> Result<Instruction, EncodeError> {
+                    Instruction::with_operands(&$def, &[$(self.$field),*])
+                }
+            }
+        };
+    }
+
     /// `ATCAS`.
     pub const fn atcas(
         set_val: u32,
@@ -3379,49 +3395,7 @@ pub mod encode {
         ofs: u32,
         addr_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::ATCAS;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(set_val) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: set_val,
-                width: f.width(),
-            });
-        }
-        word |= f.place(set_val);
-        let f = def.fields()[1];
-        if !f.fits(cmp_val) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: cmp_val,
-                width: f.width(),
-            });
-        }
-        word |= f.place(cmp_val);
-        let f = def.fields()[2];
-        if !f.fits(ofs) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: ofs,
-                width: f.width(),
-            });
-        }
-        word |= f.place(ofs);
-        let f = def.fields()[3];
-        if !f.fits(addr_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::ATCAS, &[set_val, cmp_val, ofs, addr_reg])
     }
 
     /// `ATSWAP`.
@@ -3431,49 +3405,7 @@ pub mod encode {
         data_reg: u32,
         addr_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::ATSWAP;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(single_data_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: single_data_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(single_data_reg);
-        let f = def.fields()[1];
-        if !f.fits(mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mask);
-        let f = def.fields()[2];
-        if !f.fits(data_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: data_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(data_reg);
-        let f = def.fields()[3];
-        if !f.fits(addr_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::ATSWAP, &[single_data_reg, mask, data_reg, addr_reg])
     }
 
     /// `RMWCIB0`.
@@ -3482,39 +3414,7 @@ pub mod encode {
         new_value: u32,
         index4: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::RMWCIB0;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mask);
-        let f = def.fields()[1];
-        if !f.fits(new_value) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: new_value,
-                width: f.width(),
-            });
-        }
-        word |= f.place(new_value);
-        let f = def.fields()[2];
-        if !f.fits(index4) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: index4,
-                width: f.width(),
-            });
-        }
-        word |= f.place(index4);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::RMWCIB0, &[mask, new_value, index4])
     }
 
     /// `RMWCIB1`.
@@ -3523,39 +3423,7 @@ pub mod encode {
         new_value: u32,
         index4: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::RMWCIB1;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mask);
-        let f = def.fields()[1];
-        if !f.fits(new_value) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: new_value,
-                width: f.width(),
-            });
-        }
-        word |= f.place(new_value);
-        let f = def.fields()[2];
-        if !f.fits(index4) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: index4,
-                width: f.width(),
-            });
-        }
-        word |= f.place(index4);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::RMWCIB1, &[mask, new_value, index4])
     }
 
     /// `RMWCIB2`.
@@ -3564,39 +3432,7 @@ pub mod encode {
         new_value: u32,
         index4: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::RMWCIB2;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mask);
-        let f = def.fields()[1];
-        if !f.fits(new_value) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: new_value,
-                width: f.width(),
-            });
-        }
-        word |= f.place(new_value);
-        let f = def.fields()[2];
-        if !f.fits(index4) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: index4,
-                width: f.width(),
-            });
-        }
-        word |= f.place(index4);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::RMWCIB2, &[mask, new_value, index4])
     }
 
     /// `RMWCIB3`.
@@ -3605,39 +3441,7 @@ pub mod encode {
         new_value: u32,
         index4: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::RMWCIB3;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mask);
-        let f = def.fields()[1];
-        if !f.fits(new_value) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: new_value,
-                width: f.width(),
-            });
-        }
-        word |= f.place(new_value);
-        let f = def.fields()[2];
-        if !f.fits(index4) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: index4,
-                width: f.width(),
-            });
-        }
-        word |= f.place(index4);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::RMWCIB3, &[mask, new_value, index4])
     }
 
     /// `SETDMAREG_Immediate`.
@@ -3645,164 +3449,28 @@ pub mod encode {
         new_value: u32,
         result_half_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SETDMAREG_Immediate;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(new_value) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: new_value,
-                width: f.width(),
-            });
-        }
-        word |= f.place(new_value);
-        let f = def.fields()[1];
-        if !f.fits(result_half_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_half_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_half_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SETDMAREG_Immediate, &[new_value, result_half_reg])
     }
 
-    /// `SETDMAREG_Special`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `SetdmaregSpecial::ZERO.result_size(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct SetdmaregSpecial {
-        result_size: u32,
-        which_packers: u32,
-        input_source: u32,
-        input_half_reg: u32,
-        result_half_reg: u32,
-    }
-
-    impl SetdmaregSpecial {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = SetdmaregSpecial {
-            result_size: 0,
-            which_packers: 0,
-            input_source: 0,
-            input_half_reg: 0,
-            result_half_reg: 0,
-        };
-
-        pub const fn result_size(mut self, value: u32) -> Self {
-            self.result_size = value;
-            self
-        }
-
-        pub const fn which_packers(mut self, value: u32) -> Self {
-            self.which_packers = value;
-            self
-        }
-
-        pub const fn input_source(mut self, value: u32) -> Self {
-            self.input_source = value;
-            self
-        }
-
-        pub const fn input_half_reg(mut self, value: u32) -> Self {
-            self.input_half_reg = value;
-            self
-        }
-
-        pub const fn result_half_reg(mut self, value: u32) -> Self {
-            self.result_half_reg = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SETDMAREG_Special;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.result_size) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.result_size,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.result_size);
-            let f = def.fields()[1];
-            if !f.fits(self.which_packers) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.which_packers,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.which_packers);
-            let f = def.fields()[2];
-            if !f.fits(self.input_source) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.input_source,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.input_source);
-            let f = def.fields()[3];
-            if !f.fits(self.input_half_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.input_half_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.input_half_reg);
-            let f = def.fields()[4];
-            if !f.fits(self.result_half_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.result_half_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.result_half_reg);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`SETDMAREG_Special`."]
+        SetdmaregSpecial,
+        defs::SETDMAREG_Special,
+        [
+            result_size,
+            which_packers,
+            input_source,
+            input_half_reg,
+            result_half_reg
+        ]
+    );
 
     /// `STALLWAIT_BH`.
     pub const fn stallwait(
         block_mask: u32,
         condition_mask: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::STALLWAIT;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(block_mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: block_mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(block_mask);
-        let f = def.fields()[1];
-        if !f.fits(condition_mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: condition_mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(condition_mask);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::STALLWAIT, &[block_mask, condition_mask])
     }
 
     /// `SEMWAIT`.
@@ -3811,39 +3479,10 @@ pub mod encode {
         semaphore_mask: u32,
         condition_mask: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SEMWAIT;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(block_mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: block_mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(block_mask);
-        let f = def.fields()[1];
-        if !f.fits(semaphore_mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: semaphore_mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(semaphore_mask);
-        let f = def.fields()[2];
-        if !f.fits(condition_mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: condition_mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(condition_mask);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::SEMWAIT,
+            &[block_mask, semaphore_mask, condition_mask],
+        )
     }
 
     /// `STREAMWAIT`.
@@ -3853,49 +3492,10 @@ pub mod encode {
         condition_index: u32,
         stream_select: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::STREAMWAIT;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(block_mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: block_mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(block_mask);
-        let f = def.fields()[1];
-        if !f.fits(target_value_lo) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: target_value_lo,
-                width: f.width(),
-            });
-        }
-        word |= f.place(target_value_lo);
-        let f = def.fields()[2];
-        if !f.fits(condition_index) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: condition_index,
-                width: f.width(),
-            });
-        }
-        word |= f.place(condition_index);
-        let f = def.fields()[3];
-        if !f.fits(stream_select) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: stream_select,
-                width: f.width(),
-            });
-        }
-        word |= f.place(stream_select);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::STREAMWAIT,
+            &[block_mask, target_value_lo, condition_index, stream_select],
+        )
     }
 
     /// `SEMINIT`.
@@ -3904,39 +3504,7 @@ pub mod encode {
         new_value: u32,
         semaphore_mask: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SEMINIT;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(new_max) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: new_max,
-                width: f.width(),
-            });
-        }
-        word |= f.place(new_max);
-        let f = def.fields()[1];
-        if !f.fits(new_value) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: new_value,
-                width: f.width(),
-            });
-        }
-        word |= f.place(new_value);
-        let f = def.fields()[2];
-        if !f.fits(semaphore_mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: semaphore_mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(semaphore_mask);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SEMINIT, &[new_max, new_value, semaphore_mask])
     }
 
     /// `REPLAY`.
@@ -3946,274 +3514,28 @@ pub mod encode {
         exec: u32,
         load: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::REPLAY;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(index) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: index,
-                width: f.width(),
-            });
-        }
-        word |= f.place(index);
-        let f = def.fields()[1];
-        if !f.fits(count) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: count,
-                width: f.width(),
-            });
-        }
-        word |= f.place(count);
-        let f = def.fields()[2];
-        if !f.fits(exec) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: exec,
-                width: f.width(),
-            });
-        }
-        word |= f.place(exec);
-        let f = def.fields()[3];
-        if !f.fits(load) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: load,
-                width: f.width(),
-            });
-        }
-        word |= f.place(load);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::REPLAY, &[index, count, exec, load])
     }
 
-    /// `PACR_BH`, built field by field.
-    ///
-    /// 12 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Pacr::ZERO.cfg_context(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Pacr {
-        cfg_context: u32,
-        row_pad_zero: u32,
-        dst_access_mode: u32,
-        addr_mod: u32,
-        addr_cnt_context: u32,
-        zero_write: u32,
-        read_intf_sel: u32,
-        ovrd_thread_id: u32,
-        concat: u32,
-        ctxt_ctrl: u32,
-        flush: u32,
-        last: u32,
-    }
-
-    impl Pacr {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Pacr {
-            cfg_context: 0,
-            row_pad_zero: 0,
-            dst_access_mode: 0,
-            addr_mod: 0,
-            addr_cnt_context: 0,
-            zero_write: 0,
-            read_intf_sel: 0,
-            ovrd_thread_id: 0,
-            concat: 0,
-            ctxt_ctrl: 0,
-            flush: 0,
-            last: 0,
-        };
-
-        pub const fn cfg_context(mut self, value: u32) -> Self {
-            self.cfg_context = value;
-            self
-        }
-
-        pub const fn row_pad_zero(mut self, value: u32) -> Self {
-            self.row_pad_zero = value;
-            self
-        }
-
-        pub const fn dst_access_mode(mut self, value: u32) -> Self {
-            self.dst_access_mode = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn addr_cnt_context(mut self, value: u32) -> Self {
-            self.addr_cnt_context = value;
-            self
-        }
-
-        pub const fn zero_write(mut self, value: u32) -> Self {
-            self.zero_write = value;
-            self
-        }
-
-        pub const fn read_intf_sel(mut self, value: u32) -> Self {
-            self.read_intf_sel = value;
-            self
-        }
-
-        pub const fn ovrd_thread_id(mut self, value: u32) -> Self {
-            self.ovrd_thread_id = value;
-            self
-        }
-
-        pub const fn concat(mut self, value: u32) -> Self {
-            self.concat = value;
-            self
-        }
-
-        pub const fn ctxt_ctrl(mut self, value: u32) -> Self {
-            self.ctxt_ctrl = value;
-            self
-        }
-
-        pub const fn flush(mut self, value: u32) -> Self {
-            self.flush = value;
-            self
-        }
-
-        pub const fn last(mut self, value: u32) -> Self {
-            self.last = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::PACR;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.cfg_context) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.cfg_context,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.cfg_context);
-            let f = def.fields()[1];
-            if !f.fits(self.row_pad_zero) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.row_pad_zero,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.row_pad_zero);
-            let f = def.fields()[2];
-            if !f.fits(self.dst_access_mode) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_access_mode,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_access_mode);
-            let f = def.fields()[3];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[4];
-            if !f.fits(self.addr_cnt_context) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_cnt_context,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_cnt_context);
-            let f = def.fields()[5];
-            if !f.fits(self.zero_write) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.zero_write,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.zero_write);
-            let f = def.fields()[6];
-            if !f.fits(self.read_intf_sel) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.read_intf_sel,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.read_intf_sel);
-            let f = def.fields()[7];
-            if !f.fits(self.ovrd_thread_id) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.ovrd_thread_id,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.ovrd_thread_id);
-            let f = def.fields()[8];
-            if !f.fits(self.concat) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.concat,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.concat);
-            let f = def.fields()[9];
-            if !f.fits(self.ctxt_ctrl) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.ctxt_ctrl,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.ctxt_ctrl);
-            let f = def.fields()[10];
-            if !f.fits(self.flush) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flush,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flush);
-            let f = def.fields()[11];
-            if !f.fits(self.last) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.last,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.last);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`PACR_BH`."]
+        Pacr,
+        defs::PACR,
+        [
+            cfg_context,
+            row_pad_zero,
+            dst_access_mode,
+            addr_mod,
+            addr_cnt_context,
+            zero_write,
+            read_intf_sel,
+            ovrd_thread_id,
+            concat,
+            ctxt_ctrl,
+            flush,
+            last
+        ]
+    );
 
     /// `PACR_SETREG`.
     pub const fn pacr_setreg(
@@ -4221,39 +3543,7 @@ pub mod encode {
         value10: u32,
         addr_mid: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::PACR_SETREG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(addr_sel) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_sel,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_sel);
-        let f = def.fields()[1];
-        if !f.fits(value10) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: value10,
-                width: f.width(),
-            });
-        }
-        word |= f.place(value10);
-        let f = def.fields()[2];
-        if !f.fits(addr_mid) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_mid,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_mid);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::PACR_SETREG, &[addr_sel, value10, addr_mid])
     }
 
     /// `SFPSHFT2`.
@@ -4263,86 +3553,12 @@ pub mod encode {
         vd: u32,
         mod1: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPSHFT2;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vb) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vb,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vb);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPSHFT2, &[vb, vc, vd, mod1])
     }
 
     /// `SFPSHFT2b`.
     pub const fn sfpshft2b(imm12: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPSHFT2b;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm12) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm12,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm12);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPSHFT2b, &[imm12, vd, mod1])
     }
 
     /// `SFPLUTFP32_BH`.
@@ -4351,39 +3567,7 @@ pub mod encode {
         vd: u32,
         mod1: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPLUTFP32;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mod1_mirror) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1_mirror,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1_mirror);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPLUTFP32, &[mod1_mirror, vd, mod1])
     }
 
     /// `REG2FLOP_Configuration`.
@@ -4392,219 +3576,32 @@ pub mod encode {
         th_con_cfg_index: u32,
         input_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::REG2FLOP_Configuration;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(size_sel) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: size_sel,
-                width: f.width(),
-            });
-        }
-        word |= f.place(size_sel);
-        let f = def.fields()[1];
-        if !f.fits(th_con_cfg_index) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: th_con_cfg_index,
-                width: f.width(),
-            });
-        }
-        word |= f.place(th_con_cfg_index);
-        let f = def.fields()[2];
-        if !f.fits(input_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: input_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(input_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::REG2FLOP_Configuration,
+            &[size_sel, th_con_cfg_index, input_reg],
+        )
     }
 
-    /// `REG2FLOP_ADC`, built field by field.
-    ///
-    /// 9 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Reg2FlopAdc::ZERO.size_sel(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Reg2FlopAdc {
-        size_sel: u32,
-        override_thread: u32,
-        shift8: u32,
-        thread_sel: u32,
-        channel: u32,
-        adc_sel: u32,
-        cr: u32,
-        xyzw: u32,
-        input_reg: u32,
-    }
-
-    impl Reg2FlopAdc {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Reg2FlopAdc {
-            size_sel: 0,
-            override_thread: 0,
-            shift8: 0,
-            thread_sel: 0,
-            channel: 0,
-            adc_sel: 0,
-            cr: 0,
-            xyzw: 0,
-            input_reg: 0,
-        };
-
-        pub const fn size_sel(mut self, value: u32) -> Self {
-            self.size_sel = value;
-            self
-        }
-
-        pub const fn override_thread(mut self, value: u32) -> Self {
-            self.override_thread = value;
-            self
-        }
-
-        pub const fn shift8(mut self, value: u32) -> Self {
-            self.shift8 = value;
-            self
-        }
-
-        pub const fn thread_sel(mut self, value: u32) -> Self {
-            self.thread_sel = value;
-            self
-        }
-
-        pub const fn channel(mut self, value: u32) -> Self {
-            self.channel = value;
-            self
-        }
-
-        pub const fn adc_sel(mut self, value: u32) -> Self {
-            self.adc_sel = value;
-            self
-        }
-
-        pub const fn cr(mut self, value: u32) -> Self {
-            self.cr = value;
-            self
-        }
-
-        pub const fn xyzw(mut self, value: u32) -> Self {
-            self.xyzw = value;
-            self
-        }
-
-        pub const fn input_reg(mut self, value: u32) -> Self {
-            self.input_reg = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::REG2FLOP_ADC;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.size_sel) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.size_sel,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.size_sel);
-            let f = def.fields()[1];
-            if !f.fits(self.override_thread) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.override_thread,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.override_thread);
-            let f = def.fields()[2];
-            if !f.fits(self.shift8) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.shift8,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.shift8);
-            let f = def.fields()[3];
-            if !f.fits(self.thread_sel) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.thread_sel,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.thread_sel);
-            let f = def.fields()[4];
-            if !f.fits(self.channel) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.channel,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.channel);
-            let f = def.fields()[5];
-            if !f.fits(self.adc_sel) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.adc_sel,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.adc_sel);
-            let f = def.fields()[6];
-            if !f.fits(self.cr) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.cr,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.cr);
-            let f = def.fields()[7];
-            if !f.fits(self.xyzw) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.xyzw,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.xyzw);
-            let f = def.fields()[8];
-            if !f.fits(self.input_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.input_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.input_reg);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`REG2FLOP_ADC`."]
+        Reg2FlopAdc,
+        defs::REG2FLOP_ADC,
+        [
+            size_sel,
+            override_thread,
+            shift8,
+            thread_sel,
+            channel,
+            adc_sel,
+            cr,
+            xyzw,
+            input_reg
+        ]
+    );
 
     /// `XMOV`.
     pub const fn xmov() -> Result<Instruction, EncodeError> {
-        let def = &defs::XMOV;
-        let word = def.skeleton();
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::XMOV, &[])
     }
 
     /// `WRCFG`.
@@ -4613,93 +3610,17 @@ pub mod encode {
         is128_bit: u32,
         cfg_index: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::WRCFG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(input_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: input_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(input_reg);
-        let f = def.fields()[1];
-        if !f.fits(is128_bit) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: is128_bit,
-                width: f.width(),
-            });
-        }
-        word |= f.place(is128_bit);
-        let f = def.fields()[2];
-        if !f.fits(cfg_index) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: cfg_index,
-                width: f.width(),
-            });
-        }
-        word |= f.place(cfg_index);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::WRCFG, &[input_reg, is128_bit, cfg_index])
     }
 
     /// `RDCFG`.
     pub const fn rdcfg(result_reg: u32, cfg_index: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::RDCFG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[1];
-        if !f.fits(cfg_index) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: cfg_index,
-                width: f.width(),
-            });
-        }
-        word |= f.place(cfg_index);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::RDCFG, &[result_reg, cfg_index])
     }
 
     /// `SETC16`.
     pub const fn setc16(cfg_index: u32, new_value: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SETC16;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(cfg_index) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: cfg_index,
-                width: f.width(),
-            });
-        }
-        word |= f.place(cfg_index);
-        let f = def.fields()[1];
-        if !f.fits(new_value) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: new_value,
-                width: f.width(),
-            });
-        }
-        word |= f.place(new_value);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SETC16, &[cfg_index, new_value])
     }
 
     /// `STREAMWRCFG`.
@@ -4708,1817 +3629,182 @@ pub mod encode {
         reg_index: u32,
         cfg_index: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::STREAMWRCFG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(stream_select) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: stream_select,
-                width: f.width(),
-            });
-        }
-        word |= f.place(stream_select);
-        let f = def.fields()[1];
-        if !f.fits(reg_index) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: reg_index,
-                width: f.width(),
-            });
-        }
-        word |= f.place(reg_index);
-        let f = def.fields()[2];
-        if !f.fits(cfg_index) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: cfg_index,
-                width: f.width(),
-            });
-        }
-        word |= f.place(cfg_index);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::STREAMWRCFG, &[stream_select, reg_index, cfg_index])
     }
 
-    /// `CFGSHIFTMASK`, built field by field.
-    ///
-    /// 6 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Cfgshiftmask::ZERO.mask_mode(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Cfgshiftmask {
-        mask_mode: u32,
-        alu_mode: u32,
-        mask_width: u32,
-        rotate_amt: u32,
-        scratch_index: u32,
-        cfg_index: u32,
-    }
-
-    impl Cfgshiftmask {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Cfgshiftmask {
-            mask_mode: 0,
-            alu_mode: 0,
-            mask_width: 0,
-            rotate_amt: 0,
-            scratch_index: 0,
-            cfg_index: 0,
-        };
-
-        pub const fn mask_mode(mut self, value: u32) -> Self {
-            self.mask_mode = value;
-            self
-        }
-
-        pub const fn alu_mode(mut self, value: u32) -> Self {
-            self.alu_mode = value;
-            self
-        }
-
-        pub const fn mask_width(mut self, value: u32) -> Self {
-            self.mask_width = value;
-            self
-        }
-
-        pub const fn rotate_amt(mut self, value: u32) -> Self {
-            self.rotate_amt = value;
-            self
-        }
-
-        pub const fn scratch_index(mut self, value: u32) -> Self {
-            self.scratch_index = value;
-            self
-        }
-
-        pub const fn cfg_index(mut self, value: u32) -> Self {
-            self.cfg_index = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::CFGSHIFTMASK;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.mask_mode) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.mask_mode,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.mask_mode);
-            let f = def.fields()[1];
-            if !f.fits(self.alu_mode) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.alu_mode,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.alu_mode);
-            let f = def.fields()[2];
-            if !f.fits(self.mask_width) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.mask_width,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.mask_width);
-            let f = def.fields()[3];
-            if !f.fits(self.rotate_amt) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.rotate_amt,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.rotate_amt);
-            let f = def.fields()[4];
-            if !f.fits(self.scratch_index) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.scratch_index,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.scratch_index);
-            let f = def.fields()[5];
-            if !f.fits(self.cfg_index) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.cfg_index,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.cfg_index);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `SETADC`, built field by field.
-    ///
-    /// 6 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Setadc::ZERO.pk(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Setadc {
-        pk: u32,
-        u1: u32,
-        u0: u32,
-        channel: u32,
-        xyzw: u32,
-        new_value: u32,
-    }
-
-    impl Setadc {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Setadc {
-            pk: 0,
-            u1: 0,
-            u0: 0,
-            channel: 0,
-            xyzw: 0,
-            new_value: 0,
-        };
-
-        pub const fn pk(mut self, value: u32) -> Self {
-            self.pk = value;
-            self
-        }
-
-        pub const fn u1(mut self, value: u32) -> Self {
-            self.u1 = value;
-            self
-        }
-
-        pub const fn u0(mut self, value: u32) -> Self {
-            self.u0 = value;
-            self
-        }
-
-        pub const fn channel(mut self, value: u32) -> Self {
-            self.channel = value;
-            self
-        }
-
-        pub const fn xyzw(mut self, value: u32) -> Self {
-            self.xyzw = value;
-            self
-        }
-
-        pub const fn new_value(mut self, value: u32) -> Self {
-            self.new_value = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SETADC;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.pk) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.pk,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.pk);
-            let f = def.fields()[1];
-            if !f.fits(self.u1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u1);
-            let f = def.fields()[2];
-            if !f.fits(self.u0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u0);
-            let f = def.fields()[3];
-            if !f.fits(self.channel) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.channel,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.channel);
-            let f = def.fields()[4];
-            if !f.fits(self.xyzw) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.xyzw,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.xyzw);
-            let f = def.fields()[5];
-            if !f.fits(self.new_value) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.new_value,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.new_value);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `SETADCXY`, built field by field.
-    ///
-    /// 12 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Setadcxy::ZERO.pk(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Setadcxy {
-        pk: u32,
-        u1: u32,
-        u0: u32,
-        thread_override: u32,
-        y1_val: u32,
-        x1_val: u32,
-        y0_val: u32,
-        x0_val: u32,
-        y1: u32,
-        x1: u32,
-        y0: u32,
-        x0: u32,
-    }
-
-    impl Setadcxy {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Setadcxy {
-            pk: 0,
-            u1: 0,
-            u0: 0,
-            thread_override: 0,
-            y1_val: 0,
-            x1_val: 0,
-            y0_val: 0,
-            x0_val: 0,
-            y1: 0,
-            x1: 0,
-            y0: 0,
-            x0: 0,
-        };
-
-        pub const fn pk(mut self, value: u32) -> Self {
-            self.pk = value;
-            self
-        }
-
-        pub const fn u1(mut self, value: u32) -> Self {
-            self.u1 = value;
-            self
-        }
-
-        pub const fn u0(mut self, value: u32) -> Self {
-            self.u0 = value;
-            self
-        }
-
-        pub const fn thread_override(mut self, value: u32) -> Self {
-            self.thread_override = value;
-            self
-        }
-
-        pub const fn y1_val(mut self, value: u32) -> Self {
-            self.y1_val = value;
-            self
-        }
-
-        pub const fn x1_val(mut self, value: u32) -> Self {
-            self.x1_val = value;
-            self
-        }
-
-        pub const fn y0_val(mut self, value: u32) -> Self {
-            self.y0_val = value;
-            self
-        }
-
-        pub const fn x0_val(mut self, value: u32) -> Self {
-            self.x0_val = value;
-            self
-        }
-
-        pub const fn y1(mut self, value: u32) -> Self {
-            self.y1 = value;
-            self
-        }
-
-        pub const fn x1(mut self, value: u32) -> Self {
-            self.x1 = value;
-            self
-        }
-
-        pub const fn y0(mut self, value: u32) -> Self {
-            self.y0 = value;
-            self
-        }
-
-        pub const fn x0(mut self, value: u32) -> Self {
-            self.x0 = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SETADCXY;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.pk) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.pk,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.pk);
-            let f = def.fields()[1];
-            if !f.fits(self.u1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u1);
-            let f = def.fields()[2];
-            if !f.fits(self.u0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u0);
-            let f = def.fields()[3];
-            if !f.fits(self.thread_override) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.thread_override,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.thread_override);
-            let f = def.fields()[4];
-            if !f.fits(self.y1_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.y1_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.y1_val);
-            let f = def.fields()[5];
-            if !f.fits(self.x1_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x1_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x1_val);
-            let f = def.fields()[6];
-            if !f.fits(self.y0_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.y0_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.y0_val);
-            let f = def.fields()[7];
-            if !f.fits(self.x0_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x0_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x0_val);
-            let f = def.fields()[8];
-            if !f.fits(self.y1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.y1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.y1);
-            let f = def.fields()[9];
-            if !f.fits(self.x1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x1);
-            let f = def.fields()[10];
-            if !f.fits(self.y0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.y0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.y0);
-            let f = def.fields()[11];
-            if !f.fits(self.x0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x0);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `INCADCXY`, built field by field.
-    ///
-    /// 8 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Incadcxy::ZERO.pk(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Incadcxy {
-        pk: u32,
-        u1: u32,
-        u0: u32,
-        thread_override: u32,
-        y1_inc: u32,
-        x1_inc: u32,
-        y0_inc: u32,
-        x0_inc: u32,
-    }
-
-    impl Incadcxy {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Incadcxy {
-            pk: 0,
-            u1: 0,
-            u0: 0,
-            thread_override: 0,
-            y1_inc: 0,
-            x1_inc: 0,
-            y0_inc: 0,
-            x0_inc: 0,
-        };
-
-        pub const fn pk(mut self, value: u32) -> Self {
-            self.pk = value;
-            self
-        }
-
-        pub const fn u1(mut self, value: u32) -> Self {
-            self.u1 = value;
-            self
-        }
-
-        pub const fn u0(mut self, value: u32) -> Self {
-            self.u0 = value;
-            self
-        }
-
-        pub const fn thread_override(mut self, value: u32) -> Self {
-            self.thread_override = value;
-            self
-        }
-
-        pub const fn y1_inc(mut self, value: u32) -> Self {
-            self.y1_inc = value;
-            self
-        }
-
-        pub const fn x1_inc(mut self, value: u32) -> Self {
-            self.x1_inc = value;
-            self
-        }
-
-        pub const fn y0_inc(mut self, value: u32) -> Self {
-            self.y0_inc = value;
-            self
-        }
-
-        pub const fn x0_inc(mut self, value: u32) -> Self {
-            self.x0_inc = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::INCADCXY;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.pk) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.pk,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.pk);
-            let f = def.fields()[1];
-            if !f.fits(self.u1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u1);
-            let f = def.fields()[2];
-            if !f.fits(self.u0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u0);
-            let f = def.fields()[3];
-            if !f.fits(self.thread_override) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.thread_override,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.thread_override);
-            let f = def.fields()[4];
-            if !f.fits(self.y1_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.y1_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.y1_inc);
-            let f = def.fields()[5];
-            if !f.fits(self.x1_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x1_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x1_inc);
-            let f = def.fields()[6];
-            if !f.fits(self.y0_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.y0_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.y0_inc);
-            let f = def.fields()[7];
-            if !f.fits(self.x0_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x0_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x0_inc);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `ADDRCRXY`, built field by field.
-    ///
-    /// 12 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Addrcrxy::ZERO.pk(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Addrcrxy {
-        pk: u32,
-        u1: u32,
-        u0: u32,
-        thread_override: u32,
-        y1_inc: u32,
-        x1_inc: u32,
-        y0_inc: u32,
-        x0_inc: u32,
-        y1: u32,
-        x1: u32,
-        y0: u32,
-        x0: u32,
-    }
-
-    impl Addrcrxy {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Addrcrxy {
-            pk: 0,
-            u1: 0,
-            u0: 0,
-            thread_override: 0,
-            y1_inc: 0,
-            x1_inc: 0,
-            y0_inc: 0,
-            x0_inc: 0,
-            y1: 0,
-            x1: 0,
-            y0: 0,
-            x0: 0,
-        };
-
-        pub const fn pk(mut self, value: u32) -> Self {
-            self.pk = value;
-            self
-        }
-
-        pub const fn u1(mut self, value: u32) -> Self {
-            self.u1 = value;
-            self
-        }
-
-        pub const fn u0(mut self, value: u32) -> Self {
-            self.u0 = value;
-            self
-        }
-
-        pub const fn thread_override(mut self, value: u32) -> Self {
-            self.thread_override = value;
-            self
-        }
-
-        pub const fn y1_inc(mut self, value: u32) -> Self {
-            self.y1_inc = value;
-            self
-        }
-
-        pub const fn x1_inc(mut self, value: u32) -> Self {
-            self.x1_inc = value;
-            self
-        }
-
-        pub const fn y0_inc(mut self, value: u32) -> Self {
-            self.y0_inc = value;
-            self
-        }
-
-        pub const fn x0_inc(mut self, value: u32) -> Self {
-            self.x0_inc = value;
-            self
-        }
-
-        pub const fn y1(mut self, value: u32) -> Self {
-            self.y1 = value;
-            self
-        }
-
-        pub const fn x1(mut self, value: u32) -> Self {
-            self.x1 = value;
-            self
-        }
-
-        pub const fn y0(mut self, value: u32) -> Self {
-            self.y0 = value;
-            self
-        }
-
-        pub const fn x0(mut self, value: u32) -> Self {
-            self.x0 = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::ADDRCRXY;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.pk) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.pk,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.pk);
-            let f = def.fields()[1];
-            if !f.fits(self.u1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u1);
-            let f = def.fields()[2];
-            if !f.fits(self.u0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u0);
-            let f = def.fields()[3];
-            if !f.fits(self.thread_override) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.thread_override,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.thread_override);
-            let f = def.fields()[4];
-            if !f.fits(self.y1_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.y1_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.y1_inc);
-            let f = def.fields()[5];
-            if !f.fits(self.x1_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x1_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x1_inc);
-            let f = def.fields()[6];
-            if !f.fits(self.y0_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.y0_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.y0_inc);
-            let f = def.fields()[7];
-            if !f.fits(self.x0_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x0_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x0_inc);
-            let f = def.fields()[8];
-            if !f.fits(self.y1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.y1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.y1);
-            let f = def.fields()[9];
-            if !f.fits(self.x1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x1);
-            let f = def.fields()[10];
-            if !f.fits(self.y0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.y0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.y0);
-            let f = def.fields()[11];
-            if !f.fits(self.x0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x0);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `SETADCZW`, built field by field.
-    ///
-    /// 12 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Setadczw::ZERO.pk(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Setadczw {
-        pk: u32,
-        u1: u32,
-        u0: u32,
-        thread_override: u32,
-        w1_val: u32,
-        z1_val: u32,
-        w0_val: u32,
-        z0_val: u32,
-        w1: u32,
-        z1: u32,
-        w0: u32,
-        z0: u32,
-    }
-
-    impl Setadczw {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Setadczw {
-            pk: 0,
-            u1: 0,
-            u0: 0,
-            thread_override: 0,
-            w1_val: 0,
-            z1_val: 0,
-            w0_val: 0,
-            z0_val: 0,
-            w1: 0,
-            z1: 0,
-            w0: 0,
-            z0: 0,
-        };
-
-        pub const fn pk(mut self, value: u32) -> Self {
-            self.pk = value;
-            self
-        }
-
-        pub const fn u1(mut self, value: u32) -> Self {
-            self.u1 = value;
-            self
-        }
-
-        pub const fn u0(mut self, value: u32) -> Self {
-            self.u0 = value;
-            self
-        }
-
-        pub const fn thread_override(mut self, value: u32) -> Self {
-            self.thread_override = value;
-            self
-        }
-
-        pub const fn w1_val(mut self, value: u32) -> Self {
-            self.w1_val = value;
-            self
-        }
-
-        pub const fn z1_val(mut self, value: u32) -> Self {
-            self.z1_val = value;
-            self
-        }
-
-        pub const fn w0_val(mut self, value: u32) -> Self {
-            self.w0_val = value;
-            self
-        }
-
-        pub const fn z0_val(mut self, value: u32) -> Self {
-            self.z0_val = value;
-            self
-        }
-
-        pub const fn w1(mut self, value: u32) -> Self {
-            self.w1 = value;
-            self
-        }
-
-        pub const fn z1(mut self, value: u32) -> Self {
-            self.z1 = value;
-            self
-        }
-
-        pub const fn w0(mut self, value: u32) -> Self {
-            self.w0 = value;
-            self
-        }
-
-        pub const fn z0(mut self, value: u32) -> Self {
-            self.z0 = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SETADCZW;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.pk) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.pk,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.pk);
-            let f = def.fields()[1];
-            if !f.fits(self.u1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u1);
-            let f = def.fields()[2];
-            if !f.fits(self.u0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u0);
-            let f = def.fields()[3];
-            if !f.fits(self.thread_override) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.thread_override,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.thread_override);
-            let f = def.fields()[4];
-            if !f.fits(self.w1_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.w1_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.w1_val);
-            let f = def.fields()[5];
-            if !f.fits(self.z1_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.z1_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.z1_val);
-            let f = def.fields()[6];
-            if !f.fits(self.w0_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.w0_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.w0_val);
-            let f = def.fields()[7];
-            if !f.fits(self.z0_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.z0_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.z0_val);
-            let f = def.fields()[8];
-            if !f.fits(self.w1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.w1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.w1);
-            let f = def.fields()[9];
-            if !f.fits(self.z1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.z1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.z1);
-            let f = def.fields()[10];
-            if !f.fits(self.w0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.w0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.w0);
-            let f = def.fields()[11];
-            if !f.fits(self.z0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.z0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.z0);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `INCADCZW`, built field by field.
-    ///
-    /// 8 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Incadczw::ZERO.pk(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Incadczw {
-        pk: u32,
-        u1: u32,
-        u0: u32,
-        thread_override: u32,
-        w1_inc: u32,
-        z1_inc: u32,
-        w0_inc: u32,
-        z0_inc: u32,
-    }
-
-    impl Incadczw {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Incadczw {
-            pk: 0,
-            u1: 0,
-            u0: 0,
-            thread_override: 0,
-            w1_inc: 0,
-            z1_inc: 0,
-            w0_inc: 0,
-            z0_inc: 0,
-        };
-
-        pub const fn pk(mut self, value: u32) -> Self {
-            self.pk = value;
-            self
-        }
-
-        pub const fn u1(mut self, value: u32) -> Self {
-            self.u1 = value;
-            self
-        }
-
-        pub const fn u0(mut self, value: u32) -> Self {
-            self.u0 = value;
-            self
-        }
-
-        pub const fn thread_override(mut self, value: u32) -> Self {
-            self.thread_override = value;
-            self
-        }
-
-        pub const fn w1_inc(mut self, value: u32) -> Self {
-            self.w1_inc = value;
-            self
-        }
-
-        pub const fn z1_inc(mut self, value: u32) -> Self {
-            self.z1_inc = value;
-            self
-        }
-
-        pub const fn w0_inc(mut self, value: u32) -> Self {
-            self.w0_inc = value;
-            self
-        }
-
-        pub const fn z0_inc(mut self, value: u32) -> Self {
-            self.z0_inc = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::INCADCZW;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.pk) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.pk,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.pk);
-            let f = def.fields()[1];
-            if !f.fits(self.u1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u1);
-            let f = def.fields()[2];
-            if !f.fits(self.u0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u0);
-            let f = def.fields()[3];
-            if !f.fits(self.thread_override) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.thread_override,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.thread_override);
-            let f = def.fields()[4];
-            if !f.fits(self.w1_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.w1_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.w1_inc);
-            let f = def.fields()[5];
-            if !f.fits(self.z1_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.z1_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.z1_inc);
-            let f = def.fields()[6];
-            if !f.fits(self.w0_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.w0_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.w0_inc);
-            let f = def.fields()[7];
-            if !f.fits(self.z0_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.z0_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.z0_inc);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `ADDRCRZW`, built field by field.
-    ///
-    /// 12 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Addrcrzw::ZERO.pk(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Addrcrzw {
-        pk: u32,
-        u1: u32,
-        u0: u32,
-        thread_override: u32,
-        w1_inc: u32,
-        z1_inc: u32,
-        w0_inc: u32,
-        z0_inc: u32,
-        w1: u32,
-        z1: u32,
-        w0: u32,
-        z0: u32,
-    }
-
-    impl Addrcrzw {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Addrcrzw {
-            pk: 0,
-            u1: 0,
-            u0: 0,
-            thread_override: 0,
-            w1_inc: 0,
-            z1_inc: 0,
-            w0_inc: 0,
-            z0_inc: 0,
-            w1: 0,
-            z1: 0,
-            w0: 0,
-            z0: 0,
-        };
-
-        pub const fn pk(mut self, value: u32) -> Self {
-            self.pk = value;
-            self
-        }
-
-        pub const fn u1(mut self, value: u32) -> Self {
-            self.u1 = value;
-            self
-        }
-
-        pub const fn u0(mut self, value: u32) -> Self {
-            self.u0 = value;
-            self
-        }
-
-        pub const fn thread_override(mut self, value: u32) -> Self {
-            self.thread_override = value;
-            self
-        }
-
-        pub const fn w1_inc(mut self, value: u32) -> Self {
-            self.w1_inc = value;
-            self
-        }
-
-        pub const fn z1_inc(mut self, value: u32) -> Self {
-            self.z1_inc = value;
-            self
-        }
-
-        pub const fn w0_inc(mut self, value: u32) -> Self {
-            self.w0_inc = value;
-            self
-        }
-
-        pub const fn z0_inc(mut self, value: u32) -> Self {
-            self.z0_inc = value;
-            self
-        }
-
-        pub const fn w1(mut self, value: u32) -> Self {
-            self.w1 = value;
-            self
-        }
-
-        pub const fn z1(mut self, value: u32) -> Self {
-            self.z1 = value;
-            self
-        }
-
-        pub const fn w0(mut self, value: u32) -> Self {
-            self.w0 = value;
-            self
-        }
-
-        pub const fn z0(mut self, value: u32) -> Self {
-            self.z0 = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::ADDRCRZW;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.pk) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.pk,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.pk);
-            let f = def.fields()[1];
-            if !f.fits(self.u1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u1);
-            let f = def.fields()[2];
-            if !f.fits(self.u0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u0);
-            let f = def.fields()[3];
-            if !f.fits(self.thread_override) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.thread_override,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.thread_override);
-            let f = def.fields()[4];
-            if !f.fits(self.w1_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.w1_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.w1_inc);
-            let f = def.fields()[5];
-            if !f.fits(self.z1_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.z1_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.z1_inc);
-            let f = def.fields()[6];
-            if !f.fits(self.w0_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.w0_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.w0_inc);
-            let f = def.fields()[7];
-            if !f.fits(self.z0_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.z0_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.z0_inc);
-            let f = def.fields()[8];
-            if !f.fits(self.w1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.w1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.w1);
-            let f = def.fields()[9];
-            if !f.fits(self.z1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.z1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.z1);
-            let f = def.fields()[10];
-            if !f.fits(self.w0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.w0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.w0);
-            let f = def.fields()[11];
-            if !f.fits(self.z0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.z0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.z0);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `SETADCXX`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Setadcxx::ZERO.pk(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Setadcxx {
-        pk: u32,
-        u1: u32,
-        u0: u32,
-        x1_val: u32,
-        x0_val: u32,
-    }
-
-    impl Setadcxx {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Setadcxx {
-            pk: 0,
-            u1: 0,
-            u0: 0,
-            x1_val: 0,
-            x0_val: 0,
-        };
-
-        pub const fn pk(mut self, value: u32) -> Self {
-            self.pk = value;
-            self
-        }
-
-        pub const fn u1(mut self, value: u32) -> Self {
-            self.u1 = value;
-            self
-        }
-
-        pub const fn u0(mut self, value: u32) -> Self {
-            self.u0 = value;
-            self
-        }
-
-        pub const fn x1_val(mut self, value: u32) -> Self {
-            self.x1_val = value;
-            self
-        }
-
-        pub const fn x0_val(mut self, value: u32) -> Self {
-            self.x0_val = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SETADCXX;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.pk) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.pk,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.pk);
-            let f = def.fields()[1];
-            if !f.fits(self.u1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u1);
-            let f = def.fields()[2];
-            if !f.fits(self.u0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.u0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.u0);
-            let f = def.fields()[3];
-            if !f.fits(self.x1_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x1_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x1_val);
-            let f = def.fields()[4];
-            if !f.fits(self.x0_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.x0_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.x0_val);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`CFGSHIFTMASK`."]
+        Cfgshiftmask,
+        defs::CFGSHIFTMASK,
+        [
+            mask_mode,
+            alu_mode,
+            mask_width,
+            rotate_amt,
+            scratch_index,
+            cfg_index
+        ]
+    );
+
+    builder!(
+        #[doc = "`SETADC`."]
+        Setadc,
+        defs::SETADC,
+        [pk, u1, u0, channel, xyzw, new_value]
+    );
+
+    builder!(
+        #[doc = "`SETADCXY`."]
+        Setadcxy,
+        defs::SETADCXY,
+        [
+            pk,
+            u1,
+            u0,
+            thread_override,
+            y1_val,
+            x1_val,
+            y0_val,
+            x0_val,
+            y1,
+            x1,
+            y0,
+            x0
+        ]
+    );
+
+    builder!(
+        #[doc = "`INCADCXY`."]
+        Incadcxy,
+        defs::INCADCXY,
+        [pk, u1, u0, thread_override, y1_inc, x1_inc, y0_inc, x0_inc]
+    );
+
+    builder!(
+        #[doc = "`ADDRCRXY`."]
+        Addrcrxy,
+        defs::ADDRCRXY,
+        [
+            pk,
+            u1,
+            u0,
+            thread_override,
+            y1_inc,
+            x1_inc,
+            y0_inc,
+            x0_inc,
+            y1,
+            x1,
+            y0,
+            x0
+        ]
+    );
+
+    builder!(
+        #[doc = "`SETADCZW`."]
+        Setadczw,
+        defs::SETADCZW,
+        [
+            pk,
+            u1,
+            u0,
+            thread_override,
+            w1_val,
+            z1_val,
+            w0_val,
+            z0_val,
+            w1,
+            z1,
+            w0,
+            z0
+        ]
+    );
+
+    builder!(
+        #[doc = "`INCADCZW`."]
+        Incadczw,
+        defs::INCADCZW,
+        [pk, u1, u0, thread_override, w1_inc, z1_inc, w0_inc, z0_inc]
+    );
+
+    builder!(
+        #[doc = "`ADDRCRZW`."]
+        Addrcrzw,
+        defs::ADDRCRZW,
+        [
+            pk,
+            u1,
+            u0,
+            thread_override,
+            w1_inc,
+            z1_inc,
+            w0_inc,
+            z0_inc,
+            w1,
+            z1,
+            w0,
+            z0
+        ]
+    );
+
+    builder!(
+        #[doc = "`SETADCXX`."]
+        Setadcxx,
+        defs::SETADCXX,
+        [pk, u1, u0, x1_val, x0_val]
+    );
 
     /// `NOP`.
     pub const fn nop() -> Result<Instruction, EncodeError> {
-        let def = &defs::NOP;
-        let word = def.skeleton();
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::NOP, &[])
     }
 
     /// `SEMPOST`.
     pub const fn sempost(semaphore_mask: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SEMPOST;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(semaphore_mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: semaphore_mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(semaphore_mask);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SEMPOST, &[semaphore_mask])
     }
 
     /// `SEMGET`.
     pub const fn semget(semaphore_mask: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SEMGET;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(semaphore_mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: semaphore_mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(semaphore_mask);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SEMGET, &[semaphore_mask])
     }
 
     /// `SETDVALID`.
     pub const fn setdvalid(flip_src_b: u32, flip_src_a: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SETDVALID;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(flip_src_b) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: flip_src_b,
-                width: f.width(),
-            });
-        }
-        word |= f.place(flip_src_b);
-        let f = def.fields()[1];
-        if !f.fits(flip_src_a) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: flip_src_a,
-                width: f.width(),
-            });
-        }
-        word |= f.place(flip_src_a);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SETDVALID, &[flip_src_b, flip_src_a])
     }
 
     /// `GATESRCRST`.
     pub const fn gatesrcrst(invalidate_src_b_cache: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::GATESRCRST;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(invalidate_src_b_cache) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: invalidate_src_b_cache,
-                width: f.width(),
-            });
-        }
-        word |= f.place(invalidate_src_b_cache);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::GATESRCRST, &[invalidate_src_b_cache])
     }
 
-    /// `ZEROSRC`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Zerosrc::ZERO.negative_inf_src_a(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Zerosrc {
-        negative_inf_src_a: u32,
-        single_bank_matrix_unit: u32,
-        both_banks: u32,
-        clear_src_b: u32,
-        clear_src_a: u32,
-    }
-
-    impl Zerosrc {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Zerosrc {
-            negative_inf_src_a: 0,
-            single_bank_matrix_unit: 0,
-            both_banks: 0,
-            clear_src_b: 0,
-            clear_src_a: 0,
-        };
-
-        pub const fn negative_inf_src_a(mut self, value: u32) -> Self {
-            self.negative_inf_src_a = value;
-            self
-        }
-
-        pub const fn single_bank_matrix_unit(mut self, value: u32) -> Self {
-            self.single_bank_matrix_unit = value;
-            self
-        }
-
-        pub const fn both_banks(mut self, value: u32) -> Self {
-            self.both_banks = value;
-            self
-        }
-
-        pub const fn clear_src_b(mut self, value: u32) -> Self {
-            self.clear_src_b = value;
-            self
-        }
-
-        pub const fn clear_src_a(mut self, value: u32) -> Self {
-            self.clear_src_a = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::ZEROSRC;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.negative_inf_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.negative_inf_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.negative_inf_src_a);
-            let f = def.fields()[1];
-            if !f.fits(self.single_bank_matrix_unit) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.single_bank_matrix_unit,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.single_bank_matrix_unit);
-            let f = def.fields()[2];
-            if !f.fits(self.both_banks) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.both_banks,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.both_banks);
-            let f = def.fields()[3];
-            if !f.fits(self.clear_src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.clear_src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.clear_src_b);
-            let f = def.fields()[4];
-            if !f.fits(self.clear_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.clear_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.clear_src_a);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`ZEROSRC`."]
+        Zerosrc,
+        defs::ZEROSRC,
+        [
+            negative_inf_src_a,
+            single_bank_matrix_unit,
+            both_banks,
+            clear_src_b,
+            clear_src_a
+        ]
+    );
 
     /// `TRNSPSRCB`.
     pub const fn trnspsrcb() -> Result<Instruction, EncodeError> {
-        let def = &defs::TRNSPSRCB;
-        let word = def.skeleton();
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::TRNSPSRCB, &[])
     }
 
     /// `SHIFTXA`.
     pub const fn shiftxa(direction: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SHIFTXA;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(direction) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: direction,
-                width: f.width(),
-            });
-        }
-        word |= f.place(direction);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SHIFTXA, &[direction])
     }
 
     /// `CLREXPHIST`.
     pub const fn clrexphist() -> Result<Instruction, EncodeError> {
-        let def = &defs::CLREXPHIST;
-        let word = def.skeleton();
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::CLREXPHIST, &[])
     }
 
     /// `CLEARDVALID`.
@@ -6528,623 +3814,48 @@ pub mod encode {
         keep_reading_same_src: u32,
         reset: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::CLEARDVALID;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(flip_src_b) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: flip_src_b,
-                width: f.width(),
-            });
-        }
-        word |= f.place(flip_src_b);
-        let f = def.fields()[1];
-        if !f.fits(flip_src_a) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: flip_src_a,
-                width: f.width(),
-            });
-        }
-        word |= f.place(flip_src_a);
-        let f = def.fields()[2];
-        if !f.fits(keep_reading_same_src) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: keep_reading_same_src,
-                width: f.width(),
-            });
-        }
-        word |= f.place(keep_reading_same_src);
-        let f = def.fields()[3];
-        if !f.fits(reset) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: reset,
-                width: f.width(),
-            });
-        }
-        word |= f.place(reset);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::CLEARDVALID,
+            &[flip_src_b, flip_src_a, keep_reading_same_src, reset],
+        )
     }
 
-    /// `SETRWC`, built field by field.
-    ///
-    /// 13 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Setrwc::ZERO.flip_src_b(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Setrwc {
-        flip_src_b: u32,
-        flip_src_a: u32,
-        dst_cto_cr: u32,
-        dst_cr: u32,
-        src_b_cr: u32,
-        src_a_cr: u32,
-        dst_val: u32,
-        src_b_val: u32,
-        src_a_val: u32,
-        fidelity: u32,
-        dst: u32,
-        src_b: u32,
-        src_a: u32,
-    }
+    builder!(
+        #[doc = "`SETRWC`."]
+        Setrwc,
+        defs::SETRWC,
+        [
+            flip_src_b, flip_src_a, dst_cto_cr, dst_cr, src_b_cr, src_a_cr, dst_val, src_b_val,
+            src_a_val, fidelity, dst, src_b, src_a
+        ]
+    );
 
-    impl Setrwc {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Setrwc {
-            flip_src_b: 0,
-            flip_src_a: 0,
-            dst_cto_cr: 0,
-            dst_cr: 0,
-            src_b_cr: 0,
-            src_a_cr: 0,
-            dst_val: 0,
-            src_b_val: 0,
-            src_a_val: 0,
-            fidelity: 0,
-            dst: 0,
-            src_b: 0,
-            src_a: 0,
-        };
+    builder!(
+        #[doc = "`INCRWC`."]
+        Incrwc,
+        defs::INCRWC,
+        [dst_cr, src_b_cr, src_a_cr, dst_inc, src_b_inc, src_a_inc]
+    );
 
-        pub const fn flip_src_b(mut self, value: u32) -> Self {
-            self.flip_src_b = value;
-            self
-        }
+    builder!(
+        #[doc = "`LOADIND`."]
+        Loadind,
+        defs::LOADIND,
+        [
+            size,
+            offset_half_reg,
+            offset_increment,
+            result_reg,
+            addr_reg
+        ]
+    );
 
-        pub const fn flip_src_a(mut self, value: u32) -> Self {
-            self.flip_src_a = value;
-            self
-        }
-
-        pub const fn dst_cto_cr(mut self, value: u32) -> Self {
-            self.dst_cto_cr = value;
-            self
-        }
-
-        pub const fn dst_cr(mut self, value: u32) -> Self {
-            self.dst_cr = value;
-            self
-        }
-
-        pub const fn src_b_cr(mut self, value: u32) -> Self {
-            self.src_b_cr = value;
-            self
-        }
-
-        pub const fn src_a_cr(mut self, value: u32) -> Self {
-            self.src_a_cr = value;
-            self
-        }
-
-        pub const fn dst_val(mut self, value: u32) -> Self {
-            self.dst_val = value;
-            self
-        }
-
-        pub const fn src_b_val(mut self, value: u32) -> Self {
-            self.src_b_val = value;
-            self
-        }
-
-        pub const fn src_a_val(mut self, value: u32) -> Self {
-            self.src_a_val = value;
-            self
-        }
-
-        pub const fn fidelity(mut self, value: u32) -> Self {
-            self.fidelity = value;
-            self
-        }
-
-        pub const fn dst(mut self, value: u32) -> Self {
-            self.dst = value;
-            self
-        }
-
-        pub const fn src_b(mut self, value: u32) -> Self {
-            self.src_b = value;
-            self
-        }
-
-        pub const fn src_a(mut self, value: u32) -> Self {
-            self.src_a = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SETRWC;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.flip_src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_b);
-            let f = def.fields()[1];
-            if !f.fits(self.flip_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_a);
-            let f = def.fields()[2];
-            if !f.fits(self.dst_cto_cr) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_cto_cr,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_cto_cr);
-            let f = def.fields()[3];
-            if !f.fits(self.dst_cr) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_cr,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_cr);
-            let f = def.fields()[4];
-            if !f.fits(self.src_b_cr) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_b_cr,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_b_cr);
-            let f = def.fields()[5];
-            if !f.fits(self.src_a_cr) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_a_cr,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_a_cr);
-            let f = def.fields()[6];
-            if !f.fits(self.dst_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_val);
-            let f = def.fields()[7];
-            if !f.fits(self.src_b_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_b_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_b_val);
-            let f = def.fields()[8];
-            if !f.fits(self.src_a_val) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_a_val,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_a_val);
-            let f = def.fields()[9];
-            if !f.fits(self.fidelity) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.fidelity,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.fidelity);
-            let f = def.fields()[10];
-            if !f.fits(self.dst) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst);
-            let f = def.fields()[11];
-            if !f.fits(self.src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_b);
-            let f = def.fields()[12];
-            if !f.fits(self.src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_a);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `INCRWC`, built field by field.
-    ///
-    /// 6 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Incrwc::ZERO.dst_cr(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Incrwc {
-        dst_cr: u32,
-        src_b_cr: u32,
-        src_a_cr: u32,
-        dst_inc: u32,
-        src_b_inc: u32,
-        src_a_inc: u32,
-    }
-
-    impl Incrwc {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Incrwc {
-            dst_cr: 0,
-            src_b_cr: 0,
-            src_a_cr: 0,
-            dst_inc: 0,
-            src_b_inc: 0,
-            src_a_inc: 0,
-        };
-
-        pub const fn dst_cr(mut self, value: u32) -> Self {
-            self.dst_cr = value;
-            self
-        }
-
-        pub const fn src_b_cr(mut self, value: u32) -> Self {
-            self.src_b_cr = value;
-            self
-        }
-
-        pub const fn src_a_cr(mut self, value: u32) -> Self {
-            self.src_a_cr = value;
-            self
-        }
-
-        pub const fn dst_inc(mut self, value: u32) -> Self {
-            self.dst_inc = value;
-            self
-        }
-
-        pub const fn src_b_inc(mut self, value: u32) -> Self {
-            self.src_b_inc = value;
-            self
-        }
-
-        pub const fn src_a_inc(mut self, value: u32) -> Self {
-            self.src_a_inc = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::INCRWC;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.dst_cr) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_cr,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_cr);
-            let f = def.fields()[1];
-            if !f.fits(self.src_b_cr) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_b_cr,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_b_cr);
-            let f = def.fields()[2];
-            if !f.fits(self.src_a_cr) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_a_cr,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_a_cr);
-            let f = def.fields()[3];
-            if !f.fits(self.dst_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_inc);
-            let f = def.fields()[4];
-            if !f.fits(self.src_b_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_b_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_b_inc);
-            let f = def.fields()[5];
-            if !f.fits(self.src_a_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_a_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_a_inc);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `LOADIND`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Loadind::ZERO.size(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Loadind {
-        size: u32,
-        offset_half_reg: u32,
-        offset_increment: u32,
-        result_reg: u32,
-        addr_reg: u32,
-    }
-
-    impl Loadind {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Loadind {
-            size: 0,
-            offset_half_reg: 0,
-            offset_increment: 0,
-            result_reg: 0,
-            addr_reg: 0,
-        };
-
-        pub const fn size(mut self, value: u32) -> Self {
-            self.size = value;
-            self
-        }
-
-        pub const fn offset_half_reg(mut self, value: u32) -> Self {
-            self.offset_half_reg = value;
-            self
-        }
-
-        pub const fn offset_increment(mut self, value: u32) -> Self {
-            self.offset_increment = value;
-            self
-        }
-
-        pub const fn result_reg(mut self, value: u32) -> Self {
-            self.result_reg = value;
-            self
-        }
-
-        pub const fn addr_reg(mut self, value: u32) -> Self {
-            self.addr_reg = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::LOADIND;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.size) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.size,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.size);
-            let f = def.fields()[1];
-            if !f.fits(self.offset_half_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.offset_half_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.offset_half_reg);
-            let f = def.fields()[2];
-            if !f.fits(self.offset_increment) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.offset_increment,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.offset_increment);
-            let f = def.fields()[3];
-            if !f.fits(self.result_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.result_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.result_reg);
-            let f = def.fields()[4];
-            if !f.fits(self.addr_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_reg);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `STOREIND_L1`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `StoreindL1::ZERO.size(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct StoreindL1 {
-        size: u32,
-        offset_half_reg: u32,
-        offset_increment: u32,
-        data_reg: u32,
-        addr_reg: u32,
-    }
-
-    impl StoreindL1 {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = StoreindL1 {
-            size: 0,
-            offset_half_reg: 0,
-            offset_increment: 0,
-            data_reg: 0,
-            addr_reg: 0,
-        };
-
-        pub const fn size(mut self, value: u32) -> Self {
-            self.size = value;
-            self
-        }
-
-        pub const fn offset_half_reg(mut self, value: u32) -> Self {
-            self.offset_half_reg = value;
-            self
-        }
-
-        pub const fn offset_increment(mut self, value: u32) -> Self {
-            self.offset_increment = value;
-            self
-        }
-
-        pub const fn data_reg(mut self, value: u32) -> Self {
-            self.data_reg = value;
-            self
-        }
-
-        pub const fn addr_reg(mut self, value: u32) -> Self {
-            self.addr_reg = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::STOREIND_L1;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.size) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.size,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.size);
-            let f = def.fields()[1];
-            if !f.fits(self.offset_half_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.offset_half_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.offset_half_reg);
-            let f = def.fields()[2];
-            if !f.fits(self.offset_increment) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.offset_increment,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.offset_increment);
-            let f = def.fields()[3];
-            if !f.fits(self.data_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.data_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.data_reg);
-            let f = def.fields()[4];
-            if !f.fits(self.addr_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_reg);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`STOREIND_L1`."]
+        StoreindL1,
+        defs::STOREIND_L1,
+        [size, offset_half_reg, offset_increment, data_reg, addr_reg]
+    );
 
     /// `STOREIND_MMIO`.
     pub const fn storeind_mmio(
@@ -7153,232 +3864,43 @@ pub mod encode {
         data_reg: u32,
         addr_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::STOREIND_MMIO;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(offset_half_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: offset_half_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(offset_half_reg);
-        let f = def.fields()[1];
-        if !f.fits(offset_increment) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: offset_increment,
-                width: f.width(),
-            });
-        }
-        word |= f.place(offset_increment);
-        let f = def.fields()[2];
-        if !f.fits(data_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: data_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(data_reg);
-        let f = def.fields()[3];
-        if !f.fits(addr_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::STOREIND_MMIO,
+            &[offset_half_reg, offset_increment, data_reg, addr_reg],
+        )
     }
 
-    /// `STOREIND_Src`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `StoreindSrc::ZERO.store_to_src_b(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct StoreindSrc {
-        store_to_src_b: u32,
-        offset_half_reg: u32,
-        offset_increment: u32,
-        data_reg: u32,
-        addr_reg: u32,
-    }
-
-    impl StoreindSrc {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = StoreindSrc {
-            store_to_src_b: 0,
-            offset_half_reg: 0,
-            offset_increment: 0,
-            data_reg: 0,
-            addr_reg: 0,
-        };
-
-        pub const fn store_to_src_b(mut self, value: u32) -> Self {
-            self.store_to_src_b = value;
-            self
-        }
-
-        pub const fn offset_half_reg(mut self, value: u32) -> Self {
-            self.offset_half_reg = value;
-            self
-        }
-
-        pub const fn offset_increment(mut self, value: u32) -> Self {
-            self.offset_increment = value;
-            self
-        }
-
-        pub const fn data_reg(mut self, value: u32) -> Self {
-            self.data_reg = value;
-            self
-        }
-
-        pub const fn addr_reg(mut self, value: u32) -> Self {
-            self.addr_reg = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::STOREIND_Src;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.store_to_src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.store_to_src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.store_to_src_b);
-            let f = def.fields()[1];
-            if !f.fits(self.offset_half_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.offset_half_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.offset_half_reg);
-            let f = def.fields()[2];
-            if !f.fits(self.offset_increment) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.offset_increment,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.offset_increment);
-            let f = def.fields()[3];
-            if !f.fits(self.data_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.data_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.data_reg);
-            let f = def.fields()[4];
-            if !f.fits(self.addr_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_reg);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`STOREIND_Src`."]
+        StoreindSrc,
+        defs::STOREIND_Src,
+        [
+            store_to_src_b,
+            offset_half_reg,
+            offset_increment,
+            data_reg,
+            addr_reg
+        ]
+    );
 
     /// `LOADREG`.
     pub const fn loadreg(result_reg: u32, addr_lo: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::LOADREG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[1];
-        if !f.fits(addr_lo) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_lo,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_lo);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::LOADREG, &[result_reg, addr_lo])
     }
 
     /// `STOREREG`.
     pub const fn storereg(data_reg: u32, addr_lo: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::STOREREG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(data_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: data_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(data_reg);
-        let f = def.fields()[1];
-        if !f.fits(addr_lo) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_lo,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_lo);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::STOREREG, &[data_reg, addr_lo])
     }
 
     /// `FLUSHDMA`.
     pub const fn flushdma(condition_mask: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::FLUSHDMA;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(condition_mask) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: condition_mask,
-                width: f.width(),
-            });
-        }
-        word |= f.place(condition_mask);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::FLUSHDMA, &[condition_mask])
     }
 
     /// `DMANOP`.
     pub const fn dmanop() -> Result<Instruction, EncodeError> {
-        let def = &defs::DMANOP;
-        let word = def.skeleton();
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::DMANOP, &[])
     }
 
     /// `ADDDMAREG`.
@@ -7387,39 +3909,7 @@ pub mod encode {
         right_reg: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::ADDDMAREG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[1];
-        if !f.fits(right_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_reg);
-        let f = def.fields()[2];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::ADDDMAREG, &[result_reg, right_reg, left_reg])
     }
 
     /// `ADDDMAREGi`.
@@ -7428,39 +3918,7 @@ pub mod encode {
         right_imm6: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::ADDDMAREGi;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[1];
-        if !f.fits(right_imm6) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_imm6,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_imm6);
-        let f = def.fields()[2];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::ADDDMAREGi, &[result_reg, right_imm6, left_reg])
     }
 
     /// `SUBDMAREG`.
@@ -7469,39 +3927,7 @@ pub mod encode {
         right_reg: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SUBDMAREG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[1];
-        if !f.fits(right_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_reg);
-        let f = def.fields()[2];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SUBDMAREG, &[result_reg, right_reg, left_reg])
     }
 
     /// `SUBDMAREGi`.
@@ -7510,39 +3936,7 @@ pub mod encode {
         right_imm6: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SUBDMAREGi;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[1];
-        if !f.fits(right_imm6) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_imm6,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_imm6);
-        let f = def.fields()[2];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SUBDMAREGi, &[result_reg, right_imm6, left_reg])
     }
 
     /// `MULDMAREG`.
@@ -7551,39 +3945,7 @@ pub mod encode {
         right_reg: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::MULDMAREG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[1];
-        if !f.fits(right_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_reg);
-        let f = def.fields()[2];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::MULDMAREG, &[result_reg, right_reg, left_reg])
     }
 
     /// `MULDMAREGi`.
@@ -7592,39 +3954,7 @@ pub mod encode {
         right_imm6: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::MULDMAREGi;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[1];
-        if !f.fits(right_imm6) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_imm6,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_imm6);
-        let f = def.fields()[2];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::MULDMAREGi, &[result_reg, right_imm6, left_reg])
     }
 
     /// `BITWOPDMAREG`.
@@ -7634,49 +3964,10 @@ pub mod encode {
         right_reg: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::BITWOPDMAREG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mode) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mode,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mode);
-        let f = def.fields()[1];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[2];
-        if !f.fits(right_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_reg);
-        let f = def.fields()[3];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::BITWOPDMAREG,
+            &[mode, result_reg, right_reg, left_reg],
+        )
     }
 
     /// `BITWOPDMAREGi`.
@@ -7686,49 +3977,10 @@ pub mod encode {
         right_imm6: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::BITWOPDMAREGi;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mode) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mode,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mode);
-        let f = def.fields()[1];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[2];
-        if !f.fits(right_imm6) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_imm6,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_imm6);
-        let f = def.fields()[3];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::BITWOPDMAREGi,
+            &[mode, result_reg, right_imm6, left_reg],
+        )
     }
 
     /// `SHIFTDMAREG`.
@@ -7738,49 +3990,7 @@ pub mod encode {
         right_reg: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SHIFTDMAREG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mode) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mode,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mode);
-        let f = def.fields()[1];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[2];
-        if !f.fits(right_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_reg);
-        let f = def.fields()[3];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SHIFTDMAREG, &[mode, result_reg, right_reg, left_reg])
     }
 
     /// `SHIFTDMAREGi`.
@@ -7790,49 +4000,10 @@ pub mod encode {
         right_imm5: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SHIFTDMAREGi;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mode) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mode,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mode);
-        let f = def.fields()[1];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[2];
-        if !f.fits(right_imm5) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_imm5,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_imm5);
-        let f = def.fields()[3];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::SHIFTDMAREGi,
+            &[mode, result_reg, right_imm5, left_reg],
+        )
     }
 
     /// `CMPDMAREG`.
@@ -7842,49 +4013,7 @@ pub mod encode {
         right_reg: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::CMPDMAREG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mode) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mode,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mode);
-        let f = def.fields()[1];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[2];
-        if !f.fits(right_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_reg);
-        let f = def.fields()[3];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::CMPDMAREG, &[mode, result_reg, right_reg, left_reg])
     }
 
     /// `CMPDMAREGi`.
@@ -7894,83 +4023,17 @@ pub mod encode {
         right_imm6: u32,
         left_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::CMPDMAREGi;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mode) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mode,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mode);
-        let f = def.fields()[1];
-        if !f.fits(result_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: result_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(result_reg);
-        let f = def.fields()[2];
-        if !f.fits(right_imm6) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: right_imm6,
-                width: f.width(),
-            });
-        }
-        word |= f.place(right_imm6);
-        let f = def.fields()[3];
-        if !f.fits(left_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: left_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(left_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::CMPDMAREGi, &[mode, result_reg, right_imm6, left_reg])
     }
 
     /// `ATGETM`.
     pub const fn atgetm(index: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::ATGETM;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(index) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: index,
-                width: f.width(),
-            });
-        }
-        word |= f.place(index);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::ATGETM, &[index])
     }
 
     /// `ATRELM`.
     pub const fn atrelm(index: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::ATRELM;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(index) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: index,
-                width: f.width(),
-            });
-        }
-        word |= f.place(index);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::ATRELM, &[index])
     }
 
     /// `ATINCGET`.
@@ -7980,172 +4043,15 @@ pub mod encode {
         in_out_reg: u32,
         addr_reg: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::ATINCGET;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(int_width) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: int_width,
-                width: f.width(),
-            });
-        }
-        word |= f.place(int_width);
-        let f = def.fields()[1];
-        if !f.fits(ofs) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: ofs,
-                width: f.width(),
-            });
-        }
-        word |= f.place(ofs);
-        let f = def.fields()[2];
-        if !f.fits(in_out_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: in_out_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(in_out_reg);
-        let f = def.fields()[3];
-        if !f.fits(addr_reg) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_reg,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_reg);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::ATINCGET, &[int_width, ofs, in_out_reg, addr_reg])
     }
 
-    /// `ATINCGETPTR`, built field by field.
-    ///
-    /// 6 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Atincgetptr::ZERO.no_incr(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Atincgetptr {
-        no_incr: u32,
-        incr_log2: u32,
-        int_width: u32,
-        ofs: u32,
-        result_reg: u32,
-        addr_reg: u32,
-    }
-
-    impl Atincgetptr {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Atincgetptr {
-            no_incr: 0,
-            incr_log2: 0,
-            int_width: 0,
-            ofs: 0,
-            result_reg: 0,
-            addr_reg: 0,
-        };
-
-        pub const fn no_incr(mut self, value: u32) -> Self {
-            self.no_incr = value;
-            self
-        }
-
-        pub const fn incr_log2(mut self, value: u32) -> Self {
-            self.incr_log2 = value;
-            self
-        }
-
-        pub const fn int_width(mut self, value: u32) -> Self {
-            self.int_width = value;
-            self
-        }
-
-        pub const fn ofs(mut self, value: u32) -> Self {
-            self.ofs = value;
-            self
-        }
-
-        pub const fn result_reg(mut self, value: u32) -> Self {
-            self.result_reg = value;
-            self
-        }
-
-        pub const fn addr_reg(mut self, value: u32) -> Self {
-            self.addr_reg = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::ATINCGETPTR;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.no_incr) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.no_incr,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.no_incr);
-            let f = def.fields()[1];
-            if !f.fits(self.incr_log2) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.incr_log2,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.incr_log2);
-            let f = def.fields()[2];
-            if !f.fits(self.int_width) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.int_width,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.int_width);
-            let f = def.fields()[3];
-            if !f.fits(self.ofs) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.ofs,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.ofs);
-            let f = def.fields()[4];
-            if !f.fits(self.result_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.result_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.result_reg);
-            let f = def.fields()[5];
-            if !f.fits(self.addr_reg) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_reg,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_reg);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`ATINCGETPTR`."]
+        Atincgetptr,
+        defs::ATINCGETPTR,
+        [no_incr, incr_log2, int_width, ofs, result_reg, addr_reg]
+    );
 
     /// `SFPLOAD_BH`.
     pub const fn sfpload(
@@ -8154,172 +4060,15 @@ pub mod encode {
         addr_mod: u32,
         imm10: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPLOAD;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[1];
-        if !f.fits(mod0) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod0,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod0);
-        let f = def.fields()[2];
-        if !f.fits(addr_mod) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_mod,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_mod);
-        let f = def.fields()[3];
-        if !f.fits(imm10) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm10,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm10);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPLOAD, &[vd, mod0, addr_mod, imm10])
     }
 
-    /// `SFPLOADMACRO_BH`, built field by field.
-    ///
-    /// 6 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Sfploadmacro::ZERO.macro_index(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Sfploadmacro {
-        macro_index: u32,
-        vd_lo: u32,
-        mod0: u32,
-        addr_mod: u32,
-        imm9: u32,
-        vd_hi: u32,
-    }
-
-    impl Sfploadmacro {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Sfploadmacro {
-            macro_index: 0,
-            vd_lo: 0,
-            mod0: 0,
-            addr_mod: 0,
-            imm9: 0,
-            vd_hi: 0,
-        };
-
-        pub const fn macro_index(mut self, value: u32) -> Self {
-            self.macro_index = value;
-            self
-        }
-
-        pub const fn vd_lo(mut self, value: u32) -> Self {
-            self.vd_lo = value;
-            self
-        }
-
-        pub const fn mod0(mut self, value: u32) -> Self {
-            self.mod0 = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn imm9(mut self, value: u32) -> Self {
-            self.imm9 = value;
-            self
-        }
-
-        pub const fn vd_hi(mut self, value: u32) -> Self {
-            self.vd_hi = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SFPLOADMACRO;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.macro_index) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.macro_index,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.macro_index);
-            let f = def.fields()[1];
-            if !f.fits(self.vd_lo) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vd_lo,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vd_lo);
-            let f = def.fields()[2];
-            if !f.fits(self.mod0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.mod0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.mod0);
-            let f = def.fields()[3];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[4];
-            if !f.fits(self.imm9) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.imm9,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.imm9);
-            let f = def.fields()[5];
-            if !f.fits(self.vd_hi) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vd_hi,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vd_hi);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`SFPLOADMACRO_BH`."]
+        Sfploadmacro,
+        defs::SFPLOADMACRO,
+        [macro_index, vd_lo, mod0, addr_mod, imm9, vd_hi]
+    );
 
     /// `SFPSTORE_BH`.
     pub const fn sfpstore(
@@ -8328,140 +4077,22 @@ pub mod encode {
         addr_mod: u32,
         imm10: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPSTORE;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[1];
-        if !f.fits(mod0) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod0,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod0);
-        let f = def.fields()[2];
-        if !f.fits(addr_mod) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_mod,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_mod);
-        let f = def.fields()[3];
-        if !f.fits(imm10) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm10,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm10);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPSTORE, &[vd, mod0, addr_mod, imm10])
     }
 
     /// `MOP`.
     pub const fn mop(template: u32, count1: u32, mask_lo: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::MOP;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(template) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: template,
-                width: f.width(),
-            });
-        }
-        word |= f.place(template);
-        let f = def.fields()[1];
-        if !f.fits(count1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: count1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(count1);
-        let f = def.fields()[2];
-        if !f.fits(mask_lo) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mask_lo,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mask_lo);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::MOP, &[template, count1, mask_lo])
     }
 
     /// `MOP_CFG`.
     pub const fn mop_cfg(mask_hi: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::MOP_CFG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mask_hi) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mask_hi,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mask_hi);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::MOP_CFG, &[mask_hi])
     }
 
     /// `SFPLOADI`.
     pub const fn sfploadi(vd: u32, mod0: u32, imm16: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPLOADI;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[1];
-        if !f.fits(mod0) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod0,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod0);
-        let f = def.fields()[2];
-        if !f.fits(imm16) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm16,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm16);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPLOADI, &[vd, mod0, imm16])
     }
 
     /// `SFPIADD`.
@@ -8471,539 +4102,53 @@ pub mod encode {
         vd: u32,
         mod1: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPIADD;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm12) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm12,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm12);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPIADD, &[imm12, vc, vd, mod1])
     }
 
     /// `SFPSWAP`.
     pub const fn sfpswap(vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPSWAP;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPSWAP, &[vc, vd, mod1])
     }
 
     /// `SFPCONFIG`.
     pub const fn sfpconfig(imm16: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPCONFIG;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm16) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm16,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm16);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPCONFIG, &[imm16, vd, mod1])
     }
 
-    /// `SFPMAD`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Sfpmad::ZERO.va(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Sfpmad {
-        va: u32,
-        vb: u32,
-        vc: u32,
-        vd: u32,
-        mod1: u32,
-    }
+    builder!(
+        #[doc = "`SFPMAD`."]
+        Sfpmad,
+        defs::SFPMAD,
+        [va, vb, vc, vd, mod1]
+    );
 
-    impl Sfpmad {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Sfpmad {
-            va: 0,
-            vb: 0,
-            vc: 0,
-            vd: 0,
-            mod1: 0,
-        };
+    builder!(
+        #[doc = "`SFPADD`."]
+        Sfpadd,
+        defs::SFPADD,
+        [va, vb, vc, vd, mod1]
+    );
 
-        pub const fn va(mut self, value: u32) -> Self {
-            self.va = value;
-            self
-        }
-
-        pub const fn vb(mut self, value: u32) -> Self {
-            self.vb = value;
-            self
-        }
-
-        pub const fn vc(mut self, value: u32) -> Self {
-            self.vc = value;
-            self
-        }
-
-        pub const fn vd(mut self, value: u32) -> Self {
-            self.vd = value;
-            self
-        }
-
-        pub const fn mod1(mut self, value: u32) -> Self {
-            self.mod1 = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SFPMAD;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.va) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.va,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.va);
-            let f = def.fields()[1];
-            if !f.fits(self.vb) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vb,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vb);
-            let f = def.fields()[2];
-            if !f.fits(self.vc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vc);
-            let f = def.fields()[3];
-            if !f.fits(self.vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vd);
-            let f = def.fields()[4];
-            if !f.fits(self.mod1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.mod1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.mod1);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `SFPADD`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Sfpadd::ZERO.va(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Sfpadd {
-        va: u32,
-        vb: u32,
-        vc: u32,
-        vd: u32,
-        mod1: u32,
-    }
-
-    impl Sfpadd {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Sfpadd {
-            va: 0,
-            vb: 0,
-            vc: 0,
-            vd: 0,
-            mod1: 0,
-        };
-
-        pub const fn va(mut self, value: u32) -> Self {
-            self.va = value;
-            self
-        }
-
-        pub const fn vb(mut self, value: u32) -> Self {
-            self.vb = value;
-            self
-        }
-
-        pub const fn vc(mut self, value: u32) -> Self {
-            self.vc = value;
-            self
-        }
-
-        pub const fn vd(mut self, value: u32) -> Self {
-            self.vd = value;
-            self
-        }
-
-        pub const fn mod1(mut self, value: u32) -> Self {
-            self.mod1 = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SFPADD;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.va) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.va,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.va);
-            let f = def.fields()[1];
-            if !f.fits(self.vb) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vb,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vb);
-            let f = def.fields()[2];
-            if !f.fits(self.vc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vc);
-            let f = def.fields()[3];
-            if !f.fits(self.vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vd);
-            let f = def.fields()[4];
-            if !f.fits(self.mod1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.mod1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.mod1);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `SFPMUL`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Sfpmul::ZERO.va(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Sfpmul {
-        va: u32,
-        vb: u32,
-        vc: u32,
-        vd: u32,
-        mod1: u32,
-    }
-
-    impl Sfpmul {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Sfpmul {
-            va: 0,
-            vb: 0,
-            vc: 0,
-            vd: 0,
-            mod1: 0,
-        };
-
-        pub const fn va(mut self, value: u32) -> Self {
-            self.va = value;
-            self
-        }
-
-        pub const fn vb(mut self, value: u32) -> Self {
-            self.vb = value;
-            self
-        }
-
-        pub const fn vc(mut self, value: u32) -> Self {
-            self.vc = value;
-            self
-        }
-
-        pub const fn vd(mut self, value: u32) -> Self {
-            self.vd = value;
-            self
-        }
-
-        pub const fn mod1(mut self, value: u32) -> Self {
-            self.mod1 = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SFPMUL;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.va) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.va,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.va);
-            let f = def.fields()[1];
-            if !f.fits(self.vb) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vb,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vb);
-            let f = def.fields()[2];
-            if !f.fits(self.vc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vc);
-            let f = def.fields()[3];
-            if !f.fits(self.vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vd);
-            let f = def.fields()[4];
-            if !f.fits(self.mod1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.mod1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.mod1);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`SFPMUL`."]
+        Sfpmul,
+        defs::SFPMUL,
+        [va, vb, vc, vd, mod1]
+    );
 
     /// `SFPLUT`.
     pub const fn sfplut(vd: u32, mod0: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPLUT;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[1];
-        if !f.fits(mod0) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod0,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod0);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPLUT, &[vd, mod0])
     }
 
     /// `SFPMULI`.
     pub const fn sfpmuli(imm16: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPMULI;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm16) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm16,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm16);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPMULI, &[imm16, vd, mod1])
     }
 
     /// `SFPADDI`.
     pub const fn sfpaddi(imm16: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPADDI;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm16) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm16,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm16);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPADDI, &[imm16, vd, mod1])
     }
 
     /// `SFPDIVP2`.
@@ -9013,123 +4158,17 @@ pub mod encode {
         vd: u32,
         mod1: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPDIVP2;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm8) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm8,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm8);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPDIVP2, &[imm8, vc, vd, mod1])
     }
 
     /// `SFPEXEXP`.
     pub const fn sfpexexp(vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPEXEXP;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPEXEXP, &[vc, vd, mod1])
     }
 
     /// `SFPEXMAN`.
     pub const fn sfpexman(vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPEXMAN;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPEXMAN, &[vc, vd, mod1])
     }
 
     /// `SFPSHFT`.
@@ -9139,49 +4178,7 @@ pub mod encode {
         vd: u32,
         mod1: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPSHFT;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm12) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm12,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm12);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPSHFT, &[imm12, vc, vd, mod1])
     }
 
     /// `SFPSETCC`.
@@ -9191,281 +4188,37 @@ pub mod encode {
         vd: u32,
         mod1: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPSETCC;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm1);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPSETCC, &[imm1, vc, vd, mod1])
     }
 
     /// `SFPMOV`.
     pub const fn sfpmov(vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPMOV;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPMOV, &[vc, vd, mod1])
     }
 
     /// `SFPABS`.
     pub const fn sfpabs(vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPABS;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPABS, &[vc, vd, mod1])
     }
 
     /// `SFPAND_BH`.
     pub const fn sfpand(vb: u32, vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPAND;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vb) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vb,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vb);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPAND, &[vb, vc, vd, mod1])
     }
 
     /// `SFPOR_BH`.
     pub const fn sfpor(vb: u32, vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPOR;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vb) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vb,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vb);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPOR, &[vb, vc, vd, mod1])
     }
 
     /// `SFPNOT`.
     pub const fn sfpnot(vc: u32, vd: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPNOT;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPNOT, &[vc, vd])
     }
 
     /// `SFPLZ`.
     pub const fn sfplz(vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPLZ;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPLZ, &[vc, vd, mod1])
     }
 
     /// `SFPSETEXP`.
@@ -9475,49 +4228,7 @@ pub mod encode {
         vd: u32,
         mod1: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPSETEXP;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm8) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm8,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm8);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPSETEXP, &[imm8, vc, vd, mod1])
     }
 
     /// `SFPSETMAN`.
@@ -9527,103 +4238,17 @@ pub mod encode {
         vd: u32,
         mod1: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPSETMAN;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm12) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm12,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm12);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPSETMAN, &[imm12, vc, vd, mod1])
     }
 
     /// `SFPPUSHC_BH`.
     pub const fn sfppushc(vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPPUSHC;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[1];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPPUSHC, &[vd, mod1])
     }
 
     /// `SFPPOPC`.
     pub const fn sfppopc(vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPPOPC;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[1];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPPOPC, &[vd, mod1])
     }
 
     /// `SFPSETSGN`.
@@ -9633,615 +4258,69 @@ pub mod encode {
         vd: u32,
         mod1: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPSETSGN;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm1);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPSETSGN, &[imm1, vc, vd, mod1])
     }
 
     /// `SFPENCC`.
     pub const fn sfpencc(imm2: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPENCC;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(imm2) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm2,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm2);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPENCC, &[imm2, vd, mod1])
     }
 
     /// `SFPCOMPC`.
     pub const fn sfpcompc(vd: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPCOMPC;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPCOMPC, &[vd])
     }
 
     /// `SFPTRANSP`.
     pub const fn sfptransp(vd: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPTRANSP;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPTRANSP, &[vd])
     }
 
     /// `SFPXOR`.
     pub const fn sfpxor(vc: u32, vd: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPXOR;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPXOR, &[vc, vd])
     }
 
-    /// `SFPSTOCHRND_BH`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Sfpstochrnd::ZERO.rounding_mode(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Sfpstochrnd {
-        rounding_mode: u32,
-        vb: u32,
-        vc: u32,
-        vd: u32,
-        mod1: u32,
-    }
+    builder!(
+        #[doc = "`SFPSTOCHRND_BH`."]
+        Sfpstochrnd,
+        defs::SFPSTOCHRND,
+        [rounding_mode, vb, vc, vd, mod1]
+    );
 
-    impl Sfpstochrnd {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Sfpstochrnd {
-            rounding_mode: 0,
-            vb: 0,
-            vc: 0,
-            vd: 0,
-            mod1: 0,
-        };
-
-        pub const fn rounding_mode(mut self, value: u32) -> Self {
-            self.rounding_mode = value;
-            self
-        }
-
-        pub const fn vb(mut self, value: u32) -> Self {
-            self.vb = value;
-            self
-        }
-
-        pub const fn vc(mut self, value: u32) -> Self {
-            self.vc = value;
-            self
-        }
-
-        pub const fn vd(mut self, value: u32) -> Self {
-            self.vd = value;
-            self
-        }
-
-        pub const fn mod1(mut self, value: u32) -> Self {
-            self.mod1 = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SFPSTOCHRND;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.rounding_mode) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.rounding_mode,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.rounding_mode);
-            let f = def.fields()[1];
-            if !f.fits(self.vb) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vb,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vb);
-            let f = def.fields()[2];
-            if !f.fits(self.vc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vc);
-            let f = def.fields()[3];
-            if !f.fits(self.vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vd);
-            let f = def.fields()[4];
-            if !f.fits(self.mod1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.mod1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.mod1);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `SFPSTOCHRNDi_BH`, built field by field.
-    ///
-    /// 7 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `SfpstochrnDi::ZERO.rounding_mode(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct SfpstochrnDi {
-        rounding_mode: u32,
-        imm5: u32,
-        vb: u32,
-        vc: u32,
-        vd: u32,
-        use_imm5: u32,
-        mod1: u32,
-    }
-
-    impl SfpstochrnDi {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = SfpstochrnDi {
-            rounding_mode: 0,
-            imm5: 0,
-            vb: 0,
-            vc: 0,
-            vd: 0,
-            use_imm5: 0,
-            mod1: 0,
-        };
-
-        pub const fn rounding_mode(mut self, value: u32) -> Self {
-            self.rounding_mode = value;
-            self
-        }
-
-        pub const fn imm5(mut self, value: u32) -> Self {
-            self.imm5 = value;
-            self
-        }
-
-        pub const fn vb(mut self, value: u32) -> Self {
-            self.vb = value;
-            self
-        }
-
-        pub const fn vc(mut self, value: u32) -> Self {
-            self.vc = value;
-            self
-        }
-
-        pub const fn vd(mut self, value: u32) -> Self {
-            self.vd = value;
-            self
-        }
-
-        pub const fn use_imm5(mut self, value: u32) -> Self {
-            self.use_imm5 = value;
-            self
-        }
-
-        pub const fn mod1(mut self, value: u32) -> Self {
-            self.mod1 = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SFPSTOCHRNDi;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.rounding_mode) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.rounding_mode,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.rounding_mode);
-            let f = def.fields()[1];
-            if !f.fits(self.imm5) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.imm5,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.imm5);
-            let f = def.fields()[2];
-            if !f.fits(self.vb) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vb,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vb);
-            let f = def.fields()[3];
-            if !f.fits(self.vc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vc);
-            let f = def.fields()[4];
-            if !f.fits(self.vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vd);
-            let f = def.fields()[5];
-            if !f.fits(self.use_imm5) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.use_imm5,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.use_imm5);
-            let f = def.fields()[6];
-            if !f.fits(self.mod1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.mod1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.mod1);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`SFPSTOCHRNDi_BH`."]
+        SfpstochrnDi,
+        defs::SFPSTOCHRNDi,
+        [rounding_mode, imm5, vb, vc, vd, use_imm5, mod1]
+    );
 
     /// `SFPNOP`.
     pub const fn sfpnop() -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPNOP;
-        let word = def.skeleton();
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPNOP, &[])
     }
 
     /// `SFPCAST`.
     pub const fn sfpcast(vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPCAST;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPCAST, &[vc, vd, mod1])
     }
 
     /// `SFPLE`.
     pub const fn sfple(vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPLE;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPLE, &[vc, vd, mod1])
     }
 
     /// `SFPGT`.
     pub const fn sfpgt(vc: u32, vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPGT;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[1];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[2];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPGT, &[vc, vd, mod1])
     }
 
-    /// `SFPMUL24`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Sfpmul24::ZERO.va(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Sfpmul24 {
-        va: u32,
-        vb: u32,
-        vc: u32,
-        vd: u32,
-        mod1: u32,
-    }
-
-    impl Sfpmul24 {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Sfpmul24 {
-            va: 0,
-            vb: 0,
-            vc: 0,
-            vd: 0,
-            mod1: 0,
-        };
-
-        pub const fn va(mut self, value: u32) -> Self {
-            self.va = value;
-            self
-        }
-
-        pub const fn vb(mut self, value: u32) -> Self {
-            self.vb = value;
-            self
-        }
-
-        pub const fn vc(mut self, value: u32) -> Self {
-            self.vc = value;
-            self
-        }
-
-        pub const fn vd(mut self, value: u32) -> Self {
-            self.vd = value;
-            self
-        }
-
-        pub const fn mod1(mut self, value: u32) -> Self {
-            self.mod1 = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::SFPMUL24;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.va) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.va,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.va);
-            let f = def.fields()[1];
-            if !f.fits(self.vb) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vb,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vb);
-            let f = def.fields()[2];
-            if !f.fits(self.vc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vc);
-            let f = def.fields()[3];
-            if !f.fits(self.vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.vd);
-            let f = def.fields()[4];
-            if !f.fits(self.mod1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.mod1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.mod1);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`SFPMUL24`."]
+        Sfpmul24,
+        defs::SFPMUL24,
+        [va, vb, vc, vd, mod1]
+    );
 
     /// `SFPARECIP`.
     pub const fn sfparecip(
@@ -10250,292 +4329,34 @@ pub mod encode {
         vd: u32,
         mod1: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SFPARECIP;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(vb) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vb,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vb);
-        let f = def.fields()[1];
-        if !f.fits(vc) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vc,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vc);
-        let f = def.fields()[2];
-        if !f.fits(vd) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: vd,
-                width: f.width(),
-            });
-        }
-        word |= f.place(vd);
-        let f = def.fields()[3];
-        if !f.fits(mod1) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mod1,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mod1);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SFPARECIP, &[vb, vc, vd, mod1])
     }
 
-    /// `UNPACR_Regular`, built field by field.
-    ///
-    /// 12 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `UnpacrRegular::ZERO.which_unpacker(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct UnpacrRegular {
-        which_unpacker: u32,
-        ch1_y_inc: u32,
-        ch1_z_inc: u32,
-        ch0_y_inc: u32,
-        ch0_z_inc: u32,
-        context_number: u32,
-        context_adc: u32,
-        multi_context_mode: u32,
-        flip_src: u32,
-        all_datums_are_zero: u32,
-        use_context_counter: u32,
-        row_search: u32,
-    }
-
-    impl UnpacrRegular {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = UnpacrRegular {
-            which_unpacker: 0,
-            ch1_y_inc: 0,
-            ch1_z_inc: 0,
-            ch0_y_inc: 0,
-            ch0_z_inc: 0,
-            context_number: 0,
-            context_adc: 0,
-            multi_context_mode: 0,
-            flip_src: 0,
-            all_datums_are_zero: 0,
-            use_context_counter: 0,
-            row_search: 0,
-        };
-
-        pub const fn which_unpacker(mut self, value: u32) -> Self {
-            self.which_unpacker = value;
-            self
-        }
-
-        pub const fn ch1_y_inc(mut self, value: u32) -> Self {
-            self.ch1_y_inc = value;
-            self
-        }
-
-        pub const fn ch1_z_inc(mut self, value: u32) -> Self {
-            self.ch1_z_inc = value;
-            self
-        }
-
-        pub const fn ch0_y_inc(mut self, value: u32) -> Self {
-            self.ch0_y_inc = value;
-            self
-        }
-
-        pub const fn ch0_z_inc(mut self, value: u32) -> Self {
-            self.ch0_z_inc = value;
-            self
-        }
-
-        pub const fn context_number(mut self, value: u32) -> Self {
-            self.context_number = value;
-            self
-        }
-
-        pub const fn context_adc(mut self, value: u32) -> Self {
-            self.context_adc = value;
-            self
-        }
-
-        pub const fn multi_context_mode(mut self, value: u32) -> Self {
-            self.multi_context_mode = value;
-            self
-        }
-
-        pub const fn flip_src(mut self, value: u32) -> Self {
-            self.flip_src = value;
-            self
-        }
-
-        pub const fn all_datums_are_zero(mut self, value: u32) -> Self {
-            self.all_datums_are_zero = value;
-            self
-        }
-
-        pub const fn use_context_counter(mut self, value: u32) -> Self {
-            self.use_context_counter = value;
-            self
-        }
-
-        pub const fn row_search(mut self, value: u32) -> Self {
-            self.row_search = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::UNPACR_Regular;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.which_unpacker) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.which_unpacker,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.which_unpacker);
-            let f = def.fields()[1];
-            if !f.fits(self.ch1_y_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.ch1_y_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.ch1_y_inc);
-            let f = def.fields()[2];
-            if !f.fits(self.ch1_z_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.ch1_z_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.ch1_z_inc);
-            let f = def.fields()[3];
-            if !f.fits(self.ch0_y_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.ch0_y_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.ch0_y_inc);
-            let f = def.fields()[4];
-            if !f.fits(self.ch0_z_inc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.ch0_z_inc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.ch0_z_inc);
-            let f = def.fields()[5];
-            if !f.fits(self.context_number) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.context_number,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.context_number);
-            let f = def.fields()[6];
-            if !f.fits(self.context_adc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.context_adc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.context_adc);
-            let f = def.fields()[7];
-            if !f.fits(self.multi_context_mode) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.multi_context_mode,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.multi_context_mode);
-            let f = def.fields()[8];
-            if !f.fits(self.flip_src) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src);
-            let f = def.fields()[9];
-            if !f.fits(self.all_datums_are_zero) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.all_datums_are_zero,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.all_datums_are_zero);
-            let f = def.fields()[10];
-            if !f.fits(self.use_context_counter) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.use_context_counter,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.use_context_counter);
-            let f = def.fields()[11];
-            if !f.fits(self.row_search) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.row_search,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.row_search);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`UNPACR_Regular`."]
+        UnpacrRegular,
+        defs::UNPACR_Regular,
+        [
+            which_unpacker,
+            ch1_y_inc,
+            ch1_z_inc,
+            ch0_y_inc,
+            ch0_z_inc,
+            context_number,
+            context_adc,
+            multi_context_mode,
+            flip_src,
+            all_datums_are_zero,
+            use_context_counter,
+            row_search
+        ]
+    );
 
     /// `UNPACR_IncrementContextCounter`.
     pub const fn unpacr_increment_context_counter(
         which_unpacker: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::UNPACR_IncrementContextCounter;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(which_unpacker) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: which_unpacker,
-                width: f.width(),
-            });
-        }
-        word |= f.place(which_unpacker);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::UNPACR_IncrementContextCounter, &[which_unpacker])
     }
 
     /// `UNPACR_FlushCache`.
@@ -10543,48 +4364,17 @@ pub mod encode {
         which_unpacker: u32,
         multi_context_mode: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::UNPACR_FlushCache;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(which_unpacker) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: which_unpacker,
-                width: f.width(),
-            });
-        }
-        word |= f.place(which_unpacker);
-        let f = def.fields()[1];
-        if !f.fits(multi_context_mode) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: multi_context_mode,
-                width: f.width(),
-            });
-        }
-        word |= f.place(multi_context_mode);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::UNPACR_FlushCache,
+            &[which_unpacker, multi_context_mode],
+        )
     }
 
     /// `UNPACR_NOP_OverlayClear0`.
     pub const fn unpacr_nop_overlay_clear0(
         which_unpacker: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::UNPACR_NOP_OverlayClear0;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(which_unpacker) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: which_unpacker,
-                width: f.width(),
-            });
-        }
-        word |= f.place(which_unpacker);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::UNPACR_NOP_OverlayClear0, &[which_unpacker])
     }
 
     /// `UNPACR_NOP_OverlayClear3`.
@@ -10593,178 +4383,27 @@ pub mod encode {
         which_stream: u32,
         clear_count: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::UNPACR_NOP_OverlayClear3;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(which_unpacker) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: which_unpacker,
-                width: f.width(),
-            });
-        }
-        word |= f.place(which_unpacker);
-        let f = def.fields()[1];
-        if !f.fits(which_stream) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: which_stream,
-                width: f.width(),
-            });
-        }
-        word |= f.place(which_stream);
-        let f = def.fields()[2];
-        if !f.fits(clear_count) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: clear_count,
-                width: f.width(),
-            });
-        }
-        word |= f.place(clear_count);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::UNPACR_NOP_OverlayClear3,
+            &[which_unpacker, which_stream, clear_count],
+        )
     }
 
     /// `UNPACR_NOP_Nop`.
     pub const fn unpacr_nop_nop(which_unpacker: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::UNPACR_NOP_Nop;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(which_unpacker) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: which_unpacker,
-                width: f.width(),
-            });
-        }
-        word |= f.place(which_unpacker);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::UNPACR_NOP_Nop, &[which_unpacker])
     }
 
-    /// `UNPACR_NOP_SETREG`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `UnpacrNopSetreg::ZERO.which_unpacker(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct UnpacrNopSetreg {
-        which_unpacker: u32,
-        addr_sel: u32,
-        addr_mid: u32,
-        value11: u32,
-        accumulate: u32,
-    }
-
-    impl UnpacrNopSetreg {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = UnpacrNopSetreg {
-            which_unpacker: 0,
-            addr_sel: 0,
-            addr_mid: 0,
-            value11: 0,
-            accumulate: 0,
-        };
-
-        pub const fn which_unpacker(mut self, value: u32) -> Self {
-            self.which_unpacker = value;
-            self
-        }
-
-        pub const fn addr_sel(mut self, value: u32) -> Self {
-            self.addr_sel = value;
-            self
-        }
-
-        pub const fn addr_mid(mut self, value: u32) -> Self {
-            self.addr_mid = value;
-            self
-        }
-
-        pub const fn value11(mut self, value: u32) -> Self {
-            self.value11 = value;
-            self
-        }
-
-        pub const fn accumulate(mut self, value: u32) -> Self {
-            self.accumulate = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::UNPACR_NOP_SETREG;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.which_unpacker) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.which_unpacker,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.which_unpacker);
-            let f = def.fields()[1];
-            if !f.fits(self.addr_sel) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_sel,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_sel);
-            let f = def.fields()[2];
-            if !f.fits(self.addr_mid) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mid,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mid);
-            let f = def.fields()[3];
-            if !f.fits(self.value11) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.value11,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.value11);
-            let f = def.fields()[4];
-            if !f.fits(self.accumulate) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.accumulate,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.accumulate);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`UNPACR_NOP_SETREG`."]
+        UnpacrNopSetreg,
+        defs::UNPACR_NOP_SETREG,
+        [which_unpacker, addr_sel, addr_mid, value11, accumulate]
+    );
 
     /// `UNPACR_NOP_SETDVALID_BH`.
     pub const fn unpacr_nop_setdvalid(which_unpacker: u32) -> Result<Instruction, EncodeError> {
-        let def = &defs::UNPACR_NOP_SETDVALID;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(which_unpacker) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: which_unpacker,
-                width: f.width(),
-            });
-        }
-        word |= f.place(which_unpacker);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::UNPACR_NOP_SETDVALID, &[which_unpacker])
     }
 
     /// `UNPACR_NOP_ZEROSRC_BH`.
@@ -10774,155 +4413,23 @@ pub mod encode {
         both_banks: u32,
         negative_inf_src_a: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::UNPACR_NOP_ZEROSRC;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(which_unpacker) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: which_unpacker,
-                width: f.width(),
-            });
-        }
-        word |= f.place(which_unpacker);
-        let f = def.fields()[1];
-        if !f.fits(wait_like_unpacr) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: wait_like_unpacr,
-                width: f.width(),
-            });
-        }
-        word |= f.place(wait_like_unpacr);
-        let f = def.fields()[2];
-        if !f.fits(both_banks) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: both_banks,
-                width: f.width(),
-            });
-        }
-        word |= f.place(both_banks);
-        let f = def.fields()[3];
-        if !f.fits(negative_inf_src_a) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: negative_inf_src_a,
-                width: f.width(),
-            });
-        }
-        word |= f.place(negative_inf_src_a);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(
+            &defs::UNPACR_NOP_ZEROSRC,
+            &[
+                which_unpacker,
+                wait_like_unpacr,
+                both_banks,
+                negative_inf_src_a,
+            ],
+        )
     }
 
-    /// `GMPOOL_BH`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Gmpool::ZERO.flip_src_b(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Gmpool {
-        flip_src_b: u32,
-        flip_src_a: u32,
-        addr_mod: u32,
-        arg_max: u32,
-        dst_row: u32,
-    }
-
-    impl Gmpool {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Gmpool {
-            flip_src_b: 0,
-            flip_src_a: 0,
-            addr_mod: 0,
-            arg_max: 0,
-            dst_row: 0,
-        };
-
-        pub const fn flip_src_b(mut self, value: u32) -> Self {
-            self.flip_src_b = value;
-            self
-        }
-
-        pub const fn flip_src_a(mut self, value: u32) -> Self {
-            self.flip_src_a = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn arg_max(mut self, value: u32) -> Self {
-            self.arg_max = value;
-            self
-        }
-
-        pub const fn dst_row(mut self, value: u32) -> Self {
-            self.dst_row = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::GMPOOL;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.flip_src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_b);
-            let f = def.fields()[1];
-            if !f.fits(self.flip_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_a);
-            let f = def.fields()[2];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[3];
-            if !f.fits(self.arg_max) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.arg_max,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.arg_max);
-            let f = def.fields()[4];
-            if !f.fits(self.dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_row);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`GMPOOL_BH`."]
+        Gmpool,
+        defs::GMPOOL,
+        [flip_src_b, flip_src_a, addr_mod, arg_max, dst_row]
+    );
 
     /// `GAPOOL_BH`.
     pub const fn gapool(
@@ -10931,609 +4438,57 @@ pub mod encode {
         addr_mod: u32,
         dst_row: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::GAPOOL;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(flip_src_b) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: flip_src_b,
-                width: f.width(),
-            });
-        }
-        word |= f.place(flip_src_b);
-        let f = def.fields()[1];
-        if !f.fits(flip_src_a) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: flip_src_a,
-                width: f.width(),
-            });
-        }
-        word |= f.place(flip_src_a);
-        let f = def.fields()[2];
-        if !f.fits(addr_mod) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_mod,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_mod);
-        let f = def.fields()[3];
-        if !f.fits(dst_row) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: dst_row,
-                width: f.width(),
-            });
-        }
-        word |= f.place(dst_row);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::GAPOOL, &[flip_src_b, flip_src_a, addr_mod, dst_row])
     }
 
-    /// `MVMUL_BH`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Mvmul::ZERO.flip_src_b(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Mvmul {
-        flip_src_b: u32,
-        flip_src_a: u32,
-        broadcast_src_b_row: u32,
-        addr_mod: u32,
-        dst_row: u32,
-    }
+    builder!(
+        #[doc = "`MVMUL_BH`."]
+        Mvmul,
+        defs::MVMUL,
+        [
+            flip_src_b,
+            flip_src_a,
+            broadcast_src_b_row,
+            addr_mod,
+            dst_row
+        ]
+    );
 
-    impl Mvmul {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Mvmul {
-            flip_src_b: 0,
-            flip_src_a: 0,
-            broadcast_src_b_row: 0,
-            addr_mod: 0,
-            dst_row: 0,
-        };
+    builder!(
+        #[doc = "`MOVA2D_BH`."]
+        Mova2D,
+        defs::MOVA2D,
+        [use_dst32b_lo, src_row, addr_mod, move8_rows, dst_row]
+    );
 
-        pub const fn flip_src_b(mut self, value: u32) -> Self {
-            self.flip_src_b = value;
-            self
-        }
+    builder!(
+        #[doc = "`MOVB2D_BH`."]
+        Movb2D,
+        defs::MOVB2D,
+        [
+            use_dst32b_lo,
+            src_row,
+            addr_mod,
+            move4_rows,
+            broadcast1_row_to8,
+            broadcast_col0,
+            dst_row
+        ]
+    );
 
-        pub const fn flip_src_a(mut self, value: u32) -> Self {
-            self.flip_src_a = value;
-            self
-        }
+    builder!(
+        #[doc = "`MOVD2A_BH`."]
+        Movd2A,
+        defs::MOVD2A,
+        [use_dst32b_lo, src_row, addr_mod, move4_rows, dst_row]
+    );
 
-        pub const fn broadcast_src_b_row(mut self, value: u32) -> Self {
-            self.broadcast_src_b_row = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn dst_row(mut self, value: u32) -> Self {
-            self.dst_row = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::MVMUL;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.flip_src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_b);
-            let f = def.fields()[1];
-            if !f.fits(self.flip_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_a);
-            let f = def.fields()[2];
-            if !f.fits(self.broadcast_src_b_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.broadcast_src_b_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.broadcast_src_b_row);
-            let f = def.fields()[3];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[4];
-            if !f.fits(self.dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_row);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `MOVA2D_BH`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Mova2D::ZERO.use_dst32b_lo(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Mova2D {
-        use_dst32b_lo: u32,
-        src_row: u32,
-        addr_mod: u32,
-        move8_rows: u32,
-        dst_row: u32,
-    }
-
-    impl Mova2D {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Mova2D {
-            use_dst32b_lo: 0,
-            src_row: 0,
-            addr_mod: 0,
-            move8_rows: 0,
-            dst_row: 0,
-        };
-
-        pub const fn use_dst32b_lo(mut self, value: u32) -> Self {
-            self.use_dst32b_lo = value;
-            self
-        }
-
-        pub const fn src_row(mut self, value: u32) -> Self {
-            self.src_row = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn move8_rows(mut self, value: u32) -> Self {
-            self.move8_rows = value;
-            self
-        }
-
-        pub const fn dst_row(mut self, value: u32) -> Self {
-            self.dst_row = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::MOVA2D;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.use_dst32b_lo) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.use_dst32b_lo,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.use_dst32b_lo);
-            let f = def.fields()[1];
-            if !f.fits(self.src_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_row);
-            let f = def.fields()[2];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[3];
-            if !f.fits(self.move8_rows) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.move8_rows,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.move8_rows);
-            let f = def.fields()[4];
-            if !f.fits(self.dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_row);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `MOVB2D_BH`, built field by field.
-    ///
-    /// 7 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Movb2D::ZERO.use_dst32b_lo(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Movb2D {
-        use_dst32b_lo: u32,
-        src_row: u32,
-        addr_mod: u32,
-        move4_rows: u32,
-        broadcast1_row_to8: u32,
-        broadcast_col0: u32,
-        dst_row: u32,
-    }
-
-    impl Movb2D {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Movb2D {
-            use_dst32b_lo: 0,
-            src_row: 0,
-            addr_mod: 0,
-            move4_rows: 0,
-            broadcast1_row_to8: 0,
-            broadcast_col0: 0,
-            dst_row: 0,
-        };
-
-        pub const fn use_dst32b_lo(mut self, value: u32) -> Self {
-            self.use_dst32b_lo = value;
-            self
-        }
-
-        pub const fn src_row(mut self, value: u32) -> Self {
-            self.src_row = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn move4_rows(mut self, value: u32) -> Self {
-            self.move4_rows = value;
-            self
-        }
-
-        pub const fn broadcast1_row_to8(mut self, value: u32) -> Self {
-            self.broadcast1_row_to8 = value;
-            self
-        }
-
-        pub const fn broadcast_col0(mut self, value: u32) -> Self {
-            self.broadcast_col0 = value;
-            self
-        }
-
-        pub const fn dst_row(mut self, value: u32) -> Self {
-            self.dst_row = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::MOVB2D;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.use_dst32b_lo) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.use_dst32b_lo,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.use_dst32b_lo);
-            let f = def.fields()[1];
-            if !f.fits(self.src_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_row);
-            let f = def.fields()[2];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[3];
-            if !f.fits(self.move4_rows) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.move4_rows,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.move4_rows);
-            let f = def.fields()[4];
-            if !f.fits(self.broadcast1_row_to8) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.broadcast1_row_to8,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.broadcast1_row_to8);
-            let f = def.fields()[5];
-            if !f.fits(self.broadcast_col0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.broadcast_col0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.broadcast_col0);
-            let f = def.fields()[6];
-            if !f.fits(self.dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_row);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `MOVD2A_BH`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Movd2A::ZERO.use_dst32b_lo(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Movd2A {
-        use_dst32b_lo: u32,
-        src_row: u32,
-        addr_mod: u32,
-        move4_rows: u32,
-        dst_row: u32,
-    }
-
-    impl Movd2A {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Movd2A {
-            use_dst32b_lo: 0,
-            src_row: 0,
-            addr_mod: 0,
-            move4_rows: 0,
-            dst_row: 0,
-        };
-
-        pub const fn use_dst32b_lo(mut self, value: u32) -> Self {
-            self.use_dst32b_lo = value;
-            self
-        }
-
-        pub const fn src_row(mut self, value: u32) -> Self {
-            self.src_row = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn move4_rows(mut self, value: u32) -> Self {
-            self.move4_rows = value;
-            self
-        }
-
-        pub const fn dst_row(mut self, value: u32) -> Self {
-            self.dst_row = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::MOVD2A;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.use_dst32b_lo) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.use_dst32b_lo,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.use_dst32b_lo);
-            let f = def.fields()[1];
-            if !f.fits(self.src_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_row);
-            let f = def.fields()[2];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[3];
-            if !f.fits(self.move4_rows) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.move4_rows,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.move4_rows);
-            let f = def.fields()[4];
-            if !f.fits(self.dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_row);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `MOVD2B_BH`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Movd2B::ZERO.use_dst32b_lo(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Movd2B {
-        use_dst32b_lo: u32,
-        src_row: u32,
-        addr_mod: u32,
-        move4_rows: u32,
-        dst_row: u32,
-    }
-
-    impl Movd2B {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Movd2B {
-            use_dst32b_lo: 0,
-            src_row: 0,
-            addr_mod: 0,
-            move4_rows: 0,
-            dst_row: 0,
-        };
-
-        pub const fn use_dst32b_lo(mut self, value: u32) -> Self {
-            self.use_dst32b_lo = value;
-            self
-        }
-
-        pub const fn src_row(mut self, value: u32) -> Self {
-            self.src_row = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn move4_rows(mut self, value: u32) -> Self {
-            self.move4_rows = value;
-            self
-        }
-
-        pub const fn dst_row(mut self, value: u32) -> Self {
-            self.dst_row = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::MOVD2B;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.use_dst32b_lo) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.use_dst32b_lo,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.use_dst32b_lo);
-            let f = def.fields()[1];
-            if !f.fits(self.src_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_row);
-            let f = def.fields()[2];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[3];
-            if !f.fits(self.move4_rows) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.move4_rows,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.move4_rows);
-            let f = def.fields()[4];
-            if !f.fits(self.dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_row);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`MOVD2B_BH`."]
+        Movd2B,
+        defs::MOVD2B,
+        [use_dst32b_lo, src_row, addr_mod, move4_rows, dst_row]
+    );
 
     /// `MOVB2A_BH`.
     pub const fn movb2_a(
@@ -11542,517 +4497,52 @@ pub mod encode {
         move4_rows: u32,
         src_b_row: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::MOVB2A;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(src_a_row) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: src_a_row,
-                width: f.width(),
-            });
-        }
-        word |= f.place(src_a_row);
-        let f = def.fields()[1];
-        if !f.fits(addr_mod) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_mod,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_mod);
-        let f = def.fields()[2];
-        if !f.fits(move4_rows) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: move4_rows,
-                width: f.width(),
-            });
-        }
-        word |= f.place(move4_rows);
-        let f = def.fields()[3];
-        if !f.fits(src_b_row) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: src_b_row,
-                width: f.width(),
-            });
-        }
-        word |= f.place(src_b_row);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::MOVB2A, &[src_a_row, addr_mod, move4_rows, src_b_row])
     }
 
-    /// `MOVD2B_BH`.
-    ///
-    /// `src_row` is the `SrcB` row the move writes and `dst_row` the `Dst` row
-    /// it reads: the diagram's `SrcRow` field names the `SrcB` side and its
-    /// `DstRow` the `Dst` side, as the simulator's `MOVD2B` executes them.
-    pub const fn movd2_b(
-        use_dst32b_lo: u32,
-        src_row: u32,
-        addr_mod: u32,
-        move4_rows: u32,
-        dst_row: u32,
-    ) -> Result<Instruction, EncodeError> {
-        let def = &defs::MOVD2B;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(use_dst32b_lo) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: use_dst32b_lo,
-                width: f.width(),
-            });
-        }
-        word |= f.place(use_dst32b_lo);
-        let f = def.fields()[1];
-        if !f.fits(src_row) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: src_row,
-                width: f.width(),
-            });
-        }
-        word |= f.place(src_row);
-        let f = def.fields()[2];
-        if !f.fits(addr_mod) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_mod,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_mod);
-        let f = def.fields()[3];
-        if !f.fits(move4_rows) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: move4_rows,
-                width: f.width(),
-            });
-        }
-        word |= f.place(move4_rows);
-        let f = def.fields()[4];
-        if !f.fits(dst_row) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: dst_row,
-                width: f.width(),
-            });
-        }
-        word |= f.place(dst_row);
-        Ok(Instruction::new(word, def))
-    }
+    builder!(
+        #[doc = "`ELWADD_BH`."]
+        Elwadd,
+        defs::ELWADD,
+        [
+            flip_src_b,
+            flip_src_a,
+            add_dst,
+            broadcast_src_b_row,
+            broadcast_src_b_col0,
+            addr_mod,
+            dst_row
+        ]
+    );
 
-    /// `ELWADD_BH`, built field by field.
-    ///
-    /// 7 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Elwadd::ZERO.flip_src_b(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Elwadd {
-        flip_src_b: u32,
-        flip_src_a: u32,
-        add_dst: u32,
-        broadcast_src_b_row: u32,
-        broadcast_src_b_col0: u32,
-        addr_mod: u32,
-        dst_row: u32,
-    }
+    builder!(
+        #[doc = "`ELWSUB_BH`."]
+        Elwsub,
+        defs::ELWSUB,
+        [
+            flip_src_b,
+            flip_src_a,
+            add_dst,
+            broadcast_src_b_row,
+            broadcast_src_b_col0,
+            addr_mod,
+            dst_row
+        ]
+    );
 
-    impl Elwadd {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Elwadd {
-            flip_src_b: 0,
-            flip_src_a: 0,
-            add_dst: 0,
-            broadcast_src_b_row: 0,
-            broadcast_src_b_col0: 0,
-            addr_mod: 0,
-            dst_row: 0,
-        };
-
-        pub const fn flip_src_b(mut self, value: u32) -> Self {
-            self.flip_src_b = value;
-            self
-        }
-
-        pub const fn flip_src_a(mut self, value: u32) -> Self {
-            self.flip_src_a = value;
-            self
-        }
-
-        pub const fn add_dst(mut self, value: u32) -> Self {
-            self.add_dst = value;
-            self
-        }
-
-        pub const fn broadcast_src_b_row(mut self, value: u32) -> Self {
-            self.broadcast_src_b_row = value;
-            self
-        }
-
-        pub const fn broadcast_src_b_col0(mut self, value: u32) -> Self {
-            self.broadcast_src_b_col0 = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn dst_row(mut self, value: u32) -> Self {
-            self.dst_row = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::ELWADD;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.flip_src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_b);
-            let f = def.fields()[1];
-            if !f.fits(self.flip_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_a);
-            let f = def.fields()[2];
-            if !f.fits(self.add_dst) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.add_dst,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.add_dst);
-            let f = def.fields()[3];
-            if !f.fits(self.broadcast_src_b_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.broadcast_src_b_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.broadcast_src_b_row);
-            let f = def.fields()[4];
-            if !f.fits(self.broadcast_src_b_col0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.broadcast_src_b_col0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.broadcast_src_b_col0);
-            let f = def.fields()[5];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[6];
-            if !f.fits(self.dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_row);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `ELWSUB_BH`, built field by field.
-    ///
-    /// 7 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Elwsub::ZERO.flip_src_b(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Elwsub {
-        flip_src_b: u32,
-        flip_src_a: u32,
-        add_dst: u32,
-        broadcast_src_b_row: u32,
-        broadcast_src_b_col0: u32,
-        addr_mod: u32,
-        dst_row: u32,
-    }
-
-    impl Elwsub {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Elwsub {
-            flip_src_b: 0,
-            flip_src_a: 0,
-            add_dst: 0,
-            broadcast_src_b_row: 0,
-            broadcast_src_b_col0: 0,
-            addr_mod: 0,
-            dst_row: 0,
-        };
-
-        pub const fn flip_src_b(mut self, value: u32) -> Self {
-            self.flip_src_b = value;
-            self
-        }
-
-        pub const fn flip_src_a(mut self, value: u32) -> Self {
-            self.flip_src_a = value;
-            self
-        }
-
-        pub const fn add_dst(mut self, value: u32) -> Self {
-            self.add_dst = value;
-            self
-        }
-
-        pub const fn broadcast_src_b_row(mut self, value: u32) -> Self {
-            self.broadcast_src_b_row = value;
-            self
-        }
-
-        pub const fn broadcast_src_b_col0(mut self, value: u32) -> Self {
-            self.broadcast_src_b_col0 = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn dst_row(mut self, value: u32) -> Self {
-            self.dst_row = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::ELWSUB;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.flip_src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_b);
-            let f = def.fields()[1];
-            if !f.fits(self.flip_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_a);
-            let f = def.fields()[2];
-            if !f.fits(self.add_dst) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.add_dst,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.add_dst);
-            let f = def.fields()[3];
-            if !f.fits(self.broadcast_src_b_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.broadcast_src_b_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.broadcast_src_b_row);
-            let f = def.fields()[4];
-            if !f.fits(self.broadcast_src_b_col0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.broadcast_src_b_col0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.broadcast_src_b_col0);
-            let f = def.fields()[5];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[6];
-            if !f.fits(self.dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_row);
-            Ok(Instruction::new(word, def))
-        }
-    }
-
-    /// `ELWMUL_BH`, built field by field.
-    ///
-    /// 6 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Elwmul::ZERO.flip_src_b(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Elwmul {
-        flip_src_b: u32,
-        flip_src_a: u32,
-        broadcast_src_b_row: u32,
-        broadcast_src_b_col0: u32,
-        addr_mod: u32,
-        dst_row: u32,
-    }
-
-    impl Elwmul {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Elwmul {
-            flip_src_b: 0,
-            flip_src_a: 0,
-            broadcast_src_b_row: 0,
-            broadcast_src_b_col0: 0,
-            addr_mod: 0,
-            dst_row: 0,
-        };
-
-        pub const fn flip_src_b(mut self, value: u32) -> Self {
-            self.flip_src_b = value;
-            self
-        }
-
-        pub const fn flip_src_a(mut self, value: u32) -> Self {
-            self.flip_src_a = value;
-            self
-        }
-
-        pub const fn broadcast_src_b_row(mut self, value: u32) -> Self {
-            self.broadcast_src_b_row = value;
-            self
-        }
-
-        pub const fn broadcast_src_b_col0(mut self, value: u32) -> Self {
-            self.broadcast_src_b_col0 = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn dst_row(mut self, value: u32) -> Self {
-            self.dst_row = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::ELWMUL;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.flip_src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_b);
-            let f = def.fields()[1];
-            if !f.fits(self.flip_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.flip_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.flip_src_a);
-            let f = def.fields()[2];
-            if !f.fits(self.broadcast_src_b_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.broadcast_src_b_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.broadcast_src_b_row);
-            let f = def.fields()[3];
-            if !f.fits(self.broadcast_src_b_col0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.broadcast_src_b_col0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.broadcast_src_b_col0);
-            let f = def.fields()[4];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[5];
-            if !f.fits(self.dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_row);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`ELWMUL_BH`."]
+        Elwmul,
+        defs::ELWMUL,
+        [
+            flip_src_b,
+            flip_src_a,
+            broadcast_src_b_row,
+            broadcast_src_b_col0,
+            addr_mod,
+            dst_row
+        ]
+    );
 
     /// `DOTPV_BH`.
     pub const fn dotpv(
@@ -12061,155 +4551,15 @@ pub mod encode {
         addr_mod: u32,
         dst_row: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::DOTPV;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(flip_src_b) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: flip_src_b,
-                width: f.width(),
-            });
-        }
-        word |= f.place(flip_src_b);
-        let f = def.fields()[1];
-        if !f.fits(flip_src_a) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: flip_src_a,
-                width: f.width(),
-            });
-        }
-        word |= f.place(flip_src_a);
-        let f = def.fields()[2];
-        if !f.fits(addr_mod) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_mod,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_mod);
-        let f = def.fields()[3];
-        if !f.fits(dst_row) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: dst_row,
-                width: f.width(),
-            });
-        }
-        word |= f.place(dst_row);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::DOTPV, &[flip_src_b, flip_src_a, addr_mod, dst_row])
     }
 
-    /// `MOVDBGA2D_BH`, built field by field.
-    ///
-    /// 5 operands is too many to pass positionally without inviting a
-    /// transposition, so each is named: `Movdbga2D::ZERO.use_dst32b_lo(1).encode()`.
-    #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-    pub struct Movdbga2D {
-        use_dst32b_lo: u32,
-        src_row: u32,
-        addr_mod: u32,
-        move8_rows: u32,
-        dst_row: u32,
-    }
-
-    impl Movdbga2D {
-        /// Every operand zero. Fixed bits are added by [`Self::encode`].
-        pub const ZERO: Self = Movdbga2D {
-            use_dst32b_lo: 0,
-            src_row: 0,
-            addr_mod: 0,
-            move8_rows: 0,
-            dst_row: 0,
-        };
-
-        pub const fn use_dst32b_lo(mut self, value: u32) -> Self {
-            self.use_dst32b_lo = value;
-            self
-        }
-
-        pub const fn src_row(mut self, value: u32) -> Self {
-            self.src_row = value;
-            self
-        }
-
-        pub const fn addr_mod(mut self, value: u32) -> Self {
-            self.addr_mod = value;
-            self
-        }
-
-        pub const fn move8_rows(mut self, value: u32) -> Self {
-            self.move8_rows = value;
-            self
-        }
-
-        pub const fn dst_row(mut self, value: u32) -> Self {
-            self.dst_row = value;
-            self
-        }
-
-        pub const fn encode(self) -> Result<Instruction, EncodeError> {
-            let def = &defs::MOVDBGA2D;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(self.use_dst32b_lo) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.use_dst32b_lo,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.use_dst32b_lo);
-            let f = def.fields()[1];
-            if !f.fits(self.src_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.src_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.src_row);
-            let f = def.fields()[2];
-            if !f.fits(self.addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.addr_mod);
-            let f = def.fields()[3];
-            if !f.fits(self.move8_rows) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.move8_rows,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.move8_rows);
-            let f = def.fields()[4];
-            if !f.fits(self.dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: self.dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(self.dst_row);
-            Ok(Instruction::new(word, def))
-        }
-    }
+    builder!(
+        #[doc = "`MOVDBGA2D_BH`."]
+        Movdbga2D,
+        defs::MOVDBGA2D,
+        [use_dst32b_lo, src_row, addr_mod, move8_rows, dst_row]
+    );
 
     /// `SHIFTXB_BH`.
     pub const fn shiftxb(
@@ -12217,39 +4567,7 @@ pub mod encode {
         shift_in_zero: u32,
         src_row: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::SHIFTXB;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(addr_mod) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_mod,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_mod);
-        let f = def.fields()[1];
-        if !f.fits(shift_in_zero) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: shift_in_zero,
-                width: f.width(),
-            });
-        }
-        word |= f.place(shift_in_zero);
-        let f = def.fields()[2];
-        if !f.fits(src_row) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: src_row,
-                width: f.width(),
-            });
-        }
-        word |= f.place(src_row);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::SHIFTXB, &[addr_mod, shift_in_zero, src_row])
     }
 
     /// `ZEROACC_BH`.
@@ -12259,49 +4577,7 @@ pub mod encode {
         addr_mod: u32,
         imm10: u32,
     ) -> Result<Instruction, EncodeError> {
-        let def = &defs::ZEROACC;
-        let mut word = def.skeleton();
-        let f = def.fields()[0];
-        if !f.fits(mode) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: mode,
-                width: f.width(),
-            });
-        }
-        word |= f.place(mode);
-        let f = def.fields()[1];
-        if !f.fits(use_dst32b) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: use_dst32b,
-                width: f.width(),
-            });
-        }
-        word |= f.place(use_dst32b);
-        let f = def.fields()[2];
-        if !f.fits(addr_mod) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: addr_mod,
-                width: f.width(),
-            });
-        }
-        word |= f.place(addr_mod);
-        let f = def.fields()[3];
-        if !f.fits(imm10) {
-            return Err(EncodeError::FieldTooLarge {
-                instruction: def.key(),
-                field: f.name(),
-                value: imm10,
-                width: f.width(),
-            });
-        }
-        word |= f.place(imm10);
-        Ok(Instruction::new(word, def))
+        Instruction::with_operands(&defs::ZEROACC, &[mode, use_dst32b, addr_mod, imm10])
     }
 
     /// Encoders for the forms Blackhole replaces. Reaching one has to be
@@ -12314,406 +4590,42 @@ pub mod encode {
             block_mask: u32,
             condition_mask: u32,
         ) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::STALLWAIT;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(block_mask) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: block_mask,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(block_mask);
-            let f = def.fields()[1];
-            if !f.fits(condition_mask) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: condition_mask,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(condition_mask);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(&defs::wormhole::STALLWAIT, &[block_mask, condition_mask])
         }
 
-        /// `PACR`, built field by field.
-        ///
-        /// 7 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Pacr::ZERO.addr_mod(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Pacr {
-            addr_mod: u32,
-            zero_write: u32,
-            packer_mask: u32,
-            ovrd_thread_id: u32,
-            concat: u32,
-            flush: u32,
-            last: u32,
-        }
-
-        impl Pacr {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Pacr {
-                addr_mod: 0,
-                zero_write: 0,
-                packer_mask: 0,
-                ovrd_thread_id: 0,
-                concat: 0,
-                flush: 0,
-                last: 0,
-            };
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn zero_write(mut self, value: u32) -> Self {
-                self.zero_write = value;
-                self
-            }
-
-            pub const fn packer_mask(mut self, value: u32) -> Self {
-                self.packer_mask = value;
-                self
-            }
-
-            pub const fn ovrd_thread_id(mut self, value: u32) -> Self {
-                self.ovrd_thread_id = value;
-                self
-            }
-
-            pub const fn concat(mut self, value: u32) -> Self {
-                self.concat = value;
-                self
-            }
-
-            pub const fn flush(mut self, value: u32) -> Self {
-                self.flush = value;
-                self
-            }
-
-            pub const fn last(mut self, value: u32) -> Self {
-                self.last = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::PACR;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[1];
-                if !f.fits(self.zero_write) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.zero_write,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.zero_write);
-                let f = def.fields()[2];
-                if !f.fits(self.packer_mask) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.packer_mask,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.packer_mask);
-                let f = def.fields()[3];
-                if !f.fits(self.ovrd_thread_id) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.ovrd_thread_id,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.ovrd_thread_id);
-                let f = def.fields()[4];
-                if !f.fits(self.concat) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.concat,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.concat);
-                let f = def.fields()[5];
-                if !f.fits(self.flush) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flush,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flush);
-                let f = def.fields()[6];
-                if !f.fits(self.last) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.last,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.last);
-                Ok(Instruction::new(word, def))
-            }
-        }
+        builder!(
+            #[doc = "`PACR`."]
+            Pacr,
+            defs::wormhole::PACR,
+            [
+                addr_mod,
+                zero_write,
+                packer_mask,
+                ovrd_thread_id,
+                concat,
+                flush,
+                last
+            ]
+        );
 
         /// `SFPLUTFP32`.
         pub const fn sfplutfp32(vd: u32, mod1: u32) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::SFPLUTFP32;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(vd);
-            let f = def.fields()[1];
-            if !f.fits(mod1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: mod1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(mod1);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(&defs::wormhole::SFPLUTFP32, &[vd, mod1])
         }
 
-        /// `MOVD2A`, built field by field.
-        ///
-        /// 5 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Movd2A::ZERO.use_dst32b_lo(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Movd2A {
-            use_dst32b_lo: u32,
-            src_row: u32,
-            addr_mod: u32,
-            move4_rows: u32,
-            dst_row: u32,
-        }
+        builder!(
+            #[doc = "`MOVD2A`."]
+            Movd2A,
+            defs::wormhole::MOVD2A,
+            [use_dst32b_lo, src_row, addr_mod, move4_rows, dst_row]
+        );
 
-        impl Movd2A {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Movd2A {
-                use_dst32b_lo: 0,
-                src_row: 0,
-                addr_mod: 0,
-                move4_rows: 0,
-                dst_row: 0,
-            };
-
-            pub const fn use_dst32b_lo(mut self, value: u32) -> Self {
-                self.use_dst32b_lo = value;
-                self
-            }
-
-            pub const fn src_row(mut self, value: u32) -> Self {
-                self.src_row = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn move4_rows(mut self, value: u32) -> Self {
-                self.move4_rows = value;
-                self
-            }
-
-            pub const fn dst_row(mut self, value: u32) -> Self {
-                self.dst_row = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::MOVD2A;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.use_dst32b_lo) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.use_dst32b_lo,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.use_dst32b_lo);
-                let f = def.fields()[1];
-                if !f.fits(self.src_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.src_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.src_row);
-                let f = def.fields()[2];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[3];
-                if !f.fits(self.move4_rows) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.move4_rows,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.move4_rows);
-                let f = def.fields()[4];
-                if !f.fits(self.dst_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.dst_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.dst_row);
-                Ok(Instruction::new(word, def))
-            }
-        }
-
-        /// `MOVD2B`, built field by field.
-        ///
-        /// 5 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Movd2B::ZERO.use_dst32b_lo(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Movd2B {
-            use_dst32b_lo: u32,
-            src_row: u32,
-            addr_mod: u32,
-            move4_rows: u32,
-            dst_row: u32,
-        }
-
-        impl Movd2B {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Movd2B {
-                use_dst32b_lo: 0,
-                src_row: 0,
-                addr_mod: 0,
-                move4_rows: 0,
-                dst_row: 0,
-            };
-
-            pub const fn use_dst32b_lo(mut self, value: u32) -> Self {
-                self.use_dst32b_lo = value;
-                self
-            }
-
-            pub const fn src_row(mut self, value: u32) -> Self {
-                self.src_row = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn move4_rows(mut self, value: u32) -> Self {
-                self.move4_rows = value;
-                self
-            }
-
-            pub const fn dst_row(mut self, value: u32) -> Self {
-                self.dst_row = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::MOVD2B;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.use_dst32b_lo) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.use_dst32b_lo,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.use_dst32b_lo);
-                let f = def.fields()[1];
-                if !f.fits(self.src_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.src_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.src_row);
-                let f = def.fields()[2];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[3];
-                if !f.fits(self.move4_rows) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.move4_rows,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.move4_rows);
-                let f = def.fields()[4];
-                if !f.fits(self.dst_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.dst_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.dst_row);
-                Ok(Instruction::new(word, def))
-            }
-        }
+        builder!(
+            #[doc = "`MOVD2B`."]
+            Movd2B,
+            defs::wormhole::MOVD2B,
+            [use_dst32b_lo, src_row, addr_mod, move4_rows, dst_row]
+        );
 
         /// `MOVB2A`.
         pub const fn movb2_a(
@@ -12722,1009 +4634,98 @@ pub mod encode {
             move4_rows: u32,
             src_b_row: u32,
         ) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::MOVB2A;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(src_a_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: src_a_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(src_a_row);
-            let f = def.fields()[1];
-            if !f.fits(addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(addr_mod);
-            let f = def.fields()[2];
-            if !f.fits(move4_rows) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: move4_rows,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(move4_rows);
-            let f = def.fields()[3];
-            if !f.fits(src_b_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: src_b_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(src_b_row);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(
+                &defs::wormhole::MOVB2A,
+                &[src_a_row, addr_mod, move4_rows, src_b_row],
+            )
         }
 
-        /// `MOVDBGA2D`, built field by field.
-        ///
-        /// 5 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Movdbga2D::ZERO.use_dst32b_lo(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Movdbga2D {
-            use_dst32b_lo: u32,
-            src_row: u32,
-            addr_mod: u32,
-            move8_rows: u32,
-            dst_row: u32,
-        }
-
-        impl Movdbga2D {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Movdbga2D {
-                use_dst32b_lo: 0,
-                src_row: 0,
-                addr_mod: 0,
-                move8_rows: 0,
-                dst_row: 0,
-            };
-
-            pub const fn use_dst32b_lo(mut self, value: u32) -> Self {
-                self.use_dst32b_lo = value;
-                self
-            }
-
-            pub const fn src_row(mut self, value: u32) -> Self {
-                self.src_row = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn move8_rows(mut self, value: u32) -> Self {
-                self.move8_rows = value;
-                self
-            }
-
-            pub const fn dst_row(mut self, value: u32) -> Self {
-                self.dst_row = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::MOVDBGA2D;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.use_dst32b_lo) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.use_dst32b_lo,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.use_dst32b_lo);
-                let f = def.fields()[1];
-                if !f.fits(self.src_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.src_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.src_row);
-                let f = def.fields()[2];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[3];
-                if !f.fits(self.move8_rows) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.move8_rows,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.move8_rows);
-                let f = def.fields()[4];
-                if !f.fits(self.dst_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.dst_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.dst_row);
-                Ok(Instruction::new(word, def))
-            }
-        }
-
-        /// `MOVA2D`, built field by field.
-        ///
-        /// 5 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Mova2D::ZERO.use_dst32b_lo(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Mova2D {
-            use_dst32b_lo: u32,
-            src_row: u32,
-            addr_mod: u32,
-            move8_rows: u32,
-            dst_row: u32,
-        }
-
-        impl Mova2D {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Mova2D {
-                use_dst32b_lo: 0,
-                src_row: 0,
-                addr_mod: 0,
-                move8_rows: 0,
-                dst_row: 0,
-            };
-
-            pub const fn use_dst32b_lo(mut self, value: u32) -> Self {
-                self.use_dst32b_lo = value;
-                self
-            }
-
-            pub const fn src_row(mut self, value: u32) -> Self {
-                self.src_row = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn move8_rows(mut self, value: u32) -> Self {
-                self.move8_rows = value;
-                self
-            }
-
-            pub const fn dst_row(mut self, value: u32) -> Self {
-                self.dst_row = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::MOVA2D;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.use_dst32b_lo) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.use_dst32b_lo,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.use_dst32b_lo);
-                let f = def.fields()[1];
-                if !f.fits(self.src_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.src_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.src_row);
-                let f = def.fields()[2];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[3];
-                if !f.fits(self.move8_rows) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.move8_rows,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.move8_rows);
-                let f = def.fields()[4];
-                if !f.fits(self.dst_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.dst_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.dst_row);
-                Ok(Instruction::new(word, def))
-            }
-        }
-
-        /// `MOVB2D`, built field by field.
-        ///
-        /// 7 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Movb2D::ZERO.use_dst32b_lo(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Movb2D {
-            use_dst32b_lo: u32,
-            src_row: u32,
-            addr_mod: u32,
-            move4_rows: u32,
-            broadcast1_row_to8: u32,
-            broadcast_col0: u32,
-            dst_row: u32,
-        }
-
-        impl Movb2D {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Movb2D {
-                use_dst32b_lo: 0,
-                src_row: 0,
-                addr_mod: 0,
-                move4_rows: 0,
-                broadcast1_row_to8: 0,
-                broadcast_col0: 0,
-                dst_row: 0,
-            };
-
-            pub const fn use_dst32b_lo(mut self, value: u32) -> Self {
-                self.use_dst32b_lo = value;
-                self
-            }
-
-            pub const fn src_row(mut self, value: u32) -> Self {
-                self.src_row = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn move4_rows(mut self, value: u32) -> Self {
-                self.move4_rows = value;
-                self
-            }
-
-            pub const fn broadcast1_row_to8(mut self, value: u32) -> Self {
-                self.broadcast1_row_to8 = value;
-                self
-            }
-
-            pub const fn broadcast_col0(mut self, value: u32) -> Self {
-                self.broadcast_col0 = value;
-                self
-            }
-
-            pub const fn dst_row(mut self, value: u32) -> Self {
-                self.dst_row = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::MOVB2D;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.use_dst32b_lo) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.use_dst32b_lo,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.use_dst32b_lo);
-                let f = def.fields()[1];
-                if !f.fits(self.src_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.src_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.src_row);
-                let f = def.fields()[2];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[3];
-                if !f.fits(self.move4_rows) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.move4_rows,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.move4_rows);
-                let f = def.fields()[4];
-                if !f.fits(self.broadcast1_row_to8) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.broadcast1_row_to8,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.broadcast1_row_to8);
-                let f = def.fields()[5];
-                if !f.fits(self.broadcast_col0) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.broadcast_col0,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.broadcast_col0);
-                let f = def.fields()[6];
-                if !f.fits(self.dst_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.dst_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.dst_row);
-                Ok(Instruction::new(word, def))
-            }
-        }
-
-        /// `ELWMUL`, built field by field.
-        ///
-        /// 6 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Elwmul::ZERO.flip_src_b(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Elwmul {
-            flip_src_b: u32,
-            flip_src_a: u32,
-            broadcast_src_b_row: u32,
-            broadcast_src_b_col0: u32,
-            addr_mod: u32,
-            dst_row: u32,
-        }
-
-        impl Elwmul {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Elwmul {
-                flip_src_b: 0,
-                flip_src_a: 0,
-                broadcast_src_b_row: 0,
-                broadcast_src_b_col0: 0,
-                addr_mod: 0,
-                dst_row: 0,
-            };
-
-            pub const fn flip_src_b(mut self, value: u32) -> Self {
-                self.flip_src_b = value;
-                self
-            }
-
-            pub const fn flip_src_a(mut self, value: u32) -> Self {
-                self.flip_src_a = value;
-                self
-            }
-
-            pub const fn broadcast_src_b_row(mut self, value: u32) -> Self {
-                self.broadcast_src_b_row = value;
-                self
-            }
-
-            pub const fn broadcast_src_b_col0(mut self, value: u32) -> Self {
-                self.broadcast_src_b_col0 = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn dst_row(mut self, value: u32) -> Self {
-                self.dst_row = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::ELWMUL;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.flip_src_b) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flip_src_b,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flip_src_b);
-                let f = def.fields()[1];
-                if !f.fits(self.flip_src_a) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flip_src_a,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flip_src_a);
-                let f = def.fields()[2];
-                if !f.fits(self.broadcast_src_b_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.broadcast_src_b_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.broadcast_src_b_row);
-                let f = def.fields()[3];
-                if !f.fits(self.broadcast_src_b_col0) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.broadcast_src_b_col0,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.broadcast_src_b_col0);
-                let f = def.fields()[4];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[5];
-                if !f.fits(self.dst_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.dst_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.dst_row);
-                Ok(Instruction::new(word, def))
-            }
-        }
-
-        /// `ELWADD`, built field by field.
-        ///
-        /// 7 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Elwadd::ZERO.flip_src_b(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Elwadd {
-            flip_src_b: u32,
-            flip_src_a: u32,
-            add_dst: u32,
-            broadcast_src_b_row: u32,
-            broadcast_src_b_col0: u32,
-            addr_mod: u32,
-            dst_row: u32,
-        }
-
-        impl Elwadd {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Elwadd {
-                flip_src_b: 0,
-                flip_src_a: 0,
-                add_dst: 0,
-                broadcast_src_b_row: 0,
-                broadcast_src_b_col0: 0,
-                addr_mod: 0,
-                dst_row: 0,
-            };
-
-            pub const fn flip_src_b(mut self, value: u32) -> Self {
-                self.flip_src_b = value;
-                self
-            }
-
-            pub const fn flip_src_a(mut self, value: u32) -> Self {
-                self.flip_src_a = value;
-                self
-            }
-
-            pub const fn add_dst(mut self, value: u32) -> Self {
-                self.add_dst = value;
-                self
-            }
-
-            pub const fn broadcast_src_b_row(mut self, value: u32) -> Self {
-                self.broadcast_src_b_row = value;
-                self
-            }
-
-            pub const fn broadcast_src_b_col0(mut self, value: u32) -> Self {
-                self.broadcast_src_b_col0 = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn dst_row(mut self, value: u32) -> Self {
-                self.dst_row = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::ELWADD;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.flip_src_b) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flip_src_b,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flip_src_b);
-                let f = def.fields()[1];
-                if !f.fits(self.flip_src_a) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flip_src_a,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flip_src_a);
-                let f = def.fields()[2];
-                if !f.fits(self.add_dst) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.add_dst,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.add_dst);
-                let f = def.fields()[3];
-                if !f.fits(self.broadcast_src_b_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.broadcast_src_b_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.broadcast_src_b_row);
-                let f = def.fields()[4];
-                if !f.fits(self.broadcast_src_b_col0) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.broadcast_src_b_col0,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.broadcast_src_b_col0);
-                let f = def.fields()[5];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[6];
-                if !f.fits(self.dst_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.dst_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.dst_row);
-                Ok(Instruction::new(word, def))
-            }
-        }
-
-        /// `ELWSUB`, built field by field.
-        ///
-        /// 7 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Elwsub::ZERO.flip_src_b(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Elwsub {
-            flip_src_b: u32,
-            flip_src_a: u32,
-            add_dst: u32,
-            broadcast_src_b_row: u32,
-            broadcast_src_b_col0: u32,
-            addr_mod: u32,
-            dst_row: u32,
-        }
-
-        impl Elwsub {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Elwsub {
-                flip_src_b: 0,
-                flip_src_a: 0,
-                add_dst: 0,
-                broadcast_src_b_row: 0,
-                broadcast_src_b_col0: 0,
-                addr_mod: 0,
-                dst_row: 0,
-            };
-
-            pub const fn flip_src_b(mut self, value: u32) -> Self {
-                self.flip_src_b = value;
-                self
-            }
-
-            pub const fn flip_src_a(mut self, value: u32) -> Self {
-                self.flip_src_a = value;
-                self
-            }
-
-            pub const fn add_dst(mut self, value: u32) -> Self {
-                self.add_dst = value;
-                self
-            }
-
-            pub const fn broadcast_src_b_row(mut self, value: u32) -> Self {
-                self.broadcast_src_b_row = value;
-                self
-            }
-
-            pub const fn broadcast_src_b_col0(mut self, value: u32) -> Self {
-                self.broadcast_src_b_col0 = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn dst_row(mut self, value: u32) -> Self {
-                self.dst_row = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::ELWSUB;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.flip_src_b) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flip_src_b,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flip_src_b);
-                let f = def.fields()[1];
-                if !f.fits(self.flip_src_a) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flip_src_a,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flip_src_a);
-                let f = def.fields()[2];
-                if !f.fits(self.add_dst) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.add_dst,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.add_dst);
-                let f = def.fields()[3];
-                if !f.fits(self.broadcast_src_b_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.broadcast_src_b_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.broadcast_src_b_row);
-                let f = def.fields()[4];
-                if !f.fits(self.broadcast_src_b_col0) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.broadcast_src_b_col0,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.broadcast_src_b_col0);
-                let f = def.fields()[5];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[6];
-                if !f.fits(self.dst_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.dst_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.dst_row);
-                Ok(Instruction::new(word, def))
-            }
-        }
-
-        /// `GMPOOL`, built field by field.
-        ///
-        /// 5 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Gmpool::ZERO.flip_src_b(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Gmpool {
-            flip_src_b: u32,
-            flip_src_a: u32,
-            addr_mod: u32,
-            arg_max: u32,
-            dst_row: u32,
-        }
-
-        impl Gmpool {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Gmpool {
-                flip_src_b: 0,
-                flip_src_a: 0,
-                addr_mod: 0,
-                arg_max: 0,
-                dst_row: 0,
-            };
-
-            pub const fn flip_src_b(mut self, value: u32) -> Self {
-                self.flip_src_b = value;
-                self
-            }
-
-            pub const fn flip_src_a(mut self, value: u32) -> Self {
-                self.flip_src_a = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn arg_max(mut self, value: u32) -> Self {
-                self.arg_max = value;
-                self
-            }
-
-            pub const fn dst_row(mut self, value: u32) -> Self {
-                self.dst_row = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::GMPOOL;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.flip_src_b) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flip_src_b,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flip_src_b);
-                let f = def.fields()[1];
-                if !f.fits(self.flip_src_a) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flip_src_a,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flip_src_a);
-                let f = def.fields()[2];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[3];
-                if !f.fits(self.arg_max) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.arg_max,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.arg_max);
-                let f = def.fields()[4];
-                if !f.fits(self.dst_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.dst_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.dst_row);
-                Ok(Instruction::new(word, def))
-            }
-        }
-
-        /// `ZEROACC`, built field by field.
-        ///
-        /// 5 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Zeroacc::ZERO.use_dst32b(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Zeroacc {
-            use_dst32b: u32,
-            mode: u32,
-            revert: u32,
-            addr_mod: u32,
-            imm10: u32,
-        }
-
-        impl Zeroacc {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Zeroacc {
-                use_dst32b: 0,
-                mode: 0,
-                revert: 0,
-                addr_mod: 0,
-                imm10: 0,
-            };
-
-            pub const fn use_dst32b(mut self, value: u32) -> Self {
-                self.use_dst32b = value;
-                self
-            }
-
-            pub const fn mode(mut self, value: u32) -> Self {
-                self.mode = value;
-                self
-            }
-
-            pub const fn revert(mut self, value: u32) -> Self {
-                self.revert = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn imm10(mut self, value: u32) -> Self {
-                self.imm10 = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::ZEROACC;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.use_dst32b) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.use_dst32b,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.use_dst32b);
-                let f = def.fields()[1];
-                if !f.fits(self.mode) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.mode,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.mode);
-                let f = def.fields()[2];
-                if !f.fits(self.revert) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.revert,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.revert);
-                let f = def.fields()[3];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[4];
-                if !f.fits(self.imm10) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.imm10,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.imm10);
-                Ok(Instruction::new(word, def))
-            }
-        }
+        builder!(
+            #[doc = "`MOVDBGA2D`."]
+            Movdbga2D,
+            defs::wormhole::MOVDBGA2D,
+            [use_dst32b_lo, src_row, addr_mod, move8_rows, dst_row]
+        );
+
+        builder!(
+            #[doc = "`MOVA2D`."]
+            Mova2D,
+            defs::wormhole::MOVA2D,
+            [use_dst32b_lo, src_row, addr_mod, move8_rows, dst_row]
+        );
+
+        builder!(
+            #[doc = "`MOVB2D`."]
+            Movb2D,
+            defs::wormhole::MOVB2D,
+            [
+                use_dst32b_lo,
+                src_row,
+                addr_mod,
+                move4_rows,
+                broadcast1_row_to8,
+                broadcast_col0,
+                dst_row
+            ]
+        );
+
+        builder!(
+            #[doc = "`ELWMUL`."]
+            Elwmul,
+            defs::wormhole::ELWMUL,
+            [
+                flip_src_b,
+                flip_src_a,
+                broadcast_src_b_row,
+                broadcast_src_b_col0,
+                addr_mod,
+                dst_row
+            ]
+        );
+
+        builder!(
+            #[doc = "`ELWADD`."]
+            Elwadd,
+            defs::wormhole::ELWADD,
+            [
+                flip_src_b,
+                flip_src_a,
+                add_dst,
+                broadcast_src_b_row,
+                broadcast_src_b_col0,
+                addr_mod,
+                dst_row
+            ]
+        );
+
+        builder!(
+            #[doc = "`ELWSUB`."]
+            Elwsub,
+            defs::wormhole::ELWSUB,
+            [
+                flip_src_b,
+                flip_src_a,
+                add_dst,
+                broadcast_src_b_row,
+                broadcast_src_b_col0,
+                addr_mod,
+                dst_row
+            ]
+        );
+
+        builder!(
+            #[doc = "`GMPOOL`."]
+            Gmpool,
+            defs::wormhole::GMPOOL,
+            [flip_src_b, flip_src_a, addr_mod, arg_max, dst_row]
+        );
+
+        builder!(
+            #[doc = "`ZEROACC`."]
+            Zeroacc,
+            defs::wormhole::ZEROACC,
+            [use_dst32b, mode, revert, addr_mod, imm10]
+        );
 
         /// `SHIFTXB`.
         pub const fn shiftxb(
@@ -13732,145 +4733,24 @@ pub mod encode {
             shift_in_zero: u32,
             src_row: u32,
         ) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::SHIFTXB;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(addr_mod);
-            let f = def.fields()[1];
-            if !f.fits(shift_in_zero) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: shift_in_zero,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(shift_in_zero);
-            let f = def.fields()[2];
-            if !f.fits(src_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: src_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(src_row);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(
+                &defs::wormhole::SHIFTXB,
+                &[addr_mod, shift_in_zero, src_row],
+            )
         }
 
-        /// `MVMUL`, built field by field.
-        ///
-        /// 5 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Mvmul::ZERO.flip_src_b(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Mvmul {
-            flip_src_b: u32,
-            flip_src_a: u32,
-            broadcast_src_b_row: u32,
-            addr_mod: u32,
-            dst_row: u32,
-        }
-
-        impl Mvmul {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Mvmul {
-                flip_src_b: 0,
-                flip_src_a: 0,
-                broadcast_src_b_row: 0,
-                addr_mod: 0,
-                dst_row: 0,
-            };
-
-            pub const fn flip_src_b(mut self, value: u32) -> Self {
-                self.flip_src_b = value;
-                self
-            }
-
-            pub const fn flip_src_a(mut self, value: u32) -> Self {
-                self.flip_src_a = value;
-                self
-            }
-
-            pub const fn broadcast_src_b_row(mut self, value: u32) -> Self {
-                self.broadcast_src_b_row = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn dst_row(mut self, value: u32) -> Self {
-                self.dst_row = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::MVMUL;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.flip_src_b) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flip_src_b,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flip_src_b);
-                let f = def.fields()[1];
-                if !f.fits(self.flip_src_a) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.flip_src_a,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.flip_src_a);
-                let f = def.fields()[2];
-                if !f.fits(self.broadcast_src_b_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.broadcast_src_b_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.broadcast_src_b_row);
-                let f = def.fields()[3];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[4];
-                if !f.fits(self.dst_row) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.dst_row,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.dst_row);
-                Ok(Instruction::new(word, def))
-            }
-        }
+        builder!(
+            #[doc = "`MVMUL`."]
+            Mvmul,
+            defs::wormhole::MVMUL,
+            [
+                flip_src_b,
+                flip_src_a,
+                broadcast_src_b_row,
+                addr_mod,
+                dst_row
+            ]
+        );
 
         /// `DOTPV`.
         pub const fn dotpv(
@@ -13879,49 +4759,10 @@ pub mod encode {
             addr_mod: u32,
             dst_row: u32,
         ) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::DOTPV;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(flip_src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: flip_src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(flip_src_b);
-            let f = def.fields()[1];
-            if !f.fits(flip_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: flip_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(flip_src_a);
-            let f = def.fields()[2];
-            if !f.fits(addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(addr_mod);
-            let f = def.fields()[3];
-            if !f.fits(dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(dst_row);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(
+                &defs::wormhole::DOTPV,
+                &[flip_src_b, flip_src_a, addr_mod, dst_row],
+            )
         }
 
         /// `GAPOOL`.
@@ -13931,49 +4772,10 @@ pub mod encode {
             addr_mod: u32,
             dst_row: u32,
         ) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::GAPOOL;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(flip_src_b) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: flip_src_b,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(flip_src_b);
-            let f = def.fields()[1];
-            if !f.fits(flip_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: flip_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(flip_src_a);
-            let f = def.fields()[2];
-            if !f.fits(addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(addr_mod);
-            let f = def.fields()[3];
-            if !f.fits(dst_row) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: dst_row,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(dst_row);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(
+                &defs::wormhole::GAPOOL,
+                &[flip_src_b, flip_src_a, addr_mod, dst_row],
+            )
         }
 
         /// `SFPLOAD`.
@@ -13983,172 +4785,15 @@ pub mod encode {
             addr_mod: u32,
             imm10: u32,
         ) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::SFPLOAD;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(vd);
-            let f = def.fields()[1];
-            if !f.fits(mod0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: mod0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(mod0);
-            let f = def.fields()[2];
-            if !f.fits(addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(addr_mod);
-            let f = def.fields()[3];
-            if !f.fits(imm10) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: imm10,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(imm10);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(&defs::wormhole::SFPLOAD, &[vd, mod0, addr_mod, imm10])
         }
 
-        /// `SFPLOADMACRO`, built field by field.
-        ///
-        /// 6 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `Sfploadmacro::ZERO.macro_index(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct Sfploadmacro {
-            macro_index: u32,
-            vd_lo: u32,
-            mod0: u32,
-            addr_mod: u32,
-            imm9: u32,
-            vd_hi: u32,
-        }
-
-        impl Sfploadmacro {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = Sfploadmacro {
-                macro_index: 0,
-                vd_lo: 0,
-                mod0: 0,
-                addr_mod: 0,
-                imm9: 0,
-                vd_hi: 0,
-            };
-
-            pub const fn macro_index(mut self, value: u32) -> Self {
-                self.macro_index = value;
-                self
-            }
-
-            pub const fn vd_lo(mut self, value: u32) -> Self {
-                self.vd_lo = value;
-                self
-            }
-
-            pub const fn mod0(mut self, value: u32) -> Self {
-                self.mod0 = value;
-                self
-            }
-
-            pub const fn addr_mod(mut self, value: u32) -> Self {
-                self.addr_mod = value;
-                self
-            }
-
-            pub const fn imm9(mut self, value: u32) -> Self {
-                self.imm9 = value;
-                self
-            }
-
-            pub const fn vd_hi(mut self, value: u32) -> Self {
-                self.vd_hi = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::SFPLOADMACRO;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.macro_index) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.macro_index,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.macro_index);
-                let f = def.fields()[1];
-                if !f.fits(self.vd_lo) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.vd_lo,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.vd_lo);
-                let f = def.fields()[2];
-                if !f.fits(self.mod0) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.mod0,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.mod0);
-                let f = def.fields()[3];
-                if !f.fits(self.addr_mod) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.addr_mod,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.addr_mod);
-                let f = def.fields()[4];
-                if !f.fits(self.imm9) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.imm9,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.imm9);
-                let f = def.fields()[5];
-                if !f.fits(self.vd_hi) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.vd_hi,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.vd_hi);
-                Ok(Instruction::new(word, def))
-            }
-        }
+        builder!(
+            #[doc = "`SFPLOADMACRO`."]
+            Sfploadmacro,
+            defs::wormhole::SFPLOADMACRO,
+            [macro_index, vd_lo, mod0, addr_mod, imm9, vd_hi]
+        );
 
         /// `SFPSTORE`.
         pub const fn sfpstore(
@@ -14157,120 +4802,22 @@ pub mod encode {
             addr_mod: u32,
             imm10: u32,
         ) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::SFPSTORE;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(vd);
-            let f = def.fields()[1];
-            if !f.fits(mod0) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: mod0,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(mod0);
-            let f = def.fields()[2];
-            if !f.fits(addr_mod) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: addr_mod,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(addr_mod);
-            let f = def.fields()[3];
-            if !f.fits(imm10) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: imm10,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(imm10);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(&defs::wormhole::SFPSTORE, &[vd, mod0, addr_mod, imm10])
         }
 
         /// `SFPAND`.
         pub const fn sfpand(vc: u32, vd: u32) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::SFPAND;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(vc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: vc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(vc);
-            let f = def.fields()[1];
-            if !f.fits(vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(vd);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(&defs::wormhole::SFPAND, &[vc, vd])
         }
 
         /// `SFPOR`.
         pub const fn sfpor(vc: u32, vd: u32) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::SFPOR;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(vc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: vc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(vc);
-            let f = def.fields()[1];
-            if !f.fits(vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(vd);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(&defs::wormhole::SFPOR, &[vc, vd])
         }
 
         /// `SFPPUSHC`.
         pub const fn sfppushc(vd: u32) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::SFPPUSHC;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(vd);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(&defs::wormhole::SFPPUSHC, &[vd])
         }
 
         /// `SFPSTOCHRND`.
@@ -14280,189 +4827,18 @@ pub mod encode {
             vd: u32,
             mod1: u32,
         ) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::SFPSTOCHRND;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(stochastic_rounding) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: stochastic_rounding,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(stochastic_rounding);
-            let f = def.fields()[1];
-            if !f.fits(vc) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: vc,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(vc);
-            let f = def.fields()[2];
-            if !f.fits(vd) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: vd,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(vd);
-            let f = def.fields()[3];
-            if !f.fits(mod1) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: mod1,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(mod1);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(
+                &defs::wormhole::SFPSTOCHRND,
+                &[stochastic_rounding, vc, vd, mod1],
+            )
         }
 
-        /// `SFPSTOCHRNDi`, built field by field.
-        ///
-        /// 7 operands is too many to pass positionally without inviting a
-        /// transposition, so each is named: `SfpstochrnDi::ZERO.stochastic_rounding(1).encode()`.
-        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-        pub struct SfpstochrnDi {
-            stochastic_rounding: u32,
-            imm5: u32,
-            vb: u32,
-            vc: u32,
-            vd: u32,
-            use_imm5: u32,
-            mod1: u32,
-        }
-
-        impl SfpstochrnDi {
-            /// Every operand zero. Fixed bits are added by [`Self::encode`].
-            pub const ZERO: Self = SfpstochrnDi {
-                stochastic_rounding: 0,
-                imm5: 0,
-                vb: 0,
-                vc: 0,
-                vd: 0,
-                use_imm5: 0,
-                mod1: 0,
-            };
-
-            pub const fn stochastic_rounding(mut self, value: u32) -> Self {
-                self.stochastic_rounding = value;
-                self
-            }
-
-            pub const fn imm5(mut self, value: u32) -> Self {
-                self.imm5 = value;
-                self
-            }
-
-            pub const fn vb(mut self, value: u32) -> Self {
-                self.vb = value;
-                self
-            }
-
-            pub const fn vc(mut self, value: u32) -> Self {
-                self.vc = value;
-                self
-            }
-
-            pub const fn vd(mut self, value: u32) -> Self {
-                self.vd = value;
-                self
-            }
-
-            pub const fn use_imm5(mut self, value: u32) -> Self {
-                self.use_imm5 = value;
-                self
-            }
-
-            pub const fn mod1(mut self, value: u32) -> Self {
-                self.mod1 = value;
-                self
-            }
-
-            pub const fn encode(self) -> Result<Instruction, EncodeError> {
-                let def = &defs::wormhole::SFPSTOCHRNDi;
-                let mut word = def.skeleton();
-                let f = def.fields()[0];
-                if !f.fits(self.stochastic_rounding) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.stochastic_rounding,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.stochastic_rounding);
-                let f = def.fields()[1];
-                if !f.fits(self.imm5) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.imm5,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.imm5);
-                let f = def.fields()[2];
-                if !f.fits(self.vb) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.vb,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.vb);
-                let f = def.fields()[3];
-                if !f.fits(self.vc) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.vc,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.vc);
-                let f = def.fields()[4];
-                if !f.fits(self.vd) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.vd,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.vd);
-                let f = def.fields()[5];
-                if !f.fits(self.use_imm5) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.use_imm5,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.use_imm5);
-                let f = def.fields()[6];
-                if !f.fits(self.mod1) {
-                    return Err(EncodeError::FieldTooLarge {
-                        instruction: def.key(),
-                        field: f.name(),
-                        value: self.mod1,
-                        width: f.width(),
-                    });
-                }
-                word |= f.place(self.mod1);
-                Ok(Instruction::new(word, def))
-            }
-        }
+        builder!(
+            #[doc = "`SFPSTOCHRNDi`."]
+            SfpstochrnDi,
+            defs::wormhole::SFPSTOCHRNDi,
+            [stochastic_rounding, imm5, vb, vc, vd, use_imm5, mod1]
+        );
 
         /// `UNPACR_NOP_ZEROSRC`.
         pub const fn unpacr_nop_zerosrc(
@@ -14471,66 +4847,20 @@ pub mod encode {
             both_banks: u32,
             negative_inf_src_a: u32,
         ) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::UNPACR_NOP_ZEROSRC;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(which_unpacker) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: which_unpacker,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(which_unpacker);
-            let f = def.fields()[1];
-            if !f.fits(wait_like_unpacr) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: wait_like_unpacr,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(wait_like_unpacr);
-            let f = def.fields()[2];
-            if !f.fits(both_banks) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: both_banks,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(both_banks);
-            let f = def.fields()[3];
-            if !f.fits(negative_inf_src_a) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: negative_inf_src_a,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(negative_inf_src_a);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(
+                &defs::wormhole::UNPACR_NOP_ZEROSRC,
+                &[
+                    which_unpacker,
+                    wait_like_unpacr,
+                    both_banks,
+                    negative_inf_src_a,
+                ],
+            )
         }
 
         /// `UNPACR_NOP_SETDVALID`.
         pub const fn unpacr_nop_setdvalid(which_unpacker: u32) -> Result<Instruction, EncodeError> {
-            let def = &defs::wormhole::UNPACR_NOP_SETDVALID;
-            let mut word = def.skeleton();
-            let f = def.fields()[0];
-            if !f.fits(which_unpacker) {
-                return Err(EncodeError::FieldTooLarge {
-                    instruction: def.key(),
-                    field: f.name(),
-                    value: which_unpacker,
-                    width: f.width(),
-                });
-            }
-            word |= f.place(which_unpacker);
-            Ok(Instruction::new(word, def))
+            Instruction::with_operands(&defs::wormhole::UNPACR_NOP_SETDVALID, &[which_unpacker])
         }
     }
 }
