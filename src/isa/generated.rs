@@ -11587,6 +11587,73 @@ pub mod encode {
         Ok(Instruction::new(word, def))
     }
 
+    /// `MOVD2B_BH`.
+    ///
+    /// `src_row` is the `SrcB` row the move writes and `dst_row` the `Dst` row
+    /// it reads: the diagram's `SrcRow` field names the `SrcB` side and its
+    /// `DstRow` the `Dst` side, as the simulator's `MOVD2B` executes them.
+    pub const fn movd2_b(
+        use_dst32b_lo: u32,
+        src_row: u32,
+        addr_mod: u32,
+        move4_rows: u32,
+        dst_row: u32,
+    ) -> Result<Instruction, EncodeError> {
+        let def = &defs::MOVD2B;
+        let mut word = def.skeleton();
+        let f = def.fields()[0];
+        if !f.fits(use_dst32b_lo) {
+            return Err(EncodeError::FieldTooLarge {
+                instruction: def.key(),
+                field: f.name(),
+                value: use_dst32b_lo,
+                width: f.width(),
+            });
+        }
+        word |= f.place(use_dst32b_lo);
+        let f = def.fields()[1];
+        if !f.fits(src_row) {
+            return Err(EncodeError::FieldTooLarge {
+                instruction: def.key(),
+                field: f.name(),
+                value: src_row,
+                width: f.width(),
+            });
+        }
+        word |= f.place(src_row);
+        let f = def.fields()[2];
+        if !f.fits(addr_mod) {
+            return Err(EncodeError::FieldTooLarge {
+                instruction: def.key(),
+                field: f.name(),
+                value: addr_mod,
+                width: f.width(),
+            });
+        }
+        word |= f.place(addr_mod);
+        let f = def.fields()[3];
+        if !f.fits(move4_rows) {
+            return Err(EncodeError::FieldTooLarge {
+                instruction: def.key(),
+                field: f.name(),
+                value: move4_rows,
+                width: f.width(),
+            });
+        }
+        word |= f.place(move4_rows);
+        let f = def.fields()[4];
+        if !f.fits(dst_row) {
+            return Err(EncodeError::FieldTooLarge {
+                instruction: def.key(),
+                field: f.name(),
+                value: dst_row,
+                width: f.width(),
+            });
+        }
+        word |= f.place(dst_row);
+        Ok(Instruction::new(word, def))
+    }
+
     /// `ELWADD_BH`, built field by field.
     ///
     /// 7 operands is too many to pass positionally without inviting a
