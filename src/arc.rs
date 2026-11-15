@@ -98,7 +98,20 @@ pub mod tag {
     /// cannot be mistaken for a chip with nothing fused off — the absent tag and
     /// the all-harvested mask are both zero, and zero enabled columns is
     /// self-evidently not a usable chip.
+    ///
+    /// The bits index the harvesting order, *not* ascending NOC columns: tt-metal
+    /// permutes them through `HARVESTING_NOC_LOCATIONS` before use
+    /// (`CoordinateManager::shuffle_tensix_harvesting_mask`,
+    /// `coordinate_manager.cpp:409-430`; `BlackholeTTDevice::get_chip_info`,
+    /// `blackhole_tt_device.cpp:143-146`). Only the population count is used here,
+    /// for the reason on [`Tensix::from_enabled_column_mask`].
     pub const ENABLED_TENSIX_COL: u16 = 34;
+
+    /// Bitmask of *enabled* GDDR channels, one bit per channel.
+    ///
+    /// tt-metal inverts and masks it to eight bits
+    /// (`BlackholeTTDevice::get_chip_info`, `blackhole_tt_device.cpp:146-149`).
+    pub const ENABLED_GDDR: u16 = 36;
 }
 
 #[cfg(test)]
