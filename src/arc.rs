@@ -51,6 +51,18 @@ pub const fn reset_scratch(n: u32) -> u64 {
     0x8003_0400 + (n as u64) * 4
 }
 
+/// The ARC's boot-status word (`blackhole.c:66-68`, `RESET_SCRATCH(2)`).
+///
+/// Its low three bits are a state machine word; the ARC is up far enough to
+/// answer messages when they read `0x5` (`(arc_boot_status & 0x7) == 0x5`,
+/// `BlackholeTTDevice::wait_arc_core_start`, `blackhole_tt_device.cpp:182-203`).
+/// tt-kmd waits on a different bit of the same word
+/// (`ARC_BOOT_STATUS_READY_FOR_MSG`, `0x1`, `blackhole.c:531-552`); tt-metal's
+/// value is the stricter of the two, so it is the one copied here.
+pub const BOOT_STATUS: u64 = reset_scratch(2);
+/// The value [`BOOT_STATUS`]'s low three bits take once the ARC is up.
+pub const BOOT_STATUS_READY: u32 = 0x5;
+
 /// Points at the telemetry table header (`blackhole.c:62`, `RESET_SCRATCH(13)`).
 pub const TELEMETRY_PTR: u64 = reset_scratch(13);
 /// Points at the telemetry data block (`blackhole.c:63`, `RESET_SCRATCH(12)`).

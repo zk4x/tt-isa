@@ -134,6 +134,19 @@ pub const ENABLES: u64 = MAILBOX_BASE + 0x74;
 /// Total size the firmware may assume is its own.
 pub const MAILBOX_SIZE: u64 = 0x78;
 
+/// The word a launch's host-to-device barrier writes and reads back, tt-metal's
+/// `l1_membar` (`LocalChip::l1_membar` -> `insert_host_to_device_barrier`,
+/// `local_chip.cpp:472-508`).
+///
+/// No core reads it, and no other host word is here: it is the word immediately
+/// after the header the firmware owns ([`MAILBOX_SIZE`]), so a header that grows
+/// into it fails the build rather than silently overwriting the barrier. It
+/// exists so that every L1 write the host made before it — the program, the
+/// mailbox words, the arguments — has reached the tile before the generation
+/// that starts a core is written: with write-combined window mappings a store
+/// can still be sitting in the host's buffer when the next one leaves.
+pub const BARRIER: u64 = MAILBOX_BASE + 0x7C;
+
 /// A program's block repeats: with [`loops::LOOPED`] set in its length
 /// ([`PROGRAM_LEN`], a `KERNEL` entry's), the program's first word is how
 /// many entries follow ([`loops::entry`], at most [`loops::MAX`]), and the
@@ -311,6 +324,10 @@ const _: () = assert!(UNWEDGE + 4 <= MOP_CFG_VALID);
 const _: () = assert!(MOP_CFG + 9 * 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(TRACE_BUFFER + TRACE_BUFFER_BYTES <= crate::tensix::L1_SIZE);
 const _: () = assert!(TRACE_BUFFER % 16 == 0);
+// The barrier word is the host's, in the free part of the mailbox page.
+const _: () = assert!(BARRIER % 4 == 0);
+const _: () = assert!(BARRIER >= MAILBOX_BASE + MAILBOX_SIZE);
+const _: () = assert!(BARRIER + 4 <= DUMP);
 
 /// One mailbox per Tensix thread, for the three-role datapath.
 ///
