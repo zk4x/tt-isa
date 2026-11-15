@@ -511,8 +511,8 @@ mod tests {
 
     #[test]
     fn risc_b_has_no_reset_pc_override() {
-        // Its entry point is hardwired to L1 offset 0, which every linker script
-        // for B has to honour.
+        // Its reset PC is hardwired to L1 offset 0, which is why the loader
+        // starts it with a jump written there ([`crate::dm::IMAGE_BASE`]).
         assert_eq!(Core::B.reset_pc_register(), None);
         assert_eq!(Core::B.reset_pc_override(), None);
         assert_eq!(Core::B.default_reset_pc(), 0);

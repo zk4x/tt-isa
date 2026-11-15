@@ -28,9 +28,18 @@ pub const MAILBOX_BASE: u64 = crate::mailbox::launch::BASE + 4 * crate::mailbox:
 const _: () = assert!(MAILBOX_BASE + 0x100 <= crate::mailbox::TRACE_BUFFER);
 const _: () = assert!(MAILBOX_BASE % 16 == 0);
 
-/// Where the image is linked and loaded: RISCV B has no reset-PC override and
-/// always starts at L1 offset 0 (`tensix::Core::B`).
-pub const IMAGE_BASE: u64 = crate::tensix::Core::B.default_reset_pc() as u64;
+/// Where the mover image is linked and loaded.
+///
+/// RISCV B's reset PC is hardwired to L1 offset 0 and it has no reset-PC
+/// override, so the host writes one `jal x0, IMAGE_BASE` at 0 and then releases
+/// B, exactly as tt-metal starts BRISC (`generate_risc_startup_addr`,
+/// `llrt/hal.cpp:126-149`; `.fw_launch_addr = 0x0` in
+/// `bh_hal_tensix.cpp:100-106`). The image itself starts at `0x1000`: the
+/// card's CMFW newer than 19.3 writes its throttle state to L1 offset `0x10`
+/// on every Tensix (`umd/tests/unified/multiprocess.cpp:109-111`,
+/// `hw/inc/api/compute/matmul.h:24-27`), and UMD reserves the first 128 bytes
+/// and uses `0x1000` as its safe L1 address (`tests/test_utils/test_api_common.hpp:135-137`).
+pub const IMAGE_BASE: u64 = 0x1_000;
 /// The image may not reach the first role image ([`crate::l1::roles`]): the
 /// three role images are packed against NC's slot with reset-PC overrides, so
 /// B's slot is everything below them rather than only what lies under T0's
@@ -464,7 +473,8 @@ impl Mover {
         }
     }
 
-    /// RISCV B's mover: the image at its hardwired reset PC.
+    /// RISCV B's mover: the image at [`IMAGE_BASE`], above the card-owned low
+    /// L1 words, reached by the jump at its hardwired reset PC.
     pub const B: Mover = Mover {
         core: crate::tensix::Core::B,
         image_base: IMAGE_BASE,

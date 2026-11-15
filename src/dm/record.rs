@@ -90,7 +90,7 @@ pub const PAD_WRITE: u32 = 0x17;
 /// only on an even row, so a read must take the pair a row is half of and the
 /// wanted half be moved; that code, in this record, measured 400 bytes more
 /// in RISCV B's image, which then had 172 of its 24 KiB left (a mover image
-/// may not pass `IMAGE_MAX`; the slot is 42 KiB since the role images were
+/// may not pass `IMAGE_MAX`; the slot is 38 KiB since the role images were
 /// repacked). `docs/plans/roadmap.md`, "Gather without staging", has the
 /// options.
 ///

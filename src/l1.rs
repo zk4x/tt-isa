@@ -26,8 +26,9 @@ impl Region {
 /// loaded: packed against the end of the image area, each in a [`roles::SLOT`]
 /// reached through its core's reset-PC override. The slots are what T0..T2's
 /// default reset PCs would leave -- 16 KiB each, of which the images used about
-/// half -- and the space they free goes to B's mover ([`dm::IMAGE_MAX`]), which
-/// cannot be moved: its entry point is L1 offset 0.
+/// half -- and the space they free goes to B's mover ([`dm::IMAGE_MAX`]), whose
+/// image is above the low L1 words and reached by the jump at its hardwired
+/// reset PC.
 pub mod roles {
     use crate::tensix::Core;
 
