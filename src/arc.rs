@@ -127,6 +127,14 @@ pub mod tag {
     /// (`BlackholeTTDevice::get_chip_info`, `blackhole_tt_device.cpp:146-149`).
     pub const ENABLED_GDDR: u16 = 36;
 
+    /// GDDR training status, two bits per channel (`TelemetryTag::GDDR_STATUS`,
+    /// `telemetry.hpp:22`): `0b01` trained, `0b10` and `0b11` failed, `0b00` still
+    /// training (`FirmwareInfoProvider::get_modern_dram_statuses`,
+    /// `firmware_info_provider.cpp:470-488`). tt-metal waits for every enabled
+    /// channel to read `0b01` before it touches DRAM
+    /// (`TTDevice::wait_dram_channel_training`, `tt_device.cpp:320-373`).
+    pub const GDDR_STATUS: u16 = 22;
+
     /// The chip's AI clock, in MHz (`TelemetryTag::AICLK`, `telemetry.hpp:14`).
     ///
     /// This is what tt-metal's `get_clock` reads
