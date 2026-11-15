@@ -2,7 +2,7 @@
 
 The base is `Knight-Ops/metalium-rs` at `b22a245` (`crates/tt-isa`).
 
-## Unreleased — 2026-11-12
+## 0.2.0 — 2026-11-15
 
 - Deleted `tile` (1,362 lines) after the L1 tile library and every FP16/BF16
   conversion in it turned out to have no caller: `TileImage`, the `bfp*`/`fp*`
