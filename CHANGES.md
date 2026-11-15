@@ -18,6 +18,31 @@ The base is `Knight-Ops/metalium-rs` at `b22a245` (`crates/tt-isa`).
   `noc::atomic` (389) and `noc::multicast` (485). 8,478 lines, 44,719 → 36,241.
 - `noc::multicast::clear_outstanding` was the one thing used from those 16 files
   (by `tt-firmware`'s `noc_probe_b`); it moves to `noc::clear_outstanding`.
+- `mailbox`: the launch-message language finished — a launch message names the
+  program (the staged descriptor is gone), `a0` carries the args base a called
+  program receives, NC gets a launch mailbox of its own, and the enables word is
+  named.
+- `tensix`: the tile map stays, the accessors nothing calls go; `Tensix::FULL` is
+  the part's population, not a chip's.
+- `l1`, `tag_search`, `eth`, `dram`, `arc`, `frontend`, `backend`, `noc`, `sfpu`
+  cut to what is addressed or named: `l1` to the regions anything addresses,
+  `tag_search` to its words and the probe, `eth` to the queue map and the mover
+  contract, `dram` and `arc` to their live halves, `frontend` gone (nothing builds
+  a replay or a MOP config through it), `backend`'s unwritten helpers and two `dm`
+  words gone, `noc` with one coordinate type, and the SFPU datum and modifier
+  codes nothing names dropped.
+- `encode`: `MOVD2B` builds.
+- `xtask`: the two generators (`gen-isa`, `gen-cfg`), with the generated tables
+  committed as plain Rust rather than emitted by a build script, so the crate
+  stays buildable with nothing but `rustc`; `--check` fails instead of rewriting
+  when a committed table is out of date.
+- Blackhole names, each measured or read from the part: `GDDR_STATUS`,
+  `ENABLED_GDDR` with the harvesting order of `ENABLED_TENSIX_COL`, the ARC's boot
+  status and the launch barrier's word, DRAM channels numbered logically with an
+  endpoint each, and `dm::IMAGE_BASE` at `0x1000`, above the L1 words the card
+  owns.
+- `Cargo.toml`: version `0.2.0`; `homepage` and `repository` point at this
+  repository.
 
 ## 0.1.0 — 2026-11-08
 
