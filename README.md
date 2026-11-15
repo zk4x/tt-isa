@@ -32,6 +32,22 @@ protocols. `no_std`, `#![forbid(unsafe_code)]`, zero dependencies, because it is
 compiled for both the host and `riscv32im-unknown-none-elf`. Anything that cannot
 build for both does not belong here.
 
+## Use
+
+```bash
+cargo add tt-isa
+```
+
+```rust
+use tt_isa::isa::generated::encode;
+
+// `MOVA2D` with `Move8Rows`: the word a kernel pushes to the instruction FIFO.
+let word = encode::Mova2D::ZERO.move8_rows(1).encode().unwrap().word();
+assert_eq!(word >> 24, 0x12);
+
+// The fixed L1 regions, which a kernel is placed inside rather than at.
+println!("data arena {:#x}..{:#x}", tt_isa::l1::DATA.base, tt_isa::l1::DATA.end);
+```
 
 ## Modules
 
@@ -49,12 +65,13 @@ build for both does not belong here.
 | `tag_search` | The L1 tag-search accelerator's registers and helpers (host and ttsim only: armed trigger loads hang the core on silicon). |
 | `dm` | The RISCV B data mover protocol: descriptors, list entries (`op::READ`, `WRITE`, `LIST`, `COMPUTE`, `KERNEL`, `WAIT`, ...), element-wise `kind`s. |
 | `dm::record` | Op records (`GATHER`, `SCATTER`, `ELTWISE`, `SUM`): a whole op in a few list entries, `expand`ed on the tile and, first, on the host. |
-| `l1` | The fixed L1 region map (`REGIONS`: images, mover list, data arena, mailboxes, program slots, trace, program cache), checked at compile time. Kernels never address `l1::DATA` directly; `tt_kernels::l1` places buffers there. |
+| `l1` | The fixed L1 region map (`REGIONS`: images, mover list, data arena, mailboxes, program slots, trace, program cache), checked at compile time. Kernels never address `l1::DATA` directly; the compiler places buffers there. |
 
 ## Test
 
 ```bash
-cargo test -p tt-isa
+cargo test                   # in the crate
+cargo test -p tt-isa         # in this repository's workspace
 ```
 
 `tests/llk_crosscheck.rs` checks the generated encodings against tt-metal LLK's
@@ -70,9 +87,10 @@ settling interval does restart it.
 ## Gotchas
 
 - Never edit `src/isa/generated.rs` or `src/cfg/generated.rs`. Regenerate with
-  `cargo xtask gen-isa` / `gen-cfg`, which fetch their pinned input into
-  `vendor/` themselves; `--check` fails instead of rewriting when the committed
-  file is out of date.
+  `cargo xtask gen-isa` / `gen-cfg` in this repository (`xtask` is not in the
+  published package, which ships the generated Rust and needs nothing else); the
+  generators fetch their pinned input into `vendor/` themselves, and `--check`
+  fails instead of rewriting when the committed file is out of date.
 - A fact from a Wormhole page is a hypothesis on Blackhole. Several Matrix Unit
   fields sit one bit lower on Blackhole than Wormhole draws them; those are measured
   layouts in `xtask/src/genisa/Bits32_BH.lua`.
