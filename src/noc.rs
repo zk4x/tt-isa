@@ -93,8 +93,9 @@ pub mod niu {
     pub const NOC_SELECT: u64 = NOC0_BASE ^ NOC1_BASE;
     const _: () = assert!(NOC_SELECT.count_ones() == 1 && NOC0_BASE & NOC_SELECT == 0);
 
-    /// Which of a tile's two NIUs a request leaves through. Requests to GDDR
-    /// are bound to it ([`crate::dram::DramChannel::owns`]).
+    /// Which of a tile's two NIUs a request leaves through. A request to GDDR
+    /// leaves through the endpoint its channel prefers for it
+    /// ([`crate::dram::DramChannel::preferred`]).
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
     pub enum Niu {
         Noc0,
@@ -421,14 +422,14 @@ pub mod niu {
         /// destination must be MMIO.
         MmioInline { to: Endpoint, data: u32 },
         /// Read all of `from`, a range of a usable GDDR channel, into this
-        /// tile's L1 at `to_local`, through the channel's endpoint `port`.
+        /// tile's L1 at `to_local`, out of the endpoint the channel prefers for
+        /// the issuing NoC.
         ///
         /// DRAM is an "other" address, so a read into L1 needs the two addresses
         /// congruent mod [`crate::dram::ALIGN`] (64), not 16. The offset fits
         /// the low address word: [`crate::dram::CHANNEL_BYTES`] is below 4 GiB.
         ReadDram {
             from: crate::dram::DramRange,
-            port: u8,
             to_local: u32,
         },
         /// Write `len` bytes of this tile's L1 at `from_local` over all of `to`
@@ -436,7 +437,6 @@ pub mod niu {
         WriteDram {
             from_local: u32,
             to: crate::dram::DramRange,
-            port: u8,
         },
         /// Add `value` to the 32-bit word at `to` -- the L1 of a Tensix or
         /// Ethernet tile, never MMIO or DRAM -- atomically, and write the word's
@@ -460,12 +460,6 @@ pub mod niu {
         Length,
         /// An inline write aimed at L1, or at an unaligned MMIO address.
         InlineToL1,
-        /// A DRAM endpoint port beyond the channel's three.
-        Port,
-        /// A DRAM endpoint port the issuing NIU does not own
-        /// (`crate::dram::DramChannel::owns`): both NoCs on one endpoint is
-        /// the SYS-1419 hang.
-        PortNoc,
     }
 
     /// `NOC_CTRL`'s command field: a write (`MemoryMap.md`, `NOC_CTRL`).
@@ -489,8 +483,7 @@ pub mod niu {
         /// The initiator registers to write, in order, before `CMD_CTRL`, for
         /// a request through `niu`. `me` is the initiating tile's coordinate,
         /// which reads name as their return address and writes as the source
-        /// of their data. A GDDR request through an NIU that does not own its
-        /// port is refused ([`RequestError::PortNoc`]).
+        /// of their data.
         ///
         /// Every request is on static virtual channel 1 -- class `0b00`, buddy
         /// bit 1 (`MemoryMap.md`, `NOC_CTRL` bits 7, 13-15) -- as tt-metal
@@ -539,16 +532,12 @@ pub mod niu {
                 }
                 // One request's worth of a `DramMove`, which owns the GDDR
                 // encoding and its checks.
-                Command::ReadDram {
-                    from,
-                    port,
-                    to_local,
-                } => return DramMove::single(from, port, to_local, false, me, txn, niu),
-                Command::WriteDram {
-                    from_local,
-                    to,
-                    port,
-                } => return DramMove::single(to, port, from_local, true, me, txn, niu),
+                Command::ReadDram { from, to_local } => {
+                    return DramMove::single(from, to_local, false, me, txn, niu);
+                }
+                Command::WriteDram { from_local, to } => {
+                    return DramMove::single(to, from_local, true, me, txn, niu);
+                }
                 Command::AtomicIncrement {
                     to,
                     value,
@@ -639,28 +628,21 @@ pub mod niu {
 
     impl DramMove {
         /// All of `range` to (`write == false`) or from this tile's L1 at
-        /// `l1`, through endpoint `port`, issued by the tile at `me` through
-        /// `niu` under `txn`. Refused as [`Command::registers`] would refuse
-        /// any of its requests: a port beyond the channel's three, one `niu`
-        /// does not own (the SYS-1419 hang), zero bytes, L1 not congruent to
-        /// the GDDR address (mod [`crate::dram::ALIGN`] for a read, 16 for a
-        /// write), or either side reaching [`MMIO_START`].
+        /// `l1`, driven out of `range`'s channel's preferred endpoint for
+        /// `niu`, issued by the tile at `me` through `niu` under `txn`. Refused
+        /// as [`Command::registers`] would refuse any of its requests: zero
+        /// bytes, L1 not congruent to the GDDR address (mod
+        /// [`crate::dram::ALIGN`] for a read, 16 for a write), or either side
+        /// reaching [`MMIO_START`].
         pub fn new(
             range: crate::dram::DramRange,
-            port: u8,
             l1: u32,
             write: bool,
             me: (u8, u8),
             txn: TxnId,
             niu: Niu,
         ) -> Result<Self, RequestError> {
-            if port >= crate::dram::PORTS {
-                return Err(RequestError::Port);
-            }
-            let at = range
-                .channel()
-                .endpoint(niu, port)
-                .ok_or(RequestError::PortNoc)?;
+            let at = range.channel().preferred(niu);
             let len = u32::try_from(range.len()).map_err(|_| RequestError::Length)?;
             // `CHANNEL_BYTES` is below 4 GiB, so the offset fits the low word.
             let dram_at = range.offset() as u32;
@@ -697,14 +679,13 @@ pub mod niu {
         #[allow(clippy::too_many_arguments)]
         fn single(
             range: crate::dram::DramRange,
-            port: u8,
             l1: u32,
             write: bool,
             me: (u8, u8),
             txn: TxnId,
             niu: Niu,
         ) -> Result<[(u64, u32); 10], RequestError> {
-            let m = Self::new(range, port, l1, write, me, txn, niu)?;
+            let m = Self::new(range, l1, write, me, txn, niu)?;
             if m.len > MAX_REQUEST_BYTES {
                 return Err(RequestError::Length);
             }
@@ -1101,26 +1082,17 @@ pub mod niu {
             let me = (3, 4);
             let (ret_hi, tag, ctrl) = (3 | (4 << 6), 3 << 10, CMD_RD | RESP_MARKED | STATIC_VC_1);
             for ch in crate::dram::Dram::FULL.channels() {
-                for port in 0..crate::dram::PORTS {
-                    for (off, len) in [(0u64, 64u64), (64, 4096), (4096, 40_000), (128, 16384)] {
-                        let l1 = (off % 64) as u32 + 0x2_0000;
-                        let mv = DramMove::new(
-                            ch.range(off, len).unwrap(),
-                            ch.port_for(Niu::Noc0, port),
-                            l1,
-                            false,
-                            me,
-                            T,
-                            Niu::Noc0,
-                        )
-                        .unwrap();
-                        for r in mv.words() {
-                            assert_eq!((r.ret_hi, r.tag, r.ctrl), (ret_hi, tag, ctrl));
-                            let regs = r.registers();
-                            assert_eq!(reg(&regs, initiator::AT_DATA), 0);
-                            assert_eq!(reg(&regs, initiator::TARG_ADDR_MID), 0);
-                            assert_eq!(reg(&regs, initiator::RET_ADDR_MID), 0);
-                        }
+                for (off, len) in [(0u64, 64u64), (64, 4096), (4096, 40_000), (128, 16384)] {
+                    let l1 = (off % 64) as u32 + 0x2_0000;
+                    let mv =
+                        DramMove::new(ch.range(off, len).unwrap(), l1, false, me, T, Niu::Noc0)
+                            .unwrap();
+                    for r in mv.words() {
+                        assert_eq!((r.ret_hi, r.tag, r.ctrl), (ret_hi, tag, ctrl));
+                        let regs = r.registers();
+                        assert_eq!(reg(&regs, initiator::AT_DATA), 0);
+                        assert_eq!(reg(&regs, initiator::TARG_ADDR_MID), 0);
+                        assert_eq!(reg(&regs, initiator::RET_ADDR_MID), 0);
                     }
                 }
             }
@@ -1131,19 +1103,23 @@ pub mod niu {
             let ch = crate::dram::Dram::FULL.channel(1).unwrap();
             let rd = |off: u64, to: u32| Command::ReadDram {
                 from: ch.range(off, 2048).unwrap(),
-                port: 1,
                 to_local: to,
             };
             let r = rd(0x10_0060, 0x3_0020)
                 .registers((3, 4), T, Niu::Noc1)
                 .unwrap();
-            // Channel 1, port 1 (NoC #1's): translated (17, 12 + 3 + 1).
+            // Channel 1's slot is (17, 15); NoC #1 drives subchannel 1.
             assert_eq!(reg(&r, initiator::TARG_ADDR_HI), 17 | (16 << 6));
             assert_eq!(reg(&r, initiator::TARG_ADDR_LO), 0x10_0060);
             assert_eq!(reg(&r, initiator::TARG_ADDR_MID), 0);
             assert_eq!(reg(&r, initiator::RET_ADDR_LO), 0x3_0020);
             assert_eq!(reg(&r, initiator::AT_LEN_BE), 2048);
             assert_eq!(reg(&r, initiator::CTRL), CMD_RD | RESP_MARKED | STATIC_VC_1);
+            // NoC #0 drives subchannel 0 of the same channel.
+            let r = rd(0x10_0060, 0x3_0020)
+                .registers((3, 4), T, Niu::Noc0)
+                .unwrap();
+            assert_eq!(reg(&r, initiator::TARG_ADDR_HI), 17 | (15 << 6));
             // Congruent mod 16, or mod 32, but not mod 64: refused (row 64).
             for off in [0x10_0010, 0x10_0040] {
                 assert_eq!(
@@ -1151,46 +1127,33 @@ pub mod niu {
                     Err(RequestError::Alignment)
                 );
             }
-            // Port 1 is NoC #1's: through NoC #0 it is refused (SYS-1419).
-            assert_eq!(
-                rd(0x10_0060, 0x3_0020).registers((3, 4), T, Niu::Noc0),
-                Err(RequestError::PortNoc)
-            );
         }
 
         #[test]
-        fn a_dram_write_needs_c16_a_port_and_one_request() {
+        fn a_dram_write_needs_c16_and_one_request() {
             let ch = crate::dram::Dram::FULL.channel(0).unwrap();
-            let wr = |len: u64, port: u8, from: u32| Command::WriteDram {
+            let wr = |len: u64, from: u32| Command::WriteDram {
                 from_local: from,
                 to: ch.range(0x40, len).unwrap(),
-                port,
             };
-            let r = wr(64, 0, 0x2_0000).registers((3, 4), T, Niu::Noc0).unwrap();
+            let r = wr(64, 0x2_0000).registers((3, 4), T, Niu::Noc0).unwrap();
             assert_eq!(reg(&r, initiator::TARG_ADDR_LO), 0x2_0000);
-            assert_eq!(reg(&r, initiator::RET_ADDR_HI), 17 | (12 << 6));
+            // Channel 0's slot is (17, 12); NoC #0 drives subchannel 2 there.
+            assert_eq!(reg(&r, initiator::RET_ADDR_HI), 17 | (14 << 6));
             assert_eq!(reg(&r, initiator::RET_ADDR_LO), 0x40);
             assert_eq!(
-                wr(64, 0, 0x2_0008).registers((3, 4), T, Niu::Noc0),
+                wr(64, 0x2_0008).registers((3, 4), T, Niu::Noc0),
                 Err(RequestError::Alignment)
             );
+            // NoC #1 drives subchannel 1 of the same channel.
+            let one = wr(64, 0x2_0000).registers((3, 4), T, Niu::Noc1).unwrap();
+            assert_eq!(reg(&one, initiator::RET_ADDR_HI), 17 | (13 << 6));
             assert_eq!(
-                wr(64, 3, 0x2_0000).registers((3, 4), T, Niu::Noc0),
-                Err(RequestError::Port)
-            );
-            // Ports 0 and 2 are NoC #0's: through NoC #1 they are refused.
-            for port in [0, 2] {
-                assert_eq!(
-                    wr(64, port, 0x2_0000).registers((3, 4), T, Niu::Noc1),
-                    Err(RequestError::PortNoc)
-                );
-            }
-            assert_eq!(
-                wr(MAX_REQUEST_BYTES as u64 + 16, 0, 0x2_0000).registers((3, 4), T, Niu::Noc0),
+                wr(MAX_REQUEST_BYTES as u64 + 16, 0x2_0000).registers((3, 4), T, Niu::Noc0),
                 Err(RequestError::Length)
             );
             assert_eq!(
-                wr(0, 0, 0x2_0000).registers((3, 4), T, Niu::Noc0),
+                wr(0, 0x2_0000).registers((3, 4), T, Niu::Noc0),
                 Err(RequestError::Length)
             );
         }
@@ -1203,8 +1166,7 @@ pub mod niu {
             let len = 2 * MAX_REQUEST_BYTES as u64 + 96;
             for write in [false, true] {
                 let range = ch.range(0x20_0040, len).unwrap();
-                let port = ch.port_for(Niu::Noc0, 0);
-                let mv = DramMove::new(range, port, 0x4_0040, write, (3, 4), T, Niu::Noc0).unwrap();
+                let mv = DramMove::new(range, 0x4_0040, write, (3, 4), T, Niu::Noc0).unwrap();
                 let got: [[(u64, u32); 10]; 3] = {
                     let mut it = mv.requests();
                     [it.next().unwrap(), it.next().unwrap(), it.next().unwrap()]
@@ -1219,12 +1181,10 @@ pub mod niu {
                         Command::WriteDram {
                             from_local: l1,
                             to: part,
-                            port,
                         }
                     } else {
                         Command::ReadDram {
                             from: part,
-                            port,
                             to_local: l1,
                         }
                     };
@@ -1238,12 +1198,8 @@ pub mod niu {
             // Refusals are the whole move's.
             let r = ch.range(0x20_0040, len).unwrap();
             assert_eq!(
-                DramMove::new(r, ch.cmfw_port(), 0x4_0050, false, (3, 4), T, Niu::Noc0).err(),
+                DramMove::new(r, 0x4_0050, false, (3, 4), T, Niu::Noc0).err(),
                 Some(RequestError::Alignment)
-            );
-            assert_eq!(
-                DramMove::new(r, ch.noc1_port(), 0x4_0040, false, (3, 4), T, Niu::Noc0).err(),
-                Some(RequestError::PortNoc)
             );
         }
 
@@ -1370,6 +1326,10 @@ pub mod grid {
     /// from a *count* and spares us having to guess the bit order of a mask.
     pub const TENSIX_COLUMNS: [u8; 14] = [1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15, 16];
 
+    /// The fourteen harvestable columns as a bit mask — the bits of an
+    /// `ENABLED_TENSIX_COL` word that name a column (tt-metal's `& 0x3FFF`).
+    const COLUMN_MASK: u32 = (1u32 << TENSIX_COLUMNS.len()) - 1;
+
     /// Rows of Tensix tiles. Harvesting on Blackhole is by column, not row
     /// (`NoC/Coordinates.md:54`), unlike Wormhole where it is by row.
     pub const TENSIX_ROW_COUNT: usize = 10;
@@ -1426,35 +1386,42 @@ pub mod grid {
             }
         }
         /// Interpret an `ENABLED_TENSIX_COL` telemetry word
-        /// ([`crate::arc::tag::ENABLED_TENSIX_COL`]).
+        /// ([`crate::arc::tag::ENABLED_TENSIX_COL`]) the way tt-metal does.
         ///
-        /// Only the population count is used, for the reason given on
-        /// [`TENSIX_COLUMNS`]: in translated space the survivors are a prefix, so
-        /// the count determines the set and the bit order does not matter. That
-        /// matters because the bit order is *not* published — UMD documents its own
-        /// `HarvestingMasks` as logical indices
-        /// (`umd/device/soc_descriptor.hpp:151-158`) but says nothing about the raw
-        /// firmware word, and a wrong guess about it would put a write on a
-        /// fused-off tile, which is precisely the failure this type exists to make
-        /// impossible.
+        /// tt-metal complements the word and keeps fourteen bits
+        /// (`~read_entry(ENABLED_TENSIX_COL) & 0x3FFF`,
+        /// `BlackholeTTDevice::get_chip_info`, `blackhole_tt_device.cpp:141-146`):
+        /// the *harvested* mask, in the firmware's harvesting order. It then
+        /// permutes that mask into ascending-X order
+        /// (`CoordinateManager::shuffle_tensix_harvesting_mask`,
+        /// `coordinate_manager.cpp:409-430`) and builds a Tensix grid
+        /// `14 - popcount(harvested)` columns wide
+        /// (`BlackholeCoordinateManager::get_tensix_grid_size`,
+        /// `blackhole_coordinate_manager.cpp:571-574`).
         ///
-        /// `None` if the set bits are not contiguous from bit 0. That shape would
-        /// contradict `NoC/Coordinates.md:54`, and the honest response to a chip
-        /// that contradicts the specification is to stop and report the word, not
-        /// to pick an interpretation and drive the NoC with it.
+        /// The bit order never reaches anything this crate addresses; only the
+        /// count does. With translation on, the *k*-th survivor is translated to
+        /// `TENSIX_COLUMNS[k]` whatever its physical X
+        /// (`fill_tensix_noc0_translated_mapping`), so the survivors are always
+        /// the first `n` of [`TENSIX_COLUMNS`] — and a permutation does not
+        /// change a population count, which is why tt-metal's shuffle is not
+        /// repeated here.
+        ///
+        /// Measured on the card (2026-11-15): `ENABLED_TENSIX_COL` reads
+        /// `0x1EFF` — twelve columns, bits 0-7 and 9-12, fused physical columns
+        /// X 5 and X 10. The word is not contiguous from bit 0, which is why
+        /// the old "the set bits must be `2^n - 1`" test refused the chip.
+        ///
+        /// `None` when no column survives. A word of all zeros names a part with
+        /// every column fused, which is not one this crate can drive.
         pub const fn from_enabled_column_mask(mask: u32) -> Option<Tensix> {
-            let n = mask.count_ones();
-            if n as usize > TENSIX_COLUMNS.len() {
-                return None;
-            }
-            // Contiguous from bit 0 iff the mask is 2^n - 1. Shifting by 32 is UB
-            // in Rust, so the full-width case is spelled out.
-            let expected = if n == 32 { u32::MAX } else { (1u32 << n) - 1 };
-            if mask != expected {
+            let harvested = !mask & COLUMN_MASK;
+            let enabled = TENSIX_COLUMNS.len() as u32 - harvested.count_ones();
+            if enabled == 0 {
                 return None;
             }
             Some(Tensix {
-                enabled_columns: n as u8,
+                enabled_columns: enabled as u8,
             })
         }
 
@@ -1544,29 +1511,35 @@ pub mod grid {
             assert!(is_tensix_geometry(16, 11));
         }
 
+        /// The word the card actually reports: read on 2026-11-15 as
+        /// `0x1EFF`, twelve columns and not contiguous from bit 0. tt-metal's
+        /// reading is the population count of the complement, so positions must
+        /// not matter.
         #[test]
-        fn a_mask_is_read_by_population_count() {
-            assert_eq!(
-                Tensix::from_enabled_column_mask(0b1111_1111_1111).unwrap(),
-                Tensix::from_enabled_column_count(12).unwrap()
-            );
+        fn a_mask_is_read_as_tt_metal_reads_it() {
+            let twelve = Tensix::from_enabled_column_count(12).unwrap();
+            // The card's own word, then the same twelve with the holes
+            // elsewhere: low, high, middle, and every arrangement between.
+            for mask in [0x1EFF, 0x0FFF, 0x3FFC, 0x3FCF, 0x3F3F] {
+                assert_eq!(
+                    Tensix::from_enabled_column_mask(mask).unwrap(),
+                    twelve,
+                    "{mask:#06x}"
+                );
+            }
+            // A full part.
             assert_eq!(
                 Tensix::from_enabled_column_mask(0x3FFF).unwrap(),
                 Tensix::FULL
             );
-        }
-
-        #[test]
-        fn a_mask_that_contradicts_the_specification_is_refused() {
-            // Holes in the middle would mean harvested columns are not at maximal
-            // X. Refuse rather than guess: the alternative is writing to a
-            // fused-off tile.
-            assert!(Tensix::from_enabled_column_mask(0b1111_1111_1101).is_none());
-            assert!(Tensix::from_enabled_column_mask(0b11_0000_0000_0000).is_none());
-            // More columns than the part has.
-            assert!(Tensix::from_enabled_column_mask(u32::MAX).is_none());
-            // No columns at all: the shape an absent telemetry tag takes.
-            assert_eq!(Tensix::from_enabled_column_mask(0).unwrap().tile_count(), 0);
+            // Bits above the fourteen columns do not name a column; tt-metal
+            // masks them off, so they cannot change the answer.
+            assert_eq!(
+                Tensix::from_enabled_column_mask(0x1EFF | 0xFFFF_0000).unwrap(),
+                twelve
+            );
+            // Every column fused: nothing to address.
+            assert!(Tensix::from_enabled_column_mask(0).is_none());
         }
     }
 }

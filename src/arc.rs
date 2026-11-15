@@ -104,7 +104,9 @@ pub mod tag {
     /// (`CoordinateManager::shuffle_tensix_harvesting_mask`,
     /// `coordinate_manager.cpp:409-430`; `BlackholeTTDevice::get_chip_info`,
     /// `blackhole_tt_device.cpp:143-146`). Only the population count is used here,
-    /// for the reason on [`Tensix::from_enabled_column_mask`].
+    /// for the reason on [`Tensix::from_enabled_column_mask`][tensix].
+    ///
+    /// [tensix]: crate::noc::grid::Tensix::from_enabled_column_mask
     pub const ENABLED_TENSIX_COL: u16 = 34;
 
     /// Bitmask of *enabled* GDDR channels, one bit per channel.
@@ -112,6 +114,21 @@ pub mod tag {
     /// tt-metal inverts and masks it to eight bits
     /// (`BlackholeTTDevice::get_chip_info`, `blackhole_tt_device.cpp:146-149`).
     pub const ENABLED_GDDR: u16 = 36;
+
+    /// The chip's AI clock, in MHz (`TelemetryTag::AICLK`, `telemetry.hpp:14`).
+    ///
+    /// This is what tt-metal's `get_clock` reads
+    /// (`blackhole_tt_device.cpp:205-211`), and what `wait_for_aiclk_value`
+    /// polls until a power-state change has taken effect (`chip.cpp:240-296`).
+    pub const AICLK: u16 = 14;
+
+    /// The highest AI clock the chip will run, in MHz
+    /// (`TelemetryTag::AICLK_LIMIT_MAX`, `telemetry.hpp:63`).
+    ///
+    /// For a Blackhole whose firmware is newer than 18.7 this is tt-metal's
+    /// `get_max_clock_freq` (`firmware_info_provider.cpp:197`), the value an
+    /// `AICLK_GO_BUSY` is confirmed against. Card 0 reads `0x546` (1350).
+    pub const AICLK_LIMIT_MAX: u16 = 63;
 }
 
 #[cfg(test)]

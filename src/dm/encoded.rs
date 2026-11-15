@@ -1,6 +1,7 @@
 //! Host-encoded GDDR reads (`op::READ_ENCODED`).
 //!
-//! A plain `READ` entry names a channel, port, offset, L1 address and length; the
+//! A plain `READ` entry names a channel, offset, L1 address and length (word 2
+//! is reserved); the
 //! mover decodes it, checks it whole as a `DramMove` and encodes the NIU's request
 //! words, which costs ~190 of the ~360 cycles an entry takes
 //! (`docs/learnings/performance-log.md`, "Read-loop probe"). The host knows all of
@@ -38,7 +39,7 @@
 //! (its decode is amortised over its requests anyway).
 
 use super::{Descriptor, MAILBOX_BASE, TXN_B, error, op};
-use crate::dram::{CHANNELS, Dram, PORTS};
+use crate::dram::{CHANNELS, Dram};
 use crate::noc::niu::{
     CMD_RD, DramMove, Endpoint, MAX_REQUEST_BYTES, MMIO_START, Niu, RESP_MARKED, STATIC_VC_1, TxnId,
 };
@@ -134,17 +135,19 @@ pub const fn endpoint_hi(x: u8, y: u8) -> u32 {
     Endpoint { x, y, addr: 0 }.hi()
 }
 
-/// The endpoint bitmap for the chip's `usable` channels.
+/// The endpoint bitmap for the chip's `ENABLED_GDDR` word.
+///
+/// Empty for a word that names no chip ([`Dram::from_enabled_mask`]): no
+/// endpoint can be named, and the guard refuses whatever is asked for.
 pub fn endpoint_bitmap(usable: u32) -> [u32; ENDPOINT_WORDS] {
     let mut bits = [0u32; ENDPOINT_WORDS];
-    let dram = Dram::from_usable_mask(usable as u8);
+    let Some(dram) = Dram::from_enabled_mask(usable as u8) else {
+        return bits;
+    };
     for ch in dram.channels() {
-        for port in 0..PORTS {
-            if let Some(at) = ch.endpoint(Niu::Noc0, port) {
-                let hi = endpoint_hi(at.x(), at.y()) as usize;
-                bits[hi / 32] |= 1 << (hi % 32);
-            }
-        }
+        let at = ch.preferred(Niu::Noc0);
+        let hi = endpoint_hi(at.x(), at.y()) as usize;
+        bits[hi / 32] |= 1 << (hi % 32);
     }
     bits
 }
@@ -169,10 +172,9 @@ pub fn encode(ctx: &Context, entry: [u32; 8]) -> Result<Option<[u32; 8]>, u32> {
     if d.range.len() > MAX_REQUEST_BYTES as u64 {
         return Ok(None);
     }
-    let port = d.range.channel().port_for(Niu::Noc0, d.port);
     let txn = TxnId::new(TXN_B).expect("B's transaction ID is below 16");
-    let mv = DramMove::new(d.range, port, d.l1, false, me, txn, Niu::Noc0)
-        .map_err(|_| error::ALIGNMENT)?;
+    let mv =
+        DramMove::new(d.range, d.l1, false, me, txn, Niu::Noc0).map_err(|_| error::ALIGNMENT)?;
     let r = mv
         .words()
         .next()
@@ -202,20 +204,18 @@ pub fn validate(ctx: &Context, e: [u32; 8]) -> Result<(), u32> {
     if e[0] != op::READ_ENCODED {
         return Err(error::OP);
     }
-    // Which (channel, port) the target coordinate names; the offset, L1 address and
-    // length are the entry's own words.
+    // Which channel the target coordinate names; the offset, L1 address and
+    // length are the entry's own words. Word 2 is reserved and zero.
     for channel in 0..CHANNELS as u32 {
-        for port in 0..PORTS as u32 {
-            let plain = [op::READ, channel, port, e[1], e[3], e[7], 0, 0];
-            if encode(ctx, plain) == Ok(Some(e)) {
-                return if guard(&e, endpoint_hi(ctx.me.0, ctx.me.1), |hi| {
-                    ctx.endpoint_ok(hi)
-                }) {
-                    Ok(())
-                } else {
-                    Err(error::ENCODED)
-                };
-            }
+        let plain = [op::READ, channel, 0, e[1], e[3], e[7], 0, 0];
+        if encode(ctx, plain) == Ok(Some(e)) {
+            return if guard(&e, endpoint_hi(ctx.me.0, ctx.me.1), |hi| {
+                ctx.endpoint_ok(hi)
+            }) {
+                Ok(())
+            } else {
+                Err(error::ENCODED)
+            };
         }
     }
     Err(error::ENCODED)
@@ -270,8 +270,8 @@ mod tests {
         verify_with(e, ctx().seed(op::READ_ENCODED))
     }
 
-    fn plain(channel: u32, port: u32, offset: u32, l1: u32, len: u32) -> [u32; 8] {
-        [op::READ, channel, port, offset, l1, len, 0, 0]
+    fn plain(channel: u32, reserved: u32, offset: u32, l1: u32, len: u32) -> [u32; 8] {
+        [op::READ, channel, reserved, offset, l1, len, 0, 0]
     }
 
     fn ok_bit(bits: &[u32; ENDPOINT_WORDS]) -> impl Fn(u32) -> bool + '_ {
@@ -304,8 +304,7 @@ mod tests {
         // exactly what `DramMove` makes.
         let t = TxnId::new(TXN_B).unwrap();
         let d = Descriptor::decode(0xFF, op::READ, 1, 0, 0x1000, 0x2_1000, 4096).unwrap();
-        let port = d.range.channel().port_for(Niu::Noc0, 0);
-        let r = DramMove::new(d.range, port, d.l1, false, ME, t, Niu::Noc0)
+        let r = DramMove::new(d.range, d.l1, false, ME, t, Niu::Noc0)
             .unwrap()
             .words()
             .next()
@@ -337,9 +336,9 @@ mod tests {
             encode(&ctx(), plain(0, 0, 0, 0x2_0000, 0)),
             Err(error::LENGTH)
         );
-        // A channel the chip does not report usable.
+        // A mask that names no chip: two banks fused is not a part UMD accepts.
         assert_eq!(
-            encode(&Context::new(0xFE, ME, KEY), plain(0, 0, 0, 0x2_0000, 64)),
+            encode(&Context::new(0x0F, ME, KEY), plain(0, 0, 0, 0x2_0000, 64)),
             Err(error::RANGE)
         );
     }
@@ -518,7 +517,8 @@ mod tests {
                 "validate let through {what}: {bad:x?}"
             );
         }
-        // A channel the chip does not report usable.
+        // The same channel number is a different bank under a different mask,
+        // so the entry that was right for the full chip is not right here.
         assert_eq!(
             validate(&Context::new(0xFD, ME, KEY), good()),
             Err(error::ENCODED)
@@ -533,13 +533,13 @@ mod tests {
     #[test]
     fn the_guard_accepts_what_validate_accepts() {
         let bits = endpoint_bitmap(0xFF);
-        for (c, p, off, l1, len) in [
-            (0, 0, 0, 0x2_0000, 64),
-            (7, 2, 0x10_0000, 0x3_0000, 4096),
-            (4, 1, 0x40, 0xF_F000 + 0x40, 2048),
-            (2, 0, 0, 0x2_0000, MAX_REQUEST_BYTES),
+        for (c, off, l1, len) in [
+            (0, 0, 0x2_0000, 64),
+            (7, 0x10_0000, 0x3_0000, 4096),
+            (4, 0x40, 0xF_F000 + 0x40, 2048),
+            (2, 0, 0x2_0000, MAX_REQUEST_BYTES),
         ] {
-            let e = encode(&ctx(), plain(c, p, off, l1, len)).unwrap().unwrap();
+            let e = encode(&ctx(), plain(c, 0, off, l1, len)).unwrap().unwrap();
             assert_eq!(validate(&ctx(), e), Ok(()), "{e:x?}");
             assert!(verify(&e));
             assert!(guard(&e, endpoint_hi(ME.0, ME.1), ok_bit(&bits)), "{e:x?}");
@@ -578,24 +578,24 @@ mod tests {
     }
 
     #[test]
-    fn the_bitmap_holds_exactly_the_usable_channels_endpoints() {
-        for usable in [0xFFu32, 0x0F, 0x81] {
+    fn the_bitmap_holds_exactly_the_chips_channels_endpoints() {
+        for usable in [0xFFu32, 0xFE, 0x7F] {
             let bits = endpoint_bitmap(usable);
-            let dram = Dram::from_usable_mask(usable as u8);
+            let dram = Dram::from_enabled_mask(usable as u8).expect("a chip");
             let mut want = 0;
             for ch in dram.channels() {
-                for p in 0..PORTS {
-                    if let Some(at) = ch.endpoint(Niu::Noc0, p) {
-                        let hi = endpoint_hi(at.x(), at.y());
-                        assert!(ok_bit(&bits)(hi));
-                        want += 1;
-                    }
-                }
+                let at = ch.preferred(Niu::Noc0);
+                let hi = endpoint_hi(at.x(), at.y());
+                assert!(ok_bit(&bits)(hi));
+                want += 1;
             }
             let set: u32 = bits.iter().map(|w| w.count_ones()).sum();
             assert!(set <= want, "{usable:#x}: {set} bits for {want} endpoints");
             assert!(set > 0);
         }
+        // A word that names no chip can name no endpoint at all.
+        assert_eq!(endpoint_bitmap(0x0F), [0; ENDPOINT_WORDS]);
+        assert_eq!(endpoint_bitmap(0), [0; ENDPOINT_WORDS]);
     }
 }
 
@@ -659,7 +659,7 @@ mod fuzz {
             r.next() as u32,
             r.below(12) as u32,
         );
-        let usable = r.pick(&[0xFFu32, 0xFF, 0xFF, 0x0F, 0xF0, 0x81, r_usable]);
+        let usable = r.pick(&[0xFFu32, 0xFF, 0xFF, 0xFE, 0xFD, 0x7F, r_usable]);
         let me = (r.below(64) as u8, r.below(64) as u8);
         let len = r.pick(&[
             0,
@@ -698,8 +698,10 @@ mod fuzz {
             r_l1,
         ]);
         let ch = r.pick(&[0u32, 1, 2, 3, 4, 5, 6, 7, 8, 9, r_ch]);
-        let port = r.pick(&[0u32, 1, 2, 3]);
-        (usable, me, [op::READ, ch, port, off, l1, len, 0, 0])
+        // Word 2 is reserved: mostly zero, sometimes not, to keep the refusal
+        // path in reach.
+        let reserved = r.pick(&[0u32, 0, 0, 0, 1, r_any]);
+        (usable, me, [op::READ, ch, reserved, off, l1, len, 0, 0])
     }
 
     /// What the safe mover's checks and an independent assembly of the request say about `e`.
@@ -710,12 +712,7 @@ mod fuzz {
         if d.range.len() > MAX_REQ as u64 {
             return Ok(None);
         }
-        let port = d.range.channel().port_for(Niu::Noc0, d.port);
-        let at = d
-            .range
-            .channel()
-            .endpoint(Niu::Noc0, port)
-            .ok_or(error::ALIGNMENT)?;
+        let at = d.range.channel().preferred(Niu::Noc0);
         let from = Endpoint {
             x: at.x(),
             y: at.y(),

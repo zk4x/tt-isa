@@ -63,9 +63,10 @@ pub const LEN: u64 = MAILBOX_BASE + 0x40;
 /// silicon): the return address of every read. Written once, before start.
 pub const MY_X: u64 = MAILBOX_BASE + 0x44;
 pub const MY_Y: u64 = MAILBOX_BASE + 0x48;
-/// The chip's usable-channel mask, as the host read it from the ARC
-/// ([`crate::dram::Dram::from_usable_mask`]). Written once, before start: the
-/// mover can only name channels the chip said it has.
+/// The chip's `ENABLED_GDDR` word, as the host read it from the ARC
+/// ([`crate::dram::Dram::from_enabled_mask`]). Written once, before start: the
+/// mover can only name channels the chip said it has, and channel numbers are
+/// the chip's compacted logical ones.
 pub const USABLE: u64 = MAILBOX_BASE + 0x4C;
 /// Host -> mover: non-zero, record each list's entries and records through
 /// the tile's timestamper (`crate::mailbox::trace`), which the host has
@@ -136,9 +137,9 @@ const _: () = assert!(QUEUE_SLOTS + QUEUE_LEN as u64 * 4 <= WRITE_NOC);
 /// their data climbs the DRAM columns and shares one row's link, a single
 /// link's bandwidth for the whole row (`silicon_bench_memory::
 /// gddr_aggregate_nocs`, 4 tiles: 86 GB/s against 320). Barriers stay on
-/// NoC #0. Each request's port is the entry's mapped onto the ports its NIU
-/// owns (`crate::dram::DramChannel::port_for`), so no endpoint ever sees both
-/// NoCs.
+/// NoC #0. Each request goes out of the endpoint its channel prefers for the
+/// NIU (`crate::dram::DramChannel::preferred`), and the two NoCs' preferred
+/// endpoints differ on every channel, so no endpoint ever sees both.
 pub const WRITE_NOC: u64 = MAILBOX_BASE + 0xE0;
 /// Completed trace chunks (wrapping), including nested retained streams.
 /// Unlike queue completion, this advances during a long `CALL`. Only completed
@@ -186,14 +187,15 @@ pub mod caps {
 pub mod write_noc {
     /// Writes through NoC #0's NIU, with the reads: what the mover always did.
     pub const NOC0: u32 = 0;
-    /// Writes through NoC #1's NIU, on GDDR port 1 of every channel. Both
-    /// NIUs translate coordinates the same way (`NoC/Coordinates.md`,
-    /// "Coordinate Translation"), so the entries are unchanged.
+    /// Writes through NoC #1's NIU, out of the endpoint it prefers for each
+    /// channel (subchannel 1 of every channel). Both NIUs translate coordinates
+    /// the same way (`NoC/Coordinates.md`, "Coordinate Translation"), so the
+    /// entries are unchanged.
     pub const NOC1: u32 = 1;
     /// Write entries alternate between the two NIUs, NoC #0 first in each
-    /// list, each through a port its NIU owns. The two NoCs' write paths into
-    /// GDDR share no links -- NoC #0's run down the two DRAM columns, NoC
-    /// #1's along port 1's rows into them -- so their bandwidths can add.
+    /// list, each out of the endpoint its NIU prefers. The two NoCs' write paths
+    /// into GDDR share no links -- NoC #0's run down the two DRAM columns, NoC
+    /// #1's along its subchannel's rows into them -- so their bandwidths can add.
     pub const ALTERNATE: u32 = 2;
 }
 
@@ -392,7 +394,8 @@ pub mod fill {
 /// staging area (`tt_kernels::matmul::MATMUL_STAGE`, `0x2_0000`).
 pub const LIST: u64 = 0x1_4000;
 pub const LIST_MAX: u32 = 512;
-/// Bytes per list entry: eight words, `[op, channel, port, offset, l1, len, 0, 0]`.
+/// Bytes per list entry: eight words, `[op, channel, 0, offset, l1, len, 0, 0]`.
+/// The third word is reserved and must be zero.
 pub const ENTRY_BYTES: u64 = 32;
 /// The transpose scratch slot, after the list.
 pub const SCRATCH: u64 = LIST + LIST_MAX as u64 * ENTRY_BYTES;
@@ -1003,36 +1006,34 @@ impl Entry {
 
 pub mod error {
     pub const NONE: u32 = 0;
-    /// An op that is neither read nor write.
+    /// An op that is neither read nor write, or a nonzero reserved word.
     pub const OP: u32 = 1;
-    /// A channel the chip does not report usable, or a range past its extent.
+    /// A channel the chip does not report, or a range past its extent.
     pub const RANGE: u32 = 2;
-    /// A port beyond the channel's three.
-    pub const PORT: u32 = 3;
     /// DRAM and L1 addresses not congruent mod 64 (read, `dram::ALIGN`) or 16
     /// (write), or an L1 range outside L1.
-    pub const ALIGNMENT: u32 = 4;
+    pub const ALIGNMENT: u32 = 3;
     /// Zero bytes.
-    pub const LENGTH: u32 = 5;
+    pub const LENGTH: u32 = 4;
     /// A role panicked while running an [`super::op::KERNEL`] entry.
-    pub const ROLE: u32 = 6;
+    pub const ROLE: u32 = 5;
     /// A [`super::op::KERNEL`] entry with generation zero.
-    pub const GENERATION: u32 = 7;
+    pub const GENERATION: u32 = 6;
     /// A [`super::op::KERNEL`] entry naming a program outside the program
     /// cache, misaligned, or longer than a program may be.
-    pub const PROGRAM: u32 = 8;
+    pub const PROGRAM: u32 = 7;
     /// The tile's other mover has stopped on an error or panicked, or is not
     /// idle when a packet needs it.
-    pub const PEER: u32 = 9;
+    pub const PEER: u32 = 8;
     /// An entry or record the mover's direction does not run: a GDDR write on
     /// RISCV B, which only reads (`Mover::permits`).
-    pub const DIRECTION: u32 = 10;
+    pub const DIRECTION: u32 = 9;
     /// A native arithmetic operation rejected a logical input (division by zero).
-    pub const DOMAIN: u32 = 11;
+    pub const DOMAIN: u32 = 10;
     /// A host-encoded read ([`super::op::READ_ENCODED`]) failed the card's checksum
     /// (or, with `encoded-guard`, its guard, [`super::encoded::guard`]): not what the
     /// host's encoder makes, or damaged on the way.
-    pub const ENCODED: u32 = 12;
+    pub const ENCODED: u32 = 11;
 }
 
 /// A descriptor, as both sides see it.
@@ -1040,18 +1041,22 @@ pub mod error {
 pub struct Descriptor {
     pub op: u32,
     pub range: DramRange,
-    pub port: u8,
     pub l1: u32,
 }
 
 impl Descriptor {
-    /// Decode the raw words the mover reads, against the chip's `usable` mask.
+    /// Decode the raw words the mover reads, against the chip's `enabled` mask.
     /// Everything the mover does starts here, so every refusal is here too.
+    ///
+    /// The entry's word 2 is reserved and must be zero: it carried a DRAM
+    /// endpoint port while this workspace chose its own endpoints, and a
+    /// nonzero value now means an encoder from before the move to the chip's
+    /// preferred endpoint ([`crate::dram::DramChannel::preferred`]).
     pub fn decode(
         usable: u32,
         op: u32,
         channel: u32,
-        port: u32,
+        reserved: u32,
         offset: u32,
         l1: u32,
         len: u32,
@@ -1063,10 +1068,10 @@ impl Descriptor {
         if len == 0 {
             return Err(error::LENGTH);
         }
-        if port >= crate::dram::PORTS as u32 {
-            return Err(error::PORT);
+        if reserved != 0 {
+            return Err(error::OP);
         }
-        let dram = Dram::from_usable_mask(usable as u8);
+        let dram = Dram::from_enabled_mask(usable as u8).ok_or(error::RANGE)?;
         let range = u8::try_from(channel)
             .ok()
             .and_then(|c| dram.channel(c))
@@ -1081,12 +1086,7 @@ impl Descriptor {
         if (offset as u64) % modulus != (l1 as u64) % modulus || l1_end > crate::tensix::L1_SIZE {
             return Err(error::ALIGNMENT);
         }
-        Ok(Descriptor {
-            op,
-            range,
-            port: port as u8,
-            l1,
-        })
+        Ok(Descriptor { op, range, l1 })
     }
 }
 
@@ -1293,9 +1293,9 @@ mod tests {
 
     #[test]
     fn a_good_read_decodes() {
-        let d = Descriptor::decode(ALL, op::READ, 3, 2, 0x40, 0x2_0040, 4096).unwrap();
+        let d = Descriptor::decode(ALL, op::READ, 3, 0, 0x40, 0x2_0040, 4096).unwrap();
         assert_eq!(d.range.channel().index(), 3);
-        assert_eq!((d.range.offset(), d.range.len(), d.port), (0x40, 4096, 2));
+        assert_eq!((d.range.offset(), d.range.len()), (0x40, 4096));
     }
 
     #[test]
@@ -1433,7 +1433,7 @@ mod tests {
             Entry::decode(ALL, [op::LIST, 0, 0, 0, 0, 1, 0, 0]),
             Err(error::OP)
         );
-        let w = Entry::decode(ALL, [op::WRITE, 1, 1, 0x40, 0x2_0040, 64, 0, 0]).unwrap();
+        let w = Entry::decode(ALL, [op::WRITE, 1, 0, 0x40, 0x2_0040, 64, 0, 0]).unwrap();
         assert!(matches!(
             w,
             Entry::Move {
@@ -1578,13 +1578,16 @@ mod tests {
         let dec = |u, op, ch, p, off, l1, len| Descriptor::decode(u, op, ch, p, off, l1, len);
         assert_eq!(dec(ALL, 3, 0, 0, 0, 0x2_0000, 16), Err(error::OP));
         assert_eq!(dec(ALL, op::READ, 0, 0, 0, 0x2_0000, 0), Err(error::LENGTH));
-        assert_eq!(dec(ALL, op::READ, 0, 3, 0, 0x2_0000, 16), Err(error::PORT));
+        // Word 2 is reserved and must be zero.
+        assert_eq!(dec(ALL, op::READ, 0, 3, 0, 0x2_0000, 16), Err(error::OP));
         assert_eq!(dec(ALL, op::READ, 8, 0, 0, 0x2_0000, 16), Err(error::RANGE));
-        // A channel the chip did not report cannot be named.
+        // A word that names no chip cannot name a channel either.
         assert_eq!(
-            dec(0xFE, op::READ, 0, 0, 0, 0x2_0000, 16),
+            dec(0x0F, op::READ, 0, 0, 0, 0x2_0000, 16),
             Err(error::RANGE)
         );
+        // One fused bank is a chip, and its channel 0 is its first survivor.
+        assert!(dec(0xFE, op::READ, 0, 0, 0, 0x2_0000, 16).is_ok());
         assert_eq!(
             dec(ALL, op::READ, 0, 0, 0xFEFF_FFF0, 0x2_0000, 32),
             Err(error::RANGE)

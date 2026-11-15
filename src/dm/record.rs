@@ -289,8 +289,6 @@ impl Cursor<'_> {
     }
 }
 
-const PORTS: u32 = crate::dram::PORTS as u32;
-
 fn tensor(rec: &[[u32; 8]], at: usize) -> Result<TensorRef, u32> {
     TensorRef::decode([rec[at], rec[at + 1]])
 }
@@ -387,16 +385,7 @@ fn expand_for<const READS: bool, const WRITES: bool>(
                             let (ch, off) = row.next_with_slot(super::BF16_TILE_SLOT)?;
                             let to = (at as u64) + (i as u64 * nc as u64 + j as u64) * TILE_SLOT;
                             let to = u32::try_from(to).map_err(|_| super::error::RANGE)?;
-                            emit([
-                                op::READ,
-                                ch,
-                                (i + j) % PORTS,
-                                off,
-                                to,
-                                super::BF16_TILE_SLOT as u32,
-                                0,
-                                0,
-                            ])?;
+                            emit([op::READ, ch, 0, off, to, super::BF16_TILE_SLOT as u32, 0, 0])?;
                             let valid_rows = (height - (r0 + i) * 32).min(32);
                             let valid_cols = (width - (c0 + j) * 32).min(32);
                             if valid_rows != 32 || valid_cols != 32 {
@@ -424,22 +413,12 @@ fn expand_for<const READS: bool, const WRITES: bool>(
                     } else {
                         (x.tile(i, j)?, op::READ)
                     };
-                    Ok([op, ch, (i + j) % PORTS, off, to, TILE_SLOT as u32, 0, 0])
+                    Ok([op, ch, 0, off, to, TILE_SLOT as u32, 0, 0])
                 };
             // An untransposed operand's row is consecutive tiles: a cursor
             // steps along it. A transposed one is read down a column.
-            let read = |(ch, off): (u32, u32), i: u32, j: u32, to: u32| {
-                [
-                    op::READ,
-                    ch,
-                    (i + j) % PORTS,
-                    off,
-                    to,
-                    TILE_SLOT as u32,
-                    0,
-                    0,
-                ]
-            };
+            let read =
+                |(ch, off): (u32, u32), to: u32| [op::READ, ch, 0, off, to, TILE_SLOT as u32, 0, 0];
             for i in 0..rows {
                 let mut row = if a_t {
                     None
@@ -449,7 +428,7 @@ fn expand_for<const READS: bool, const WRITES: bool>(
                 for kk in 0..kt {
                     let to = a_at + (i * kt + kk) * TILE_SLOT as u32;
                     emit(match row.as_mut() {
-                        Some(r) => read(r.next()?, i0 + i, kk, to),
+                        Some(r) => read(r.next()?, to),
                         None => fetch(&a, a_t, i0 + i, kk, to)?,
                     })?;
                 }
@@ -459,7 +438,7 @@ fn expand_for<const READS: bool, const WRITES: bool>(
                 for j in 0..cols {
                     let to = b_at + (kk * cols + j) * TILE_SLOT as u32;
                     emit(match row.as_mut() {
-                        Some(r) => read(r.next()?, kk, j0 + j, to),
+                        Some(r) => read(r.next()?, to),
                         None => fetch(&b, b_t, kk, j0 + j, to)?,
                     })?;
                 }
@@ -474,16 +453,7 @@ fn expand_for<const READS: bool, const WRITES: bool>(
                 for j in 0..cols {
                     let (ch, off) = row.next()?;
                     let out = out_at + (i * cols + j) * stride;
-                    emit([
-                        op::WRITE,
-                        ch,
-                        (i + j) % PORTS,
-                        off + TILE_DATA as u32,
-                        out,
-                        4096,
-                        0,
-                        0,
-                    ])?;
+                    emit([op::WRITE, ch, 0, off + TILE_DATA as u32, out, 4096, 0, 0])?;
                 }
             }
         }
@@ -546,12 +516,12 @@ fn expand_for<const READS: bool, const WRITES: bool>(
                     op::READ
                 };
                 emit(if read {
-                    [op, ch, n % PORTS, off, slot, TILE_SLOT as u32, 0, 0]
+                    [op, ch, 0, off, slot, TILE_SLOT as u32, 0, 0]
                 } else {
                     [
                         op::WRITE,
                         ch,
-                        n % PORTS,
+                        0,
                         off + TILE_DATA as u32,
                         slot + TILE_DATA as u32,
                         4096,
@@ -599,7 +569,6 @@ fn expand_for<const READS: bool, const WRITES: bool>(
             // A tile row's face-row `h` of row `r`: two 64-byte reads a row a
             // tile column, each congruent to `TILE_DATA` mod 64 in every slot.
             let face_row = |r: u32, h: u32| DATA + ((r / 16 * 2 + h) * 16 + r % 16) * 64;
-            let mut port = 0;
             for r in 0..count {
                 let v = index(word(r));
                 let mut row = table.cursor(v / 32, j0)?;
@@ -608,8 +577,7 @@ fn expand_for<const READS: bool, const WRITES: bool>(
                     for half in 0..core::hint::black_box(2) {
                         let from = off + face_row(v % 32, half);
                         let to = stage_at + j * TILE_SLOT as u32 + face_row(r, half);
-                        emit([op::READ, ch, port, from, to, 64, 0, 0])?;
-                        port = if port + 1 == PORTS { 0 } else { port + 1 };
+                        emit([op::READ, ch, 0, from, to, 64, 0, 0])?;
                     }
                 }
             }
@@ -679,7 +647,7 @@ fn pad<const WRITE: bool>(
             emit([
                 op::WRITE,
                 ch,
-                n % PORTS,
+                0,
                 off + TILE_DATA as u32,
                 at + TILE_DATA as u32,
                 4096,
@@ -687,7 +655,7 @@ fn pad<const WRITE: bool>(
                 0,
             ])?;
         } else {
-            emit([op::READ, ch, n % PORTS, off, at, TILE_SLOT as u32, 0, 0])?;
+            emit([op::READ, ch, 0, off, at, TILE_SLOT as u32, 0, 0])?;
             let vr = if i == rt - 1 { rows } else { 0 };
             let vc = if j == a.ct - 1 { cols } else { 0 };
             emit([op::FILL, value, vr | vc << 8, at, 0, 0, 0, 0])?;
@@ -824,16 +792,7 @@ mod tests {
                     let to = at + (i * nc + j) * 4160;
                     assert_eq!(
                         got[next],
-                        [
-                            op::READ,
-                            x.channels[channel] as u32,
-                            (i + j) % PORTS,
-                            off,
-                            to,
-                            2112,
-                            0,
-                            0
-                        ]
+                        [op::READ, x.channels[channel] as u32, 0, off, to, 2112, 0, 0]
                     );
                     next += 1;
                     let rows = (height - i * 32).min(32);
@@ -1016,8 +975,7 @@ mod tests {
                         + j as u64 * TILE_SLOT
                         + TILE_DATA
                         + 4 * crate::dm::face_index(r, 16 * h) as u64;
-                    let n = want.len() as u32;
-                    want.push([op::READ, ch, n % PORTS, from as u32, to as u32, 64, 0, 0]);
+                    want.push([op::READ, ch, 0, from as u32, to as u32, 64, 0, 0]);
                 }
             }
         }
