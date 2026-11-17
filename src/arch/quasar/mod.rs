@@ -38,6 +38,13 @@ impl Cfg for Fields {
     const PRNG_SEED_Seed_Val: ConfigField = crate::cfg::quasar::global::PRNG_SEED_Seed_Val;
 }
 
+/// The fixed regions of a tile's 4 MiB L1.
+pub mod l1;
+/// The L1 contract between host and firmware.
+pub mod mailbox;
+/// NoC coordinates, the one NIU's register block and the fixed grid.
+pub mod noc;
+
 /// Where a hart's reset bit lives, as another core or the host sees it.
 const TILE_RESET: u64 = 0x0301_79B0;
 
@@ -52,12 +59,17 @@ const TRISC_RESET_PC: u64 = 0x0100;
 /// Offset of the TRISC reset-PC override register.
 const TRISC_RESET_PC_OVERRIDE: u64 = 0x0110;
 
-/// `MEM_DM_FIRMWARE_BASE`: where the movers' firmware begins
-/// (`dev_mem_map.h:112`, `MEM_LLK_DEBUG_BASE + MEM_LLK_DEBUG_SIZE`).
-const DM_FIRMWARE: u32 = 0x000E_780;
+/// `MEM_DM_FIRMWARE_BASE`: where the movers' firmware begins.
+///
+/// The chain is `MEM_MAILBOX_BASE` 16 + `MEM_MAILBOX_SIZE` 59904 = `0xEA10`,
+/// rounded to `0xEA20`; `MEM_LLK_DEBUG_BASE` + 1 KiB = `0xEE20`, rounded to
+/// `MEM_INTERRUPT_TABLE_BASE` `0xEF00`; + `MEM_INTERRUPT_TABLE_SIZE` 256 B =
+/// `0xF000` (`dev_mem_map.h:103-113`). All eight movers share the one 12 KiB
+/// image there; each is told which hart it is.
+const DM_FIRMWARE: u32 = 0x0000_F000;
 /// `MEM_TRISC0_FIRMWARE_BASE`, and the stride to the next TRISC's
-/// (`dev_mem_map.h:113-116`, `MEM_TRISC_FIRMWARE_SIZE` = 5 KiB).
-const TRISC0_FIRMWARE: u32 = 0x0001_1780;
+/// (`dev_mem_map.h:114-117`, `MEM_TRISC_FIRMWARE_SIZE` = 5 KiB).
+const TRISC0_FIRMWARE: u32 = 0x0001_2000;
 const TRISC_FIRMWARE_STRIDE: u32 = 5 * 1024;
 
 impl Arch for Quasar {
@@ -97,14 +109,23 @@ impl Arch for Quasar {
     /// `MOP_CFG_BASE` (`tt_t6_trisc_map.h:20`).
     const MOP_CFG_BASE: u64 = 0x0080_E000;
 
-    /// The TDMA unpackers (bits 0-2), packers (3-5), glue (8), THCON (9) and FPU
-    /// (10) -- `t6_debug_map.h:380-398`.
+    /// Every non-RISC field of `SOFT_RESET_0`: unpackers 0-2, packers 3-5, glue 8,
+    /// THCON 9, FPU 10, and the `SrcA`/`SrcB`/`Dst` register banks at 15-17 plus
+    /// `SRCA_REG_SOFT_RESET_FPU` 19-22 (`t6_debug_map.h:380-419`).
     ///
     /// The RISCs are bits 11-14 and are held by [`Arch::reset`], not by this mask.
+    /// Bits 6-7 have no field in the generated map — Quasar's TDMA has no separate
+    /// mover or search unit — so unlike Blackhole's "every bit below the RISCs"
+    /// they are left out: `0x7B873F`, not `0x7B87FF`.
+    ///
     /// `tensix.h:254-265` still carries the pre-TDMA macros, which put the
     /// unpacker in two bits and the packer in four; the generated register map is
-    /// the one that matches the register.
-    const BACKEND_RESET_MASK: u32 = 0x7FF;
+    /// the one that matches the register. tt-metal has no Quasar whole-backend
+    /// value to copy: the firmware only touches `RISC_CONTROL_SOFT_RESET`
+    /// (`tt-2xx/risc_common.h:116-140`) and the host only the tile register's DM
+    /// bits, and TT-LLK's `_PIPELINE_RESET_MASK` is Wormhole/Blackhole's, skipped
+    /// for `ChipArchitecture.QUASAR`.
+    const BACKEND_RESET_MASK: u32 = 0x7B_873F;
 
     /// `CFG_REGS_BASE` (`tt_t6_trisc_map.h:31`): one `Config[2][94*4]` per engine,
     /// reached through the hart's own local map.

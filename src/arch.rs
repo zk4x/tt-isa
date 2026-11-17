@@ -551,6 +551,16 @@ mod tests {
             assert_eq!(Qsr::reset_pc_override(Core::Dm(hart)), Ok(None));
         }
         assert_eq!(Qsr::engine(4), None);
+
+        // The backend mask holds every datapath field of `SOFT_RESET_0` and none
+        // of the four TRISC bits, which `reset` owns: 0-5, 8-10, 15-17, 19-22.
+        assert_eq!(Qsr::BACKEND_RESET_MASK, 0x7B_873F);
+        for trisc in 0..4u32 {
+            assert_eq!(Qsr::BACKEND_RESET_MASK & (1 << (11 + trisc)), 0);
+        }
+        // Bits 6 and 7 have no field on Quasar, so the blackhole-style "every bit
+        // below the RISCs" mask would set two bits this register does not define.
+        assert_eq!(Qsr::BACKEND_RESET_MASK & 0b1100_0000, 0);
     }
 
     #[test]
@@ -572,12 +582,12 @@ mod tests {
     #[test]
     fn quasar_starts_a_mover_at_its_firmware_and_a_trisc_at_its_slot() {
         for hart in 0..8u8 {
-            assert_eq!(Qsr::default_reset_pc(Core::Dm(hart)), Ok(0x000E_780));
+            assert_eq!(Qsr::default_reset_pc(Core::Dm(hart)), Ok(0x0000_F000));
         }
         for trisc in 0..4u8 {
             assert_eq!(
                 Qsr::default_reset_pc(Core::Math { engine: 0, trisc }),
-                Ok(0x0001_1780 + 5 * 1024 * u32::from(trisc))
+                Ok(0x0001_2000 + 5 * 1024 * u32::from(trisc))
             );
         }
         // The engine does not move a TRISC's entry point: the four slots are one
