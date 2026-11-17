@@ -477,8 +477,8 @@ impl Mover {
             }
             // The two movers of a Blackhole tile are B and NC; no other core has
             // one, so no other core can be the subject of this question.
-            crate::tensix::Core::Dm0 | crate::tensix::Core::Dm1 => {
-                panic!("a DM core is Quasar's; Blackhole's movers are B and NC")
+            crate::tensix::Core::Dm(_) | crate::tensix::Core::Math { .. } => {
+                panic!("a DM or math core is Quasar's; Blackhole's movers are B and NC")
             }
         }
     }

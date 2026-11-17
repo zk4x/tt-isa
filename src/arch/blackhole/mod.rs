@@ -6,7 +6,7 @@
 //! Spec: `BlackholeA0/TensixTile/BabyRISCV/README.md` for the tile's map,
 //! `SoftReset.md` for reset control, `HiMemTile.md` for the NoC-visible aperture.
 
-use super::{Arch, Cfg};
+use super::{Arch, Cfg, EngineRegs};
 use crate::cfg::{ConfigField, ConfigSpan, ThreadConfigField};
 use crate::isa::EncodeError;
 use crate::tensix::Core;
@@ -81,16 +81,8 @@ impl Arch for Blackhole {
     const CFGREG_RDDATA: u64 = 0xFFB1_2078;
 
     /// `RISC_SOFT_RESET_0`: the five cores and the backend, one bit per unit
-    /// (`SoftReset.md:10-36`).
-    const SOFT_RESET_0: u64 = 0xFFB1_21B0;
+    /// (`SoftReset.md:10-36`). Read through [`Arch::reset`].
     const DISABLE_RESET: u64 = 0xFFB1_2224;
-
-    const TRISC0_RESET_PC: u64 = 0xFFB1_2228;
-    const TRISC1_RESET_PC: u64 = 0xFFB1_222C;
-    const TRISC2_RESET_PC: u64 = 0xFFB1_2230;
-    const TRISC_RESET_PC_OVERRIDE: u64 = 0xFFB1_2234;
-    const NCRISC_RESET_PC: u64 = 0xFFB1_2238;
-    const NCRISC_RESET_PC_OVERRIDE: u64 = 0xFFB1_223C;
 
     /// Readable from T0, T1 and T2 only (`SyncUnit.md`, "RISCV access to
     /// semaphores").
@@ -157,15 +149,39 @@ impl Arch for Blackhole {
         &Core::BLACKHOLE
     }
 
-    fn soft_reset_bit(core: Core) -> Result<u32, EncodeError> {
+    /// One register holds the whole tile: `RISC_SOFT_RESET_0` at `0xFFB1_21B0`
+    /// (`SoftReset.md:10-36`).
+    fn reset(core: Core) -> Result<(u64, u32), EncodeError> {
+        const SOFT_RESET_0: u64 = 0xFFB1_21B0;
         match core {
-            Core::B => Ok(11),
-            Core::T0 => Ok(12),
-            Core::T1 => Ok(13),
-            Core::T2 => Ok(14),
-            Core::NC => Ok(18),
-            Core::Dm0 | Core::Dm1 => Err(EncodeError::NoSuchCore { core: core.name() }),
+            Core::B => Ok((SOFT_RESET_0, 11)),
+            Core::T0 => Ok((SOFT_RESET_0, 12)),
+            Core::T1 => Ok((SOFT_RESET_0, 13)),
+            Core::T2 => Ok((SOFT_RESET_0, 14)),
+            Core::NC => Ok((SOFT_RESET_0, 18)),
+            Core::Dm(_) | Core::Math { .. } => Err(EncodeError::NoSuchCore { core: core.name() }),
         }
+    }
+
+    /// A Blackhole tile has one engine block, the tile's own debug registers.
+    const ENGINES: u8 = 1;
+
+    /// The block at `0xFFB1_2000`, with the tile's four slots in the order the
+    /// reset-PC registers take them: T0, T1, T2, NC.
+    fn engine(engine: u8) -> Option<EngineRegs> {
+        if engine != 0 {
+            return None;
+        }
+        Some(EngineRegs {
+            base: Self::DEBUG_REGS_BASE,
+            reset_pc: [0xFFB1_2228, 0xFFB1_222C, 0xFFB1_2230, 0xFFB1_2238],
+            reset_pc_override: [
+                (0xFFB1_2234, 1 << 0),
+                (0xFFB1_2234, 1 << 1),
+                (0xFFB1_2234, 1 << 2),
+                (0xFFB1_223C, 1 << 0),
+            ],
+        })
     }
 
     fn default_reset_pc(core: Core) -> Result<u32, EncodeError> {
@@ -175,32 +191,38 @@ impl Arch for Blackhole {
             Core::T1 => Ok(0x0_A000),
             Core::T2 => Ok(0x0_E000),
             Core::NC => Ok(0x1_2000),
-            Core::Dm0 | Core::Dm1 => Err(EncodeError::NoSuchCore { core: core.name() }),
+            Core::Dm(_) | Core::Math { .. } => Err(EncodeError::NoSuchCore { core: core.name() }),
         }
     }
 
     /// **RISCV B has none**: its entry point is hardwired to L1 offset `0`, a
     /// linker-script constraint rather than a preference.
     fn reset_pc_register(core: Core) -> Result<Option<u64>, EncodeError> {
-        match core {
-            Core::B => Ok(None),
-            Core::T0 => Ok(Some(Self::TRISC0_RESET_PC)),
-            Core::T1 => Ok(Some(Self::TRISC1_RESET_PC)),
-            Core::T2 => Ok(Some(Self::TRISC2_RESET_PC)),
-            Core::NC => Ok(Some(Self::NCRISC_RESET_PC)),
-            Core::Dm0 | Core::Dm1 => Err(EncodeError::NoSuchCore { core: core.name() }),
-        }
+        let slot = match core {
+            Core::B => return Ok(None),
+            Core::T0 => 0,
+            Core::T1 => 1,
+            Core::T2 => 2,
+            Core::NC => 3,
+            Core::Dm(_) | Core::Math { .. } => {
+                return Err(EncodeError::NoSuchCore { core: core.name() });
+            }
+        };
+        Ok(Self::engine(0).map(|regs| regs.reset_pc[slot]))
     }
 
     fn reset_pc_override(core: Core) -> Result<Option<(u64, u32)>, EncodeError> {
-        match core {
-            Core::B => Ok(None),
-            Core::T0 => Ok(Some((Self::TRISC_RESET_PC_OVERRIDE, 1 << 0))),
-            Core::T1 => Ok(Some((Self::TRISC_RESET_PC_OVERRIDE, 1 << 1))),
-            Core::T2 => Ok(Some((Self::TRISC_RESET_PC_OVERRIDE, 1 << 2))),
-            Core::NC => Ok(Some((Self::NCRISC_RESET_PC_OVERRIDE, 1 << 0))),
-            Core::Dm0 | Core::Dm1 => Err(EncodeError::NoSuchCore { core: core.name() }),
-        }
+        let slot = match core {
+            Core::B => return Ok(None),
+            Core::T0 => 0,
+            Core::T1 => 1,
+            Core::T2 => 2,
+            Core::NC => 3,
+            Core::Dm(_) | Core::Math { .. } => {
+                return Err(EncodeError::NoSuchCore { core: core.name() });
+            }
+        };
+        Ok(Self::engine(0).map(|regs| regs.reset_pc_override[slot]))
     }
 
     /// The table in `PushTensixInstruction.md:5-9`. T0/T1/T2 each reach only their
@@ -214,7 +236,9 @@ impl Arch for Blackhole {
             (Core::T0, 0) => Ok(Self::INSTRN_BUF_BASE),
             (Core::T1, 1) => Ok(Self::INSTRN_BUF_BASE),
             (Core::T2, 2) => Ok(Self::INSTRN_BUF_BASE),
-            (Core::Dm0 | Core::Dm1, _) => Err(EncodeError::NoSuchCore { core: core.name() }),
+            (Core::Dm(_) | Core::Math { .. }, _) => {
+                Err(EncodeError::NoSuchCore { core: core.name() })
+            }
             _ => Err(EncodeError::IllegalPush {
                 core: core.name(),
                 thread,

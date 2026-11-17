@@ -64,6 +64,34 @@ pub trait Cfg {
     const CLR_DVALID_SrcB_Disable: ThreadConfigField;
 }
 
+/// One compute engine's register block inside a tile.
+///
+/// A tile may hold more than one of these — Quasar has four, at
+/// `0x0180_0000 + 0x10000·n` (`tt-2xx/quasar/tensix_neo_reg.h`) — and the cores
+/// that belong to one are reset through it. Blackhole has a single block for the
+/// whole tile, so its engine 0 is the tile's own debug register block.
+///
+/// The four slots are the block's own core slots, in the block's order, not the
+/// [`Core`] list's: on Blackhole they are T0, T1, T2 and NC, on Quasar trisc 0..3.
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub struct EngineRegs {
+    /// The block's first byte, as another core or the host addresses it.
+    ///
+    /// This is the *window* view. The harts inside the engine reach the same
+    /// registers through their own local map, which is
+    /// [`Arch::DEBUG_REGS_BASE`] — the same number on Blackhole, a different one
+    /// on Quasar.
+    pub base: u64,
+    /// Reset-PC register of each slot.
+    pub reset_pc: [u64; 4],
+    /// Reset-PC override register and enable bit of each slot.
+    ///
+    /// Per slot rather than a slice of one word: Blackhole's NC override lives in
+    /// its own register (`0xFFB1_223C`) whose bit is 0, while T0..T2 share
+    /// `0xFFB1_2234` with bits 0..3.
+    pub reset_pc_override: [(u64, u32); 4],
+}
+
 /// One Tenstorrent architecture, as a type.
 ///
 /// Implementors are zero-sized: an architecture is a compile-time fact, and the
@@ -96,23 +124,8 @@ pub trait Arch {
     /// The latched configuration word.
     const CFGREG_RDDATA: u64;
 
-    /// Bits holding the RISC-V cores and the Tensix backend in reset.
-    const SOFT_RESET_0: u64;
     /// Clears a core's reset-PC override.
     const DISABLE_RESET: u64;
-
-    /// T0's reset-PC register.
-    const TRISC0_RESET_PC: u64;
-    /// T1's reset-PC register.
-    const TRISC1_RESET_PC: u64;
-    /// T2's reset-PC register.
-    const TRISC2_RESET_PC: u64;
-    /// The three TRISCs' reset-PC override enable bits.
-    const TRISC_RESET_PC_OVERRIDE: u64;
-    /// NC's reset-PC register.
-    const NCRISC_RESET_PC: u64;
-    /// NC's reset-PC override enable bit.
-    const NCRISC_RESET_PC_OVERRIDE: u64;
 
     /// Semaphore access from T0/T1/T2: a load reads, a store posts or gets.
     const SEMAPHORE_ACCESS: u64;
@@ -171,8 +184,8 @@ pub trait Arch {
     const MOP_CFG_BASE: u64;
     /// One past the range whose loads wait on the thread's own instructions.
     const PC_BUF_HAZARD_END: u64;
-    /// Bits of [`SOFT_RESET_0`](Self::SOFT_RESET_0) that hold the Tensix backend,
-    /// as opposed to the cores, in reset.
+    /// Bits of the reset register ([`reset`](Self::reset)) that hold the Tensix
+    /// backend, as opposed to the cores, in reset.
     const BACKEND_RESET_MASK: u32;
 
     /// `Config`, `ConfigDualWrite` and `ThreadConfig`, mapped one after the other.
@@ -189,13 +202,28 @@ pub trait Arch {
     /// lists them.
     fn cores() -> &'static [Core];
 
-    /// Bit of [`SOFT_RESET_0`](Self::SOFT_RESET_0) holding `core` in reset.
-    fn soft_reset_bit(core: Core) -> Result<u32, EncodeError>;
+    /// Register and bit holding `core` in reset.
+    ///
+    /// A register and a bit rather than an address, because the two do not always
+    /// belong to the core's engine: on Quasar the 16 TRISCs are held by their own
+    /// engine's `SOFT_RESET_0` (bits 11..15), while the eight movers are held by
+    /// one tile-level register (`TENSIX_SOFT_RESET_ADDR`, bits 8..16) that no
+    /// engine block contains.
+    fn reset(core: Core) -> Result<(u64, u32), EncodeError>;
 
-    /// The mask of [`soft_reset_bit`](Self::soft_reset_bit).
+    /// The mask of [`reset`](Self::reset).
     fn soft_reset_mask(core: Core) -> Result<u32, EncodeError> {
-        Ok(1 << Self::soft_reset_bit(core)?)
+        Ok(1 << Self::reset(core)?.1)
     }
+
+    /// How many engine blocks a tile has: one on Blackhole, four on Quasar.
+    const ENGINES: u8;
+
+    /// The register block of engine `engine`, in tile order.
+    ///
+    /// `None` for an engine the tile does not have, so a constant table built
+    /// over [`ENGINES`](Self::ENGINES) cannot ask for a fifth.
+    fn engine(engine: u8) -> Option<EngineRegs>;
 
     /// Where `core` begins executing after reset is released.
     fn default_reset_pc(core: Core) -> Result<u32, EncodeError>;
@@ -229,22 +257,26 @@ mod tests {
         assert_eq!(Bh::cores(), &Core::BLACKHOLE);
         // Every core it claims answers every per-core question.
         for &core in Bh::cores() {
-            Bh::soft_reset_bit(core).expect("a core has a reset bit");
+            Bh::reset(core).expect("a core has a reset bit");
             Bh::default_reset_pc(core).expect("a core has a reset PC");
             Bh::reset_pc_register(core).expect("a core answers about its register");
             Bh::reset_pc_override(core).expect("a core answers about its override");
         }
         // …and the cores it does not have are refused, not answered.
-        for core in [Core::Dm0, Core::Dm1] {
+        for core in [Core::Dm(0), Core::Dm(7)] {
             assert_eq!(
                 Bh::default_reset_pc(core),
                 Err(EncodeError::NoSuchCore { core: core.name() })
             );
             assert_eq!(
-                Bh::soft_reset_bit(core),
+                Bh::reset(core),
                 Err(EncodeError::NoSuchCore { core: core.name() })
             );
         }
+        // One engine block for the tile, and no second.
+        assert_eq!(Bh::ENGINES, 1);
+        assert!(Bh::engine(0).is_some());
+        assert_eq!(Bh::engine(1), None);
     }
 
     #[test]
@@ -307,7 +339,7 @@ mod tests {
                 core.name()
             );
         }
-        for core in [Core::Dm0, Core::Dm1] {
+        for core in [Core::Dm(0), Core::Dm(7)] {
             assert_eq!(
                 Bh::pushed_to(core, 0),
                 Err(EncodeError::NoSuchCore { core: core.name() })
