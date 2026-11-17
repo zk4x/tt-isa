@@ -105,11 +105,11 @@ pub const SIM_PUSH_WINDOW: u32 = 16;
 
 /// Non-zero: before pushing, the runner releases every Tensix semaphore a
 /// thread may be blocked on, from the RISC-V side
-/// (`crate::tensix::SEMAPHORE_ACCESS`): posting each that reads zero, round
-/// after round. A thread left in `SEMWAIT` by a failed kernel survives the
-/// backend reset (divergence row 65), and a reset program pushed behind it
-/// would queue forever; a semaphore post by the RISC-V core does not queue
-/// behind anything. Set by the host's tile reset on silicon only.
+/// (`crate::arch::BlackholeSpecials::semaphore_access`): posting each that reads
+/// zero, round after round. A thread left in `SEMWAIT` by a failed kernel
+/// survives the backend reset (divergence row 65), and a reset program pushed
+/// behind it would queue forever; a semaphore post by the RISC-V core does not
+/// queue behind anything. Set by the host's tile reset on silicon only.
 pub const UNWEDGE: u64 = MAILBOX_BASE + 0x44;
 
 /// Non-zero: [`MOP_CFG`] holds this role's MOP Expander configuration, which

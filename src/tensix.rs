@@ -262,7 +262,7 @@ pub const TIMESTAMP_EVENT_BYTES: u64 = 16;
 ///
 /// A marker type rather than a number because the legal `(core, thread)` pairs are
 /// a sparse table rather than a range — see
-/// [`Arch::pushed_to`](crate::arch::Arch::pushed_to).
+/// [`BlackholeSpecials::pushed_to`](crate::arch::BlackholeSpecials::pushed_to).
 pub trait TensixThread {
     /// 0, 1 or 2. Needed where a thread index is data rather than a choice, such as
     /// the mailbox word the host and the image cross-check against each other.
@@ -330,8 +330,7 @@ mod tests {
     }
 
     /// The names are the ones the specification and the tooling print, so an error
-    /// naming a core can be searched for in the headers.
-    #[test]
+    /// naming a core can be searched for in the headers.    #[test]
     fn names_are_the_tooling_names() {
         assert_eq!(Core::NC.name(), "NC");
         assert_eq!(Core::Dm(0).name(), "DM0");

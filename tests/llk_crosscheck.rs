@@ -17,9 +17,9 @@
 //! Each case builds the same instruction twice: through our encoder, and from
 //! the LLK macro's shifts, transcribed with the macro named.
 
-use tt_isa::backend;
-use tt_isa::isa::generated::encode;
-use tt_isa::sfpu;
+use tt_isa::arch::blackhole::backend;
+use tt_isa::arch::blackhole::sfpu;
+use tt_isa::isa::blackhole::encode;
 
 /// `TT_OP(opcode, params)`: the opcode in the top byte.
 fn op(opcode: u32, params: u32) -> u32 {
@@ -322,7 +322,7 @@ fn the_datapath_encodings_agree_with_llk() {
 #[test]
 fn every_measured_addr_mod_matches_llks_matrix_or_pooling_field() {
     use tt_isa::isa::Provenance;
-    use tt_isa::isa::generated::ALL;
+    use tt_isa::isa::blackhole::ALL;
     let measured: Vec<_> = ALL
         .iter()
         .filter(|d| {

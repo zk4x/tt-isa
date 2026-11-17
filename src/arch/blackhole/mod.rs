@@ -6,8 +6,8 @@
 //! Spec: `BlackholeA0/TensixTile/BabyRISCV/README.md` for the tile's map,
 //! `SoftReset.md` for reset control, `HiMemTile.md` for the NoC-visible aperture.
 
-use super::{Arch, Cfg, EngineRegs};
-use crate::cfg::{ConfigField, ConfigSpan, ThreadConfigField};
+use super::{Arch, BlackholeSpecials, Cfg, EngineRegs, Specials};
+use crate::cfg::ConfigField;
 use crate::isa::EncodeError;
 use crate::tensix::Core;
 
@@ -51,23 +51,43 @@ impl Cfg for Fields {
     const RISC_DEST_ACCESS_CTRL_SEC2_fmt: ConfigField =
         crate::cfg::blackhole::alu::RISC_DEST_ACCESS_CTRL_SEC2_fmt;
     const PRNG_SEED_Seed_Val: ConfigField = crate::cfg::blackhole::global::PRNG_SEED_Seed_Val;
-    const THCON_SEC0_REG0_TileDescriptor: ConfigSpan =
-        crate::cfg::blackhole::thcon::THCON_SEC0_REG0_TileDescriptor;
-    const THCON_SEC0_REG2_Out_data_format: ConfigField =
-        crate::cfg::blackhole::thcon::THCON_SEC0_REG2_Out_data_format;
-
-    const CFG_STATE_ID_StateID: ThreadConfigField =
-        crate::cfg::blackhole::thread::CFG_STATE_ID_StateID;
-    const CLR_DVALID_SrcA_Disable: ThreadConfigField =
-        crate::cfg::blackhole::thread::CLR_DVALID_SrcA_Disable;
-    const CLR_DVALID_SrcB_Disable: ThreadConfigField =
-        crate::cfg::blackhole::thread::CLR_DVALID_SrcB_Disable;
 }
 
 impl Arch for Blackhole {
     type Cfg = Fields;
 
     const NAME: &'static str = "Blackhole";
+
+    /// Blackhole's own mechanisms, gathered in one value: the timestamper, the
+    /// configuration read pair, the load-adjacency hazards, the semaphore
+    /// aperture and the NoC view of the local data RAM.
+    const SPECIALS: Specials = Specials::Blackhole(BlackholeSpecials {
+        timestamp: 0xFFB1_21FC,
+        timestamp_cntl: 0xFFB1_2200,
+        timestamp_status: 0xFFB1_2204,
+        timestamp_buf0_start: 0xFFB1_2208,
+        timestamp_buf0_end: 0xFFB1_220C,
+        cfgreg_rd_cntl: 0xFFB1_2058,
+        cfgreg_rddata: 0xFFB1_2078,
+        coprocessor_done_check: Self::PC_BUF_BASE + 0x04,
+        mop_expander_done_check: Self::PC_BUF_BASE + 0x08,
+        pc_buf_hazard_end: Self::PC_BUF_BASE + 0xFFFF,
+        // Readable from T0, T1 and T2 only (`SyncUnit.md`, "RISCV access to
+        // semaphores").
+        semaphore_access: 0xFFE8_0020,
+        local_data_ram_noc_base: 0xFFB1_4000,
+        local_data_ram_noc_end: 0xFFB1_E000,
+        local_data_ram_noc_stride: 0x2000,
+        // `BabyRISCV/README.md:152`: no NoC access lands inside this window.
+        local_ram_zeroing_cycles: 2048,
+        instrn1_buf: 0xFFE5_0000,
+        instrn2_buf: 0xFFE6_0000,
+        thcon_tile_descriptor: crate::cfg::blackhole::thcon::THCON_SEC0_REG0_TileDescriptor,
+        thcon_out_data_format: crate::cfg::blackhole::thcon::THCON_SEC0_REG2_Out_data_format,
+        cfg_state_id: crate::cfg::blackhole::thread::CFG_STATE_ID_StateID,
+        clr_dvalid_srca_disable: crate::cfg::blackhole::thread::CLR_DVALID_SrcA_Disable,
+        clr_dvalid_srcb_disable: crate::cfg::blackhole::thread::CLR_DVALID_SrcB_Disable,
+    });
 
     /// L1 scratchpad RAM. Instructions can only be fetched from here
     /// (`BabyRISCV/README.md:39`).
@@ -77,51 +97,23 @@ impl Arch for Blackhole {
     const LOCAL_DATA_RAM_BASE: u64 = 0xFFB0_0000;
     const DEBUG_REGS_BASE: u64 = 0xFFB1_2000;
 
-    const CFGREG_RD_CNTL: u64 = 0xFFB1_2058;
-    const CFGREG_RDDATA: u64 = 0xFFB1_2078;
-
     /// `RISC_SOFT_RESET_0`: the five cores and the backend, one bit per unit
     /// (`SoftReset.md:10-36`). Read through [`Arch::reset`].
     const DISABLE_RESET: u64 = 0xFFB1_2224;
-
-    /// Readable from T0, T1 and T2 only (`SyncUnit.md`, "RISCV access to
-    /// semaphores").
-    const SEMAPHORE_ACCESS: u64 = 0xFFE8_0020;
 
     /// `RISCV_DEBUG_REG_WALL_CLOCK_L`: reading it also latches the high half.
     const WALL_CLOCK_L: u64 = 0xFFB1_21F0;
     const WALL_CLOCK_L_PLUS_4: u64 = 0xFFB1_21F4;
     const WALL_CLOCK_H: u64 = 0xFFB1_21F8;
-    /// `RISCV_DEBUG_REG_TIMESTAMP`: a store appends an event.
-    const TIMESTAMP: u64 = 0xFFB1_21FC;
-    const TIMESTAMP_CNTL: u64 = 0xFFB1_2200;
-    const TIMESTAMP_STATUS: u64 = 0xFFB1_2204;
-    const TIMESTAMP_BUF0_START: u64 = 0xFFB1_2208;
-    const TIMESTAMP_BUF0_END: u64 = 0xFFB1_220C;
-
-    /// First byte of the NoC-visible local-data-RAM aperture
-    /// (`BabyRISCV/README.md:109`).
-    const LOCAL_DATA_RAM_NOC_BASE: u64 = 0xFFB1_4000;
-    /// One past its last byte (`README.md:116`).
-    const LOCAL_DATA_RAM_NOC_END: u64 = 0xFFB1_E000;
-    /// Address space each core is given inside it.
-    const LOCAL_DATA_RAM_NOC_STRIDE: u64 = 0x2000;
-    /// `BabyRISCV/README.md:152`: no NoC access lands inside this window.
-    const LOCAL_RAM_ZEROING_CYCLES: u32 = 2048;
 
     /// From T0/T1/T2 this feeds that core's own thread; from B, thread 0 after
     /// the MOP expander (`PushTensixInstruction.md:5-9`).
     const INSTRN_BUF_BASE: u64 = 0xFFE4_0000;
-    const INSTRN1_BUF_BASE: u64 = 0xFFE5_0000;
-    const INSTRN2_BUF_BASE: u64 = 0xFFE6_0000;
 
     /// Base of the PCBuf / Manual TTSync / semaphore region
     /// (`BabyRISCV/README.md:126-128`).
     const PC_BUF_BASE: u64 = 0xFFE8_0000;
-    const COPROCESSOR_DONE_CHECK: u64 = 0xFFE8_0000 + 0x04;
-    const MOP_EXPANDER_DONE_CHECK: u64 = 0xFFE8_0000 + 0x08;
     const MOP_CFG_BASE: u64 = 0xFFB8_0000;
-    const PC_BUF_HAZARD_END: u64 = 0xFFE8_0000 + 0xFFFF;
 
     /// Bits 0, 1 and 7 are the unpacker and move together; bit 10 is the matrix
     /// and vector unit, without which SFPU instructions are silently discarded
@@ -228,24 +220,6 @@ impl Arch for Blackhole {
     /// The table in `PushTensixInstruction.md:5-9`. T0/T1/T2 each reach only their
     /// own thread, through the *same* buffer address: the pair identifies the
     /// thread, not the address. B reaches all three, one buffer each.
-    fn pushed_to(core: Core, thread: u32) -> Result<u64, EncodeError> {
-        match (core, thread) {
-            (Core::B, 0) => Ok(Self::INSTRN_BUF_BASE),
-            (Core::B, 1) => Ok(Self::INSTRN1_BUF_BASE),
-            (Core::B, 2) => Ok(Self::INSTRN2_BUF_BASE),
-            (Core::T0, 0) => Ok(Self::INSTRN_BUF_BASE),
-            (Core::T1, 1) => Ok(Self::INSTRN_BUF_BASE),
-            (Core::T2, 2) => Ok(Self::INSTRN_BUF_BASE),
-            (Core::Dm(_) | Core::Math { .. }, _) => {
-                Err(EncodeError::NoSuchCore { core: core.name() })
-            }
-            _ => Err(EncodeError::IllegalPush {
-                core: core.name(),
-                thread,
-            }),
-        }
-    }
-
     fn dst_access_fmt(thread: u32) -> Result<ConfigField, EncodeError> {
         use crate::cfg::blackhole::alu;
         match thread {
@@ -259,6 +233,12 @@ impl Arch for Blackhole {
 
 // The Manual TTSync registers sit inside the load-adjacency hazard range, since
 // that range is what callers use to decide whether a load is affected.
-const _: () = assert!(Blackhole::COPROCESSOR_DONE_CHECK > Blackhole::PC_BUF_BASE);
-const _: () = assert!(Blackhole::COPROCESSOR_DONE_CHECK < Blackhole::PC_BUF_HAZARD_END);
-const _: () = assert!(Blackhole::MOP_EXPANDER_DONE_CHECK < Blackhole::PC_BUF_HAZARD_END);
+const _: () = {
+    let s = match Blackhole::SPECIALS {
+        Specials::Blackhole(s) => s,
+        _ => panic!("Blackhole answers with Blackhole's specials"),
+    };
+    assert!(s.coprocessor_done_check > Blackhole::PC_BUF_BASE);
+    assert!(s.coprocessor_done_check < s.pc_buf_hazard_end);
+    assert!(s.mop_expander_done_check < s.pc_buf_hazard_end);
+};
