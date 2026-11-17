@@ -1,13 +1,13 @@
 // Copyright (C) 2025 zk4x
 // SPDX-License-Identifier: Apache-2.0
 
-//! Fetching the two pinned inputs.
+//! Fetching the pinned inputs.
 //!
-//! One is a whole repository (the specification tree), the other a single header.
-//! Both are verified on arrival: the generator must never read a tree it cannot
-//! name the revision of.
+//! One is a whole repository (the specification tree); two are single files
+//! (`cfg_defines.h` and the Quasar LLK `assembly.yaml`). All are verified on
+//! arrival: a generator must never read an input it cannot name the revision of.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use crate::pin;
 use crate::spec;
@@ -127,6 +127,65 @@ fn verify(path: &Path) -> Result<(), String> {
             "{} hashes {got}, not the pinned {}: the download is corrupted",
             path.display(),
             pin::CFG_DEFINES_SHA256
+        ));
+    }
+    Ok(())
+}
+
+/// Where the pinned Quasar LLK assembly table lives.
+pub fn quasar_assembly_path() -> PathBuf {
+    workspace_root()
+        .join("vendor")
+        .join("quasar")
+        .join("assembly.yaml")
+}
+
+/// Ensure the pinned Quasar LLK assembly table is present and matches the pin.
+pub fn quasar_assembly_if_needed() -> Result<(), String> {
+    let path = quasar_assembly_path();
+    if path.exists() {
+        let bytes = std::fs::read(&path).map_err(|e| format!("reading {}: {e}", path.display()))?;
+        if sha256(&bytes)? == pin::QUASAR_ASSEMBLY_SHA256 {
+            return Ok(());
+        }
+    }
+    quasar_assembly(true)
+}
+
+/// Download the pinned Quasar LLK `assembly.yaml` into `vendor/`.
+pub fn quasar_assembly(force: bool) -> Result<(), String> {
+    let dest = quasar_assembly_path();
+    if dest.exists() && !force {
+        let bytes = std::fs::read(&dest).map_err(|e| format!("reading {}: {e}", dest.display()))?;
+        let got = sha256(&bytes)?;
+        if got == pin::QUASAR_ASSEMBLY_SHA256 {
+            println!("{} is already present and matches the pin", dest.display());
+            return Ok(());
+        }
+        return Err(format!(
+            "{} hashes {got}, not the pinned {}.\nRe-run with --force to replace it.",
+            dest.display(),
+            pin::QUASAR_ASSEMBLY_SHA256
+        ));
+    }
+    let url = format!(
+        "https://raw.githubusercontent.com/tenstorrent/tt-metal/{}/tt_metal/tt-llk/tt_llk_quasar/instructions/assembly.yaml",
+        pin::QUASAR_REV
+    );
+    download(&url, &dest)?;
+    verify_quasar(&dest)?;
+    Ok(())
+}
+
+fn verify_quasar(path: &Path) -> Result<(), String> {
+    let bytes = std::fs::read(path).map_err(|e| format!("reading {}: {e}", path.display()))?;
+    let got = sha256(&bytes)?;
+    if got != pin::QUASAR_ASSEMBLY_SHA256 {
+        let _ = std::fs::remove_file(path);
+        return Err(format!(
+            "{} hashes {got}, not the pinned {}: the download is corrupted",
+            path.display(),
+            pin::QUASAR_ASSEMBLY_SHA256
         ));
     }
     Ok(())

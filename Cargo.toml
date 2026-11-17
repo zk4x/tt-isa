@@ -7,11 +7,11 @@ license = "Apache-2.0"
 repository = "https://github.com/zk4x/tt-isa"
 homepage = "https://github.com/zk4x/tt-isa"
 documentation = "https://docs.rs/tt-isa"
-description = "Blackhole ISA: instruction encoders, register maps, coordinate spaces. no_std, no dependencies."
+description = "Blackhole hardware and Quasar ISA definitions: instruction encoders, register maps, coordinate spaces. no_std, no dependencies."
 
 [dependencies]
 
-# The two generated tables are produced by `cargo xtask`, not by a build script:
+# The three generated tables are produced by `cargo xtask`, not by a build script:
 # the crate stays buildable for `riscv32im` with nothing but rustc, and a pin bump
 # becomes a diff someone can read.
 [workspace]

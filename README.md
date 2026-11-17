@@ -28,9 +28,11 @@ fork are recorded in `CHANGES.md`.
 
 Blackhole hardware definitions shared by the host and the firmware: instruction
 encoders, register and memory maps, coordinate spaces, and the host/firmware
-protocols. `no_std`, `#![forbid(unsafe_code)]`, zero dependencies, because it is
-compiled for both the host and `riscv32im-unknown-none-elf`. Anything that cannot
-build for both does not belong here.
+protocols. It also carries the Quasar instruction encodings, generated from
+tt-metal's Quasar LLK table; the rest of the Quasar port lives in its consumers.
+`no_std`, `#![forbid(unsafe_code)]`, zero dependencies, because it is compiled
+for both the host and `riscv32im-unknown-none-elf`. Anything that cannot build
+for both does not belong here.
 
 ## Use
 
@@ -49,11 +51,20 @@ assert_eq!(word >> 24, 0x12);
 println!("data arena {:#x}..{:#x}", tt_isa::l1::DATA.base, tt_isa::l1::DATA.end);
 ```
 
+Quasar instructions have their own table and the same bit-level encoder:
+
+```rust
+use tt_isa::isa::quasar::encode as quasar;
+
+let word = quasar::setrwc(0, 0, 0, 1).unwrap().word();
+assert_eq!(word, 0x3700_0001);
+```
+
 ## Modules
 
 | Module | What it holds |
 |---|---|
-| `isa` | The Tensix instruction set. `isa::generated` is produced by `cargo xtask gen-isa`; each encoding carries a `Provenance` (Blackhole, shared, Wormhole-only `UNVERIFIED`, or measured). Wormhole forms are in `isa::generated::defs::wormhole`. |
+| `isa` | The Tensix instruction set. `isa::generated` is produced by `cargo xtask gen-isa`; each encoding carries a `Provenance` (Blackhole, shared, Wormhole-only `UNVERIFIED`, measured, or Quasar). Wormhole forms are in `isa::generated::defs::wormhole`. `isa::quasar` is produced separately by `cargo xtask gen-quasar` from tt-metal's Quasar LLK `assembly.yaml`. |
 | `cfg` | Backend-configuration fields. `cfg::generated` is produced by `cargo xtask gen-cfg` from `cfg_defines.h`. |
 | `backend`, `sfpu`, `sync` | Hand-written layers over the encodings: checked config reads/mutations/writes and unit waits, SFPU encodings, Tensix semaphores. |
 | `noc` | NoC coordinate spaces (typed per NoC), NIU registers, `noc::grid::Tensix` (the surviving columns), `noc::probe` (the probe image's protocol) and `noc::read_loop` (the mover's read loop). |
@@ -74,8 +85,10 @@ cargo test                   # in the crate
 cargo test -p tt-isa         # in this repository's workspace
 ```
 
-`tests/llk_crosscheck.rs` checks the generated encodings against tt-metal LLK's
-Blackhole `TT_OP_*` macros.
+`tests/llk_crosscheck.rs` checks the generated Blackhole encodings against
+tt-metal LLK's Blackhole `TT_OP_*` macros. The Quasar table is checked against a
+few Quasar LLK macros in `src/isa/mod.rs`, and `cargo xtask gen-quasar --check`
+keeps the committed table in step with the pinned `assembly.yaml`.
 
 Measured BFP8/BFP4/BFP2 format codes are 6/7/15. `TileImage` describes headers,
 shared exponents and sub-byte datums; native encoding lives in `tt-kernels`
@@ -86,11 +99,15 @@ settling interval does restart it.
 
 ## Gotchas
 
-- Never edit `src/isa/generated.rs` or `src/cfg/generated.rs`. Regenerate with
-  `cargo xtask gen-isa` / `gen-cfg` in this repository (`xtask` is not in the
-  published package, which ships the generated Rust and needs nothing else); the
-  generators fetch their pinned input into `vendor/` themselves, and `--check`
-  fails instead of rewriting when the committed file is out of date.
+- Never edit `src/isa/generated.rs`, `src/isa/quasar.rs` or
+  `src/cfg/generated.rs`. Regenerate with `cargo xtask gen-isa` / `gen-quasar` /
+  `gen-cfg` in this repository (`xtask` is not in the published package, which
+  ships the generated Rust and needs nothing else); the generators fetch their
+  pinned input into `vendor/` themselves, and `--check` fails instead of
+  rewriting when the committed file is out of date.
+- The Quasar table records the LLK source, not silicon evidence. The LLK table
+  does not mark signed fields, so they are all `Field::signed == false`; the bit
+  pattern is still exact.
 - A fact from a Wormhole page is a hypothesis on Blackhole. Several Matrix Unit
   fields sit one bit lower on Blackhole than Wormhole draws them; those are measured
   layouts in `xtask/src/genisa/Bits32_BH.lua`.

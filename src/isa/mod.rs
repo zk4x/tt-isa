@@ -6,6 +6,11 @@
 //! guaranteed bug source. The five SFPU encoders that predate it were hand-written,
 //! and the tests that pinned them are what now check the generator.
 //!
+//! [`quasar`] is a separate table. Quasar is not covered by
+//! `tt-isa-documentation`; its source is tt-metal's Quasar LLK `assembly.yaml`,
+//! pinned in `xtask/src/pin.rs` and regenerated with `cargo xtask gen-quasar`.
+//! Those encodings carry [`Provenance::Quasar`].
+//!
 //! # Two layers, and why the line falls where it does
 //!
 //! What is here is the **raw** layer: it encodes what the bits allow. A field is
@@ -31,6 +36,7 @@
 //! [`Provenance`], derived from which tree embeds its diagram. See that type.
 
 pub mod generated;
+pub mod quasar;
 
 /// One bit field of an instruction.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -168,6 +174,11 @@ pub enum Provenance {
     /// unchanged. Enters the table only through `xtask/src/gen_isa/measured.rs`
     /// (`CONFIRMED`).
     Confirmed { evidence: &'static str },
+    /// A Quasar encoding, from tt-metal's Quasar LLK `assembly.yaml`.
+    ///
+    /// Quasar is pre-silicon, so this records where the encoding came from
+    /// rather than independent verification against silicon.
+    Quasar,
 }
 
 impl Provenance {
@@ -533,6 +544,7 @@ mod tests {
                 Provenance::WormholeOnly => "WormholeOnly",
                 Provenance::Measured { .. } => "Measured",
                 Provenance::Confirmed { .. } => "Confirmed",
+                Provenance::Quasar => "Quasar",
             };
             *counts.entry(name).or_default() += 1;
         }
@@ -979,5 +991,89 @@ mod tests {
         }
         // A filter that matched nothing would pass vacuously.
         assert_eq!(checked, 8, "the NOC_AT_LEN_BE_* layouts");
+    }
+}
+
+#[cfg(test)]
+mod quasar_tests {
+    use super::Provenance;
+    use super::quasar;
+    extern crate std;
+    use std::collections::BTreeSet;
+
+    #[test]
+    fn the_quasar_table_has_the_pinned_shape() {
+        assert_eq!(quasar::ALL.len(), 164);
+
+        let mut keys = BTreeSet::new();
+        let mut opcodes = BTreeSet::new();
+        for def in quasar::ALL {
+            assert!(keys.insert(def.key()), "{} appears twice", def.key());
+            assert!(
+                opcodes.insert(def.opcode()),
+                "{}: duplicate opcode {:#04x}",
+                def.key(),
+                def.opcode()
+            );
+            assert_eq!(def.provenance(), Provenance::Quasar);
+            assert!(def.fixed().is_empty(), "{} has fixed bits", def.key());
+
+            let mut claimed = 0u32;
+            for field in def.fields() {
+                assert_eq!(
+                    claimed & field.mask(),
+                    0,
+                    "{}: {} overlaps another field",
+                    def.key(),
+                    field.name()
+                );
+                assert_eq!(
+                    field.mask() & 0xFF00_0000,
+                    0,
+                    "{}: {} reaches into the opcode",
+                    def.key(),
+                    field.name()
+                );
+                claimed |= field.mask();
+            }
+
+            assert_eq!(
+                def.unspecified(),
+                0x00FF_FFFF & !claimed,
+                "{}: unspecified bits are not the complement of its fields",
+                def.key()
+            );
+        }
+    }
+
+    #[test]
+    fn quasar_encoders_match_the_llk_macros() {
+        let mova = quasar::encode::Mova2D::ZERO
+            .dest_32b_lo(1)
+            .src(2)
+            .addr_mode(3)
+            .instr_mod(2)
+            .dst(5)
+            .encode()
+            .unwrap();
+        assert_eq!(mova.word(), 0x1284_E005);
+        assert_eq!(mova.operand("dst"), Some(5));
+
+        let setrwc = quasar::encode::setrwc(0, 0, 0, 1).unwrap();
+        assert_eq!(setrwc.word(), 0x3700_0001);
+
+        let rmwcib = quasar::encode::rmwcib0(0x10, 0xff, 0xaa).unwrap();
+        assert_eq!(rmwcib.word(), 0xb210_ffaa);
+
+        let unpacr = quasar::encode::UnpacrNop::ZERO
+            .unpacker_select(0)
+            .set_dvalid(1)
+            .stall_cntrl(1)
+            .bank_clr_ctrl(0)
+            .src_clr_val_ctrl(0)
+            .nop_type(2)
+            .encode()
+            .unwrap();
+        assert_eq!(unpacr.word(), 0x4300_00a2);
     }
 }

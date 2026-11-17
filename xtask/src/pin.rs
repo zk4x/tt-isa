@@ -22,3 +22,14 @@ pub const TT_METAL_REV: &str = "81989dcdb8f9b340c932ae7a71a346f4f08703eb";
 /// SHA-256 of that header.
 pub const CFG_DEFINES_SHA256: &str =
     "bc2636abc3ea04e6ca322923e6f2713b242857d021d8ef39b9180a14bcb1a5b8";
+
+/// The tt-metal commit whose Quasar LLK `assembly.yaml` the Quasar instruction
+/// table is generated from.
+///
+/// Quasar is not in `tt-isa-documentation`; tt-metal's Quasar LLK carries the
+/// table as its assembly source.
+pub const QUASAR_REV: &str = "b1d492357ba0f7a6f996f58af318b39592d5afe4";
+
+/// SHA-256 of that `assembly.yaml`.
+pub const QUASAR_ASSEMBLY_SHA256: &str =
+    "85db27258f94e6ac081ba177bbeb3d4e49635d161dfb85f85f95b0e6a2d2a15e";

@@ -1,9 +1,10 @@
 // Copyright (C) 2025 zk4x
 // SPDX-License-Identifier: Apache-2.0
 
-//! The two generated tables: `src/isa/generated.rs` and `src/cfg/generated.rs`.
+//! The three generated tables: `src/isa/generated.rs`, `src/cfg/generated.rs`
+//! and `src/isa/quasar.rs`.
 //!
-//! Both are committed rather than produced by a build script, so that `tt-isa`
+//! All are committed rather than produced by a build script, so that `tt-isa`
 //! stays dependency-free and buildable for `riscv32im` with nothing but rustc.
 //! That makes regeneration a command someone runs, and `--check` the gate that
 //! keeps the committed file honest.
@@ -17,6 +18,7 @@ mod fetch;
 mod gencfg;
 mod genisa;
 mod pin;
+mod quasar;
 mod spec;
 mod util;
 
@@ -28,10 +30,14 @@ tasks:
                       --check fails instead of rewriting when the file is out of date
   gen-cfg [--check]   regenerate the configuration-field table from the pinned
                       cfg_defines.h; --check as above
+  gen-quasar [--check]
+                      regenerate the Quasar instruction table from the pinned
+                      tt-metal Quasar LLK assembly.yaml; --check as above
   fetch-spec          download the pinned specification tree into vendor/
   fetch-cfg           download the pinned cfg_defines.h into vendor/
+  fetch-quasar        download the pinned Quasar LLK assembly.yaml into vendor/
 
-Both generators fetch their pinned input when it is missing or does not match
+All generators fetch their pinned input when it is missing or does not match
 its digest, so a fresh clone needs no setup step.";
 
 fn main() -> ExitCode {
@@ -41,8 +47,10 @@ fn main() -> ExitCode {
     let result = match task.as_deref() {
         Some("gen-isa") => genisa::generate(check),
         Some("gen-cfg") => gencfg::generate(check),
+        Some("gen-quasar") => quasar::generate(check),
         Some("fetch-spec") => fetch::spec(true),
         Some("fetch-cfg") => fetch::cfg_defines(true),
+        Some("fetch-quasar") => fetch::quasar_assembly(true),
         Some(other) => Err(format!("unknown task `{other}`\n\n{USAGE}")),
         None => Err(USAGE.to_string()),
     };
