@@ -7,8 +7,8 @@
 //!
 //! The split is deliberate. `SFPLOADI` can encode any four-bit `VD`, so the
 //! generated encoder accepts one; but `LReg[8]` upwards are constants and a write
-//! to one is silently discarded, so [`loadi`] refuses it. `SFPMAD` can encode any
-//! `VC`, but the specification says not to use `SFPMUL` unless `VC == 9`, so [`mul`]
+//! to one is silently discarded, so [`loadi`](crate::arch::blackhole::sfpu::loadi) refuses it. `SFPMAD` can encode any
+//! `VC`, but the specification says not to use `SFPMUL` unless `VC == 9`, so [`mul`](crate::arch::blackhole::sfpu::mul)
 //! does not offer the parameter. Every refusal here can cite a page; nothing here
 //! is a guess about the encoding, and nothing in the generated layer is a guess
 //! about the hardware.

@@ -17,7 +17,7 @@
 //! refused only when the value does not fit the field.
 //!
 //! What the hardware *honours* is a separate question, and it lives in the
-//! hand-written wrappers next door in [`crate::sfpu`]. `SFPLOADI` can encode any
+//! hand-written wrappers next door in [`crate::arch::blackhole::sfpu`]. `SFPLOADI` can encode any
 //! four-bit `VD`, but `LReg[8]` upwards are constants and a write to one is
 //! silently discarded — so `sfpu::loadi` refuses it. `SFPMUL` can encode any `VC`,
 //! but the specification says not to use it unless `VC == 9` — so `sfpu::mul` does

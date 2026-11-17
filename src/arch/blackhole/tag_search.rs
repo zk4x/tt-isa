@@ -13,7 +13,7 @@
 //! software **changes** one of the five trigger bits (`Search_Enable`,
 //! `Tag_alloc`, `Tag_inv`, `Tag_inv_all`, `Data_Valid_chk`). Writing a tag value
 //! or an address while those keep their value does not re-latch, so a
-//! configuration is written as [`DISARM`], the value words, then the arming
+//! configuration is written as [`DISARM`](crate::arch::blackhole::tag_search::DISARM), the value words, then the arming
 //! bit: the last trigger flip sees the final fields.
 //!
 //! Silicon status: `UNVERIFIED`. Nothing here has executed on a Blackhole card;

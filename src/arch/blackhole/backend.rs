@@ -1,7 +1,7 @@
 //! Reading, writing and mutating Tensix backend configuration, and unit waits.
 //!
 //! The encodings are generated — see [`crate::isa`]. What is here is the layer
-//! above, in the same split [`crate::sfpu`] uses: the generated layer encodes what
+//! above, in the same split [`crate::arch::blackhole::sfpu`] uses: the generated layer encodes what
 //! the bits allow, and this layer refuses what the hardware does not honour and
 //! cites the page that says so.
 //!
@@ -23,7 +23,7 @@
 //! a sub-word field. **`libttsim_bh.so` has no handler for it** — it carries
 //! `tensix_wrcfg` and `tensix_setgpr` but no `rmwcib` symbol of any kind — so a
 //! program using it cannot be developed against the simulator. Whole-word `WRCFG`
-//! is the path this module takes; see [`ConfigWords`] for how sub-word fields are
+//! is the path this module takes; see [`ConfigWords`](crate::arch::blackhole::backend::ConfigWords) for how sub-word fields are
 //! composed into a word before it is written.
 
 use crate::cfg::{ConfigField, ConfigSpan, ThreadConfigField};

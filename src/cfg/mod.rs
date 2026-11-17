@@ -9,7 +9,7 @@
 //!
 //! `BackendConfiguration.md` describes two separate configuration variables,
 //! mapped one after the other into the address space of RISCV B / T0 / T1 / T2
-//! starting at [`Arch::TENSIX_CFG_BASE`](crate::arch::Arch::TENSIX_CFG_BASE):
+//! starting at [`Arch::TENSIX_CFG_BASE`]:
 //!
 //! ```text
 //! uint32_t Config[2][CFG_STATE_SIZE * 4];

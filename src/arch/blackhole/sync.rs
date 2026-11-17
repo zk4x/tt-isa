@@ -20,9 +20,9 @@
 //!
 //! # What is encoded rather than commented
 //!
-//! * A semaphore is a [`Semaphore`], constructed only for indices `0..8`, so the
+//! * A semaphore is a [`Semaphore`](crate::arch::blackhole::sync::Semaphore), constructed only for indices `0..8`, so the
 //!   producer and the consumer name the same one by construction.
-//! * Every wait and every [`post_after`] blocks **B1**, the Sync Unit.
+//! * Every wait and every [`post_after`](crate::arch::blackhole::sync::post_after) blocks **B1**, the Sync Unit.
 //!   `SEMWAIT.md`: once any `SEMWAIT` is in use, every `STALLWAIT` and `SEMWAIT`
 //!   should block B1, or a later `SEMWAIT` can latch while an earlier wait is still
 //!   in place and the earlier one is forgotten. It is also what makes a
@@ -30,7 +30,7 @@
 //! * A `SEMWAIT` with no condition is `UndefinedBehavior`; the helpers always set
 //!   one.
 
-use crate::backend::{self, Before, EncodeError};
+use super::backend::{self, Before, EncodeError};
 use crate::isa::Instruction;
 use crate::isa::blackhole::encode;
 

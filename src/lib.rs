@@ -18,7 +18,6 @@
 
 pub mod arc;
 pub mod arch;
-pub mod backend;
 pub mod cfg;
 pub mod dataflow;
 pub mod dm;
@@ -28,7 +27,4 @@ pub mod isa;
 pub mod l1;
 pub mod mailbox;
 pub mod noc;
-pub mod sfpu;
-pub mod sync;
-pub mod tag_search;
 pub mod tensix;

@@ -20,6 +20,10 @@
 //! between architectures belongs to the caller, which holds a concrete type either
 //! way.
 //!
+//! Field names keep the spelling `cfg_defines.h` gives them (`THCON_SEC0_REG0_TileDescriptor`,
+//! `RISC_DEST_ACCESS_CTRL_SEC0_fmt`), so that a name in the specification can be
+//! searched for here without translation — the same rule the generated tables follow.
+#![allow(non_upper_case_globals)]
 //! # What lives where
 //!
 //! Every constant here is an associated const, so a layout proof stays a
@@ -33,9 +37,32 @@
 
 pub mod blackhole;
 
-use crate::cfg::ConfigField;
+use crate::cfg::{ConfigField, ConfigSpan, ThreadConfigField};
 use crate::isa::EncodeError;
 use crate::tensix::Core;
+
+/// The configuration fields an algorithm names, one implementation per
+/// architecture.
+///
+/// The field table (`cfg::blackhole`, `cfg::quasar`) is namespaced by section, so
+/// generic code cannot reach `alu::STATE_RESET_EN`: a module path is not a type. The
+/// implementation of this trait is that reachability, and it carries only the fields
+/// the algorithms use — a field nobody names does not belong here.
+///
+/// Names are kept exactly as `cfg_defines.h` spells them, as in the generated table.
+pub trait Cfg {
+    const STATE_RESET_EN: ConfigField;
+    const RISC_DEST_ACCESS_CTRL_SEC0_fmt: ConfigField;
+    const RISC_DEST_ACCESS_CTRL_SEC1_fmt: ConfigField;
+    const RISC_DEST_ACCESS_CTRL_SEC2_fmt: ConfigField;
+    const PRNG_SEED_Seed_Val: ConfigField;
+    const THCON_SEC0_REG0_TileDescriptor: ConfigSpan;
+    const THCON_SEC0_REG2_Out_data_format: ConfigField;
+
+    const CFG_STATE_ID_StateID: ThreadConfigField;
+    const CLR_DVALID_SrcA_Disable: ThreadConfigField;
+    const CLR_DVALID_SrcB_Disable: ThreadConfigField;
+}
 
 /// One Tenstorrent architecture, as a type.
 ///
@@ -43,6 +70,9 @@ use crate::tensix::Core;
 /// functions below are associated rather than methods because an instance would
 /// carry nothing.
 pub trait Arch {
+    /// The configuration fields this architecture's algorithms name.
+    type Cfg: Cfg;
+
     /// The architecture's name, as the specification and the tooling write it.
     const NAME: &'static str;
 

@@ -38,7 +38,7 @@ pub mod roles {
     ///
     /// The value is `Arch::default_reset_pc(Core::NC)` on Blackhole, spelled as a
     /// literal because this is a `const` position and the per-core lookup is not
-    /// allowed to be one; [`the_role_slots_end_at_ncs_reset_pc`] proves they agree.
+    /// allowed to be one; `the_role_slots_end_at_ncs_reset_pc` proves they agree.
     pub const END: u64 = 0x1_2000;
     /// The load address (and link address) of the T0, T1 and T2 role images.
     pub const BASE: [u64; 3] = [END - 3 * SLOT, END - 2 * SLOT, END - SLOT];

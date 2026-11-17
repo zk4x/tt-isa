@@ -531,7 +531,7 @@ pub mod nc {
     ///
     /// [`Arch::default_reset_pc`](crate::arch::Arch::default_reset_pc) is the
     /// source of truth; this literal is the `const` spelling of it, and
-    /// [`ncs_stub_is_at_its_reset_pc`] proves the two agree.
+    /// `ncs_stub_is_at_its_reset_pc` proves the two agree.
     pub const STUB_AT: u64 = 0x1_2000;
     /// Where the image is linked and loaded: the first 4 KiB boundary past
     /// B's mover area (the stub's jump needs one), up to the data arena.

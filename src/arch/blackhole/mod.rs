@@ -6,10 +6,27 @@
 //! Spec: `BlackholeA0/TensixTile/BabyRISCV/README.md` for the tile's map,
 //! `SoftReset.md` for reset control, `HiMemTile.md` for the NoC-visible aperture.
 
-use super::Arch;
-use crate::cfg::ConfigField;
+use super::{Arch, Cfg};
+use crate::cfg::{ConfigField, ConfigSpan, ThreadConfigField};
 use crate::isa::EncodeError;
 use crate::tensix::Core;
+
+/// The Tensix backend protocol: configuration writes, unit waits and the instruction
+/// sequences that drive them.
+///
+/// This layer is the architecture's own, not the crate's: `WRCFG`/`SETC16`/`MOP`,
+/// the packer and unpacker waits and the SFPU bodies have no counterpart with the
+/// same shape on Quasar, where `SETRWC`, `STALLWAIT` and its own movers apply. An
+/// architecture that shares the protocol inherits the module; one that does not
+/// writes its own.
+pub mod backend;
+/// The SFPU: lane-register bodies over the generated encodings.
+pub mod sfpu;
+/// Tensix semaphores, and the waits built on them.
+pub mod sync;
+/// The L1 cache tag-search accelerator: its configuration words and the probe that
+/// drives them.
+pub mod tag_search;
 
 /// The Blackhole architecture, as a type.
 ///
@@ -18,7 +35,38 @@ use crate::tensix::Core;
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub struct Blackhole;
 
+/// The configuration fields Blackhole's algorithms name.
+///
+/// The generated table is namespaced by section (`cfg::blackhole::alu::…`), which
+/// generic code cannot reach; this is the typed reachability, and nothing else.
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
+pub struct Fields;
+
+impl Cfg for Fields {
+    const STATE_RESET_EN: ConfigField = crate::cfg::blackhole::alu::STATE_RESET_EN;
+    const RISC_DEST_ACCESS_CTRL_SEC0_fmt: ConfigField =
+        crate::cfg::blackhole::alu::RISC_DEST_ACCESS_CTRL_SEC0_fmt;
+    const RISC_DEST_ACCESS_CTRL_SEC1_fmt: ConfigField =
+        crate::cfg::blackhole::alu::RISC_DEST_ACCESS_CTRL_SEC1_fmt;
+    const RISC_DEST_ACCESS_CTRL_SEC2_fmt: ConfigField =
+        crate::cfg::blackhole::alu::RISC_DEST_ACCESS_CTRL_SEC2_fmt;
+    const PRNG_SEED_Seed_Val: ConfigField = crate::cfg::blackhole::global::PRNG_SEED_Seed_Val;
+    const THCON_SEC0_REG0_TileDescriptor: ConfigSpan =
+        crate::cfg::blackhole::thcon::THCON_SEC0_REG0_TileDescriptor;
+    const THCON_SEC0_REG2_Out_data_format: ConfigField =
+        crate::cfg::blackhole::thcon::THCON_SEC0_REG2_Out_data_format;
+
+    const CFG_STATE_ID_StateID: ThreadConfigField =
+        crate::cfg::blackhole::thread::CFG_STATE_ID_StateID;
+    const CLR_DVALID_SrcA_Disable: ThreadConfigField =
+        crate::cfg::blackhole::thread::CLR_DVALID_SrcA_Disable;
+    const CLR_DVALID_SrcB_Disable: ThreadConfigField =
+        crate::cfg::blackhole::thread::CLR_DVALID_SrcB_Disable;
+}
+
 impl Arch for Blackhole {
+    type Cfg = Fields;
+
     const NAME: &'static str = "Blackhole";
 
     /// L1 scratchpad RAM. Instructions can only be fetched from here

@@ -66,14 +66,14 @@ assert_eq!(word, 0x3700_0001);
 |---|---|
 | `isa` | The Tensix instruction set. `isa::blackhole` is produced by `cargo xtask gen-isa`; each encoding carries a `Provenance` (Blackhole, shared, Wormhole-only `UNVERIFIED`, measured, or Quasar). Wormhole forms are in `isa::blackhole::defs::wormhole`. `isa::quasar` is produced separately by `cargo xtask gen-quasar` from tt-metal's Quasar LLK `assembly.yaml`. |
 | `cfg` | Backend-configuration fields, one table per architecture: `cfg::blackhole` and `cfg::quasar`, both produced by `cargo xtask gen-cfg` from their pinned `cfg_defines.h`. |
-| `backend`, `sfpu`, `sync` | Hand-written layers over the encodings: checked config reads/mutations/writes and unit waits, SFPU encodings, Tensix semaphores. |
+| `arch` | The architectures as types: `arch::Arch` (addresses, per-core facts, the push table, and `type Cfg` for the configuration fields an algorithm names) and `arch::blackhole`, which owns Blackhole's values and the layers that are the architecture's own: `backend` (config writes, unit waits), `sfpu`, `sync`, `tag_search`. |
 | `noc` | NoC coordinate spaces (typed per NoC), NIU registers, `noc::grid::Tensix` (the surviving columns), `noc::probe` (the probe image's protocol) and `noc::read_loop` (the mover's read loop). |
-| `tensix` | Tile memory map, baby RISC-V cores (`Core`), reset PCs, soft reset. |
+| `tensix` | The shared vocabulary of a tile: the core identities (`Core`, including both chips' cores) and the Tensix thread identities. Addresses, reset PCs and reset bits are the architecture's (`arch`). |
 | `arc` | The ARC telemetry tags: how to ask a chip what it is (harvesting, translation). |
 | `dram` | GDDR6 channels (`Dram`, `DramRange`); only a chip's grid can produce a range. |
 | `eth` | Ethernet tile register map, firmware-owned L1, and the `eth::mover` protocol. |
 | `mailbox` | The L1 contract between host and firmware: status words, role mailboxes, program region. `mailbox::guard` is the role-side deadline, blocked status and host release that make a blocking instruction safe to run. |
-| `tag_search` | The L1 tag-search accelerator's registers and helpers (host and ttsim only: armed trigger loads hang the core on silicon). |
+| `tag_search` | The L1 tag-search accelerator's registers and helpers (host and ttsim only: armed trigger loads hang the core on silicon). Now `arch::blackhole::tag_search`. |
 | `dm` | The RISCV B data mover protocol: descriptors, list entries (`op::READ`, `WRITE`, `LIST`, `COMPUTE`, `KERNEL`, `WAIT`, ...), element-wise `kind`s. |
 | `dm::record` | Op records (`GATHER`, `SCATTER`, `ELTWISE`, `SUM`): a whole op in a few list entries, `expand`ed on the tile and, first, on the host. |
 | `l1` | The fixed L1 region map (`REGIONS`: images, mover list, data arena, mailboxes, program slots, trace, program cache), checked at compile time. Kernels never address `l1::DATA` directly; the compiler places buffers there. |
@@ -92,7 +92,7 @@ keeps the committed table in step with the pinned `assembly.yaml`.
 
 Measured BFP8/BFP4/BFP2 format codes are 6/7/15. `TileImage` describes headers,
 shared exponents and sub-byte datums; native encoding lives in `tt-kernels`
-rather than a shipping host arithmetic fallback. `backend::write_prng_seed`
+rather than a shipping host arithmetic fallback. `arch::blackhole::backend::write_prng_seed`
 is a checked diagnostic WRCFG sequence: writing the register does not restart
 silicon's Vector Unit stream. The separately gated RISC-V store path with a
 settling interval does restart it.
