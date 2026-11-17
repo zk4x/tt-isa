@@ -7,7 +7,7 @@
 //! Only E1 is ours. E0 belongs to Tenstorrent's base firmware, which trains and
 //! retrains the link (`BabyRISCV/README.md`).
 
-/// The E1 image's mailbox, laid out as [`crate::mailbox::offset`].
+/// The E1 image's mailbox, laid out as [`crate::arch::blackhole::mailbox::offset`].
 pub const MAILBOX_BASE: u64 = 0x1_F000;
 
 /// Our transfer buffers, `0x20000..0x70000`: 320 KiB.

@@ -2,7 +2,7 @@
 //!
 //! A coordinate is a pair of small integers, raw (untranslated) unless a caller
 //! says otherwise; which NoC a request travels is chosen by its base address
-//! ([`niu::NOC0_BASE`]/[`niu::NOC1_BASE`]), as in tt-metal's
+//! ([`niu::NOC0_BASE`](crate::arch::blackhole::noc::niu::NOC0_BASE)/[`niu::NOC1_BASE`](crate::arch::blackhole::noc::niu::NOC1_BASE)), as in tt-metal's
 //! `noc_parameters.h`.
 //!
 //! Spec: `BlackholeA0/NoC/Coordinates.md`, `MemoryMap.md`.
@@ -95,7 +95,7 @@ pub mod niu {
 
     /// Which of a tile's two NIUs a request leaves through. A request to GDDR
     /// leaves through the endpoint its channel prefers for it
-    /// ([`crate::dram::DramChannel::preferred`]).
+    /// ([`crate::arch::blackhole::dram::DramChannel::preferred`]).
     #[derive(Copy, Clone, Debug, Eq, PartialEq)]
     pub enum Niu {
         Noc0,
@@ -426,17 +426,17 @@ pub mod niu {
         /// the issuing NoC.
         ///
         /// DRAM is an "other" address, so a read into L1 needs the two addresses
-        /// congruent mod [`crate::dram::ALIGN`] (64), not 16. The offset fits
-        /// the low address word: [`crate::dram::CHANNEL_BYTES`] is below 4 GiB.
+        /// congruent mod [`crate::arch::blackhole::dram::ALIGN`] (64), not 16. The offset fits
+        /// the low address word: [`crate::arch::blackhole::dram::CHANNEL_BYTES`] is below 4 GiB.
         ReadDram {
-            from: crate::dram::DramRange,
+            from: crate::arch::blackhole::dram::DramRange,
             to_local: u32,
         },
         /// Write `len` bytes of this tile's L1 at `from_local` over all of `to`
         /// (C16, WH `NoC/Alignment.md:32`).
         WriteDram {
             from_local: u32,
-            to: crate::dram::DramRange,
+            to: crate::arch::blackhole::dram::DramRange,
         },
         /// Add `value` to the 32-bit word at `to` -- the L1 of a Tensix or
         /// Ethernet tile, never MMIO or DRAM -- atomically, and write the word's
@@ -632,10 +632,10 @@ pub mod niu {
         /// `niu`, issued by the tile at `me` through `niu` under `txn`. Refused
         /// as [`Command::registers`] would refuse any of its requests: zero
         /// bytes, L1 not congruent to the GDDR address (mod
-        /// [`crate::dram::ALIGN`] for a read, 16 for a write), or either side
+        /// [`crate::arch::blackhole::dram::ALIGN`] for a read, 16 for a write), or either side
         /// reaching [`MMIO_START`].
         pub fn new(
-            range: crate::dram::DramRange,
+            range: crate::arch::blackhole::dram::DramRange,
             l1: u32,
             write: bool,
             me: (u8, u8),
@@ -646,7 +646,11 @@ pub mod niu {
             let len = u32::try_from(range.len()).map_err(|_| RequestError::Length)?;
             // `CHANNEL_BYTES` is below 4 GiB, so the offset fits the low word.
             let dram_at = range.offset() as u32;
-            let modulus = if write { 16 } else { crate::dram::ALIGN as u32 };
+            let modulus = if write {
+                16
+            } else {
+                crate::arch::blackhole::dram::ALIGN as u32
+            };
             if len == 0 {
                 return Err(RequestError::Length);
             }
@@ -678,7 +682,7 @@ pub mod niu {
         /// [`Command::registers`] for a move of at most one request.
         #[allow(clippy::too_many_arguments)]
         fn single(
-            range: crate::dram::DramRange,
+            range: crate::arch::blackhole::dram::DramRange,
             l1: u32,
             write: bool,
             me: (u8, u8),
@@ -771,9 +775,9 @@ pub mod niu {
     }
 
     /// A move between this tile's L1 and host memory at the PCIe tile
-    /// ([`crate::dm::op::HOST_READ`]): its requests, `MAX_REQUEST_BYTES` each,
+    /// ([`crate::arch::blackhole::dm::op::HOST_READ`]): its requests, `MAX_REQUEST_BYTES` each,
     /// on static VC 1 as every other request. The caller checked it
-    /// (`crate::dm::Entry::decode`): the host address in a host window, not
+    /// (`crate::arch::blackhole::dm::Entry::decode`): the host address in a host window, not
     /// crossing a 4 GiB boundary, congruent with `l1`.
     #[derive(Copy, Clone, Debug)]
     pub struct HostMove {
@@ -1081,7 +1085,7 @@ pub mod niu {
         fn every_request_of_a_dram_read_shares_its_constant_words() {
             let me = (3, 4);
             let (ret_hi, tag, ctrl) = (3 | (4 << 6), 3 << 10, CMD_RD | RESP_MARKED | STATIC_VC_1);
-            for ch in crate::dram::Dram::FULL.channels() {
+            for ch in crate::arch::blackhole::dram::Dram::FULL.channels() {
                 for (off, len) in [(0u64, 64u64), (64, 4096), (4096, 40_000), (128, 16384)] {
                     let l1 = (off % 64) as u32 + 0x2_0000;
                     let mv =
@@ -1100,7 +1104,7 @@ pub mod niu {
 
         #[test]
         fn a_dram_read_targets_the_translated_endpoint_and_needs_c64() {
-            let ch = crate::dram::Dram::FULL.channel(1).unwrap();
+            let ch = crate::arch::blackhole::dram::Dram::FULL.channel(1).unwrap();
             let rd = |off: u64, to: u32| Command::ReadDram {
                 from: ch.range(off, 2048).unwrap(),
                 to_local: to,
@@ -1131,7 +1135,7 @@ pub mod niu {
 
         #[test]
         fn a_dram_write_needs_c16_and_one_request() {
-            let ch = crate::dram::Dram::FULL.channel(0).unwrap();
+            let ch = crate::arch::blackhole::dram::Dram::FULL.channel(0).unwrap();
             let wr = |len: u64, from: u32| Command::WriteDram {
                 from_local: from,
                 to: ch.range(0x40, len).unwrap(),
@@ -1162,7 +1166,7 @@ pub mod niu {
         /// that one request would, in order, the last short.
         #[test]
         fn a_long_dram_move_is_its_requests() {
-            let ch = crate::dram::Dram::FULL.channel(6).unwrap();
+            let ch = crate::arch::blackhole::dram::Dram::FULL.channel(6).unwrap();
             let len = 2 * MAX_REQUEST_BYTES as u64 + 96;
             for write in [false, true] {
                 let range = ch.range(0x20_0040, len).unwrap();
@@ -1297,7 +1301,7 @@ pub mod niu {
 /// full Blackhole and not of any particular one. Tenstorrent fuses off Tensix
 /// columns for yield, so a p150a commonly presents 120. Which columns are gone
 /// varies per ASIC and cannot be measured by probing, because probing a fused-off
-/// tile is the hang described in [`crate::arc`].
+/// tile is the hang described in [`crate::arch::blackhole::arc`].
 ///
 /// The geometry below is therefore split in two. `is_tensix_geometry` answers
 /// "could this coordinate ever hold a Tensix tile", which is a property of the
@@ -1386,7 +1390,7 @@ pub mod grid {
             }
         }
         /// Interpret an `ENABLED_TENSIX_COL` telemetry word
-        /// ([`crate::arc::tag::ENABLED_TENSIX_COL`]) the way tt-metal does.
+        /// ([`crate::arch::blackhole::arc::tag::ENABLED_TENSIX_COL`]) the way tt-metal does.
         ///
         /// tt-metal complements the word and keeps fourteen bits
         /// (`~read_entry(ENABLED_TENSIX_COL) & 0x3FFF`,

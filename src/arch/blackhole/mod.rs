@@ -28,6 +28,23 @@ pub mod sync;
 /// drives them.
 pub mod tag_search;
 
+/// The ARC's telemetry tags, and the message queue that asks for them.
+pub mod arc;
+/// The B-reader / role-stream / NC-writer ownership protocol.
+pub mod dataflow;
+/// The data mover on RISCV B, and NC's forwarding stub.
+pub mod dm;
+/// DRAM banks, their alignment and the addresses that alias one bank.
+pub mod dram;
+/// The Ethernet tile's queues and its NoC reach.
+pub mod eth;
+/// The fixed regions of a Tensix tile's L1.
+pub mod l1;
+/// The L1 mailbox: launch, trace and dump words every role reads.
+pub mod mailbox;
+/// NoC coordinate spaces, the NIU registers and the grid this crate is built for.
+pub mod noc;
+
 /// The Blackhole architecture, as a type.
 ///
 /// Zero-sized: which architecture a program is built for is a compile-time fact,

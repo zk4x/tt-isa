@@ -41,8 +41,8 @@
 use super::{Descriptor, MAILBOX_BASE, TXN_B, error, op};
 use crate::arch::Arch;
 use crate::arch::blackhole::Blackhole;
-use crate::dram::{CHANNELS, Dram};
-use crate::noc::niu::{
+use crate::arch::blackhole::dram::{CHANNELS, Dram};
+use crate::arch::blackhole::noc::niu::{
     CMD_RD, DramMove, Endpoint, MAX_REQUEST_BYTES, MMIO_START, Niu, RESP_MARKED, STATIC_VC_1, TxnId,
 };
 
@@ -55,7 +55,7 @@ const _: () = assert!(ENDPOINTS + ENDPOINT_WORDS as u64 * 4 <= MAILBOX_BASE + 0x
 const _: () = assert!(ENDPOINTS >= MAILBOX_BASE + 0x100);
 
 // The target bound of `guard` (`MMIO_START`) is the channel's own extent, as `Descriptor::decode` checks it.
-const _: () = assert!(crate::dram::CHANNEL_BYTES == MMIO_START as u64);
+const _: () = assert!(crate::arch::blackhole::dram::CHANNEL_BYTES == MMIO_START as u64);
 
 /// `PACKET_TAG` of B's reads: its transaction ID in bits 10..14.
 pub const TAG: u32 = (TXN_B as u32) << 10;
@@ -245,7 +245,7 @@ pub fn guard(e: &[u32; 8], me_hi: u32, endpoint_ok: impl FnOnce(u32) -> bool) ->
     (len.wrapping_sub(1) < MAX_REQUEST_BYTES)
         & (targ <= room)
         & (ret <= l1_room)
-        & ((targ ^ ret) & (crate::dram::ALIGN as u32 - 1) == 0)
+        & ((targ ^ ret) & (crate::arch::blackhole::dram::ALIGN as u32 - 1) == 0)
         & (ret_hi == me_hi)
         & (e[6] == 0)
         & (hi < ENDPOINT_WORDS as u32 * 32)
@@ -611,8 +611,8 @@ mod fuzz {
     use super::*;
     use crate::arch::Arch;
     use crate::arch::blackhole::Blackhole;
-    use crate::dm::Mover;
-    use crate::noc::niu::Command;
+    use crate::arch::blackhole::dm::Mover;
+    use crate::arch::blackhole::noc::niu::Command;
 
     struct Rng(u64);
     impl Rng {
@@ -648,7 +648,7 @@ mod fuzz {
     static OVERRIDE: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
 
     const KEY: u32 = 0x5EED_1234;
-    const CHANNEL: u32 = crate::dram::CHANNEL_BYTES as u32;
+    const CHANNEL: u32 = crate::arch::blackhole::dram::CHANNEL_BYTES as u32;
     const MAX_REQ: u32 = MAX_REQUEST_BYTES;
 
     /// A plain `READ` the mover might be sent: mostly well-formed, biased to the edges of every check.

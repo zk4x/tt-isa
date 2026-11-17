@@ -62,21 +62,17 @@ assert_eq!(word, 0x3700_0001);
 
 ## Modules
 
+The root holds only what both architectures share. Everything with one
+architecture's protocol in it lives under that architecture.
+
 | Module | What it holds |
 |---|---|
 | `isa` | The Tensix instruction set. `isa::blackhole` is produced by `cargo xtask gen-isa`; each encoding carries a `Provenance` (Blackhole, shared, Wormhole-only `UNVERIFIED`, measured, or Quasar). Wormhole forms are in `isa::blackhole::defs::wormhole`. `isa::quasar` is produced separately by `cargo xtask gen-quasar` from tt-metal's Quasar LLK `assembly.yaml`. |
 | `cfg` | Backend-configuration fields, one table per architecture: `cfg::blackhole` and `cfg::quasar`, both produced by `cargo xtask gen-cfg` from their pinned `cfg_defines.h`. |
-| `arch` | The architectures as types: `arch::Arch` (addresses, per-core facts, the push table, and `type Cfg` for the configuration fields an algorithm names) and `arch::blackhole`, which owns Blackhole's values and the layers that are the architecture's own: `backend` (config writes, unit waits), `sfpu`, `sync`, `tag_search`. |
-| `noc` | NoC coordinate spaces (typed per NoC), NIU registers, `noc::grid::Tensix` (the surviving columns), `noc::probe` (the probe image's protocol) and `noc::read_loop` (the mover's read loop). |
-| `tensix` | The shared vocabulary of a tile: the core identities (`Core`, including both chips' cores) and the Tensix thread identities. Addresses, reset PCs and reset bits are the architecture's (`arch`). |
-| `arc` | The ARC telemetry tags: how to ask a chip what it is (harvesting, translation). |
-| `dram` | GDDR6 channels (`Dram`, `DramRange`); only a chip's grid can produce a range. |
-| `eth` | Ethernet tile register map, firmware-owned L1, and the `eth::mover` protocol. |
-| `mailbox` | The L1 contract between host and firmware: status words, role mailboxes, program region. `mailbox::guard` is the role-side deadline, blocked status and host release that make a blocking instruction safe to run. |
-| `tag_search` | The L1 tag-search accelerator's registers and helpers (host and ttsim only: armed trigger loads hang the core on silicon). Now `arch::blackhole::tag_search`. |
-| `dm` | The RISCV B data mover protocol: descriptors, list entries (`op::READ`, `WRITE`, `LIST`, `COMPUTE`, `KERNEL`, `WAIT`, ...), element-wise `kind`s. |
-| `dm::record` | Op records (`GATHER`, `SCATTER`, `ELTWISE`, `SUM`): a whole op in a few list entries, `expand`ed on the tile and, first, on the host. |
-| `l1` | The fixed L1 region map (`REGIONS`: images, mover list, data arena, mailboxes, program slots, trace, program cache), checked at compile time. Kernels never address `l1::DATA` directly; the compiler places buffers there. |
+| `arch` | The architectures as types: `arch::Arch` (addresses, per-core facts, reset, the engine blocks, and `type Cfg` for the configuration fields an algorithm names), `arch::Specials` (the mechanisms only one architecture has), and one module per architecture. |
+| `tensix` | The shared vocabulary of a tile: the hart identities (`Core`, both chips') and the Tensix thread identities. Addresses, reset PCs and reset bits are the architecture's (`arch`). |
+| `arch::blackhole` | Blackhole's values (`Blackhole`, `Fields`) and everything with Blackhole's protocol in it: `backend` (config writes, unit waits), `sfpu`, `sync`, `tag_search`, `noc` (coordinate spaces, NIU registers, `noc::grid::Tensix`, `noc::probe`, `noc::read_loop`), `arc` (telemetry tags), `dram` (GDDR6 channels), `eth` (Ethernet tile and `eth::mover`), `mailbox` (the host/firmware L1 contract, and `mailbox::guard`), `dm` (RISCV B's descriptor mover, with `dm::record`), `dataflow` (the B-reader / role-stream / NC-writer protocol), `l1` (the fixed L1 region map). |
+| `arch::quasar` | Quasar's values (`Quasar`, `Fields`). Its own protocol modules — an L1 layout over 4 MiB, DFBs in place of circular buffers, no push table — do not exist yet; the `Arch` impl does. |
 
 ## Test
 

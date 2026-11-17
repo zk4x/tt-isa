@@ -7,12 +7,12 @@
 //! Counter pairs are received/consumed pages, wrapping modulo 2^16; capacities
 //! stay below half the counter range. Wait slots are B, T0, T1, T2, NC.
 //!
-//! A third channel, [`Stream::Transfer`], runs B to NC with no compute between:
+//! A third channel, [`Stream::Transfer`](crate::arch::blackhole::dataflow::Stream::Transfer), runs B to NC with no compute between:
 //! a standalone transfer (an upload, a copy, an index gather) reads into L1 on
 //! B and writes out on NC, one batch a credit. A packet of only transfer
 //! batches has no `LAUNCH` and no `KERNEL_WAIT`.
 
-use crate::{dm, l1, mailbox};
+use crate::arch::blackhole::{dm, l1, mailbox};
 
 pub const STREAMED: u32 = 1 << 30;
 pub const LENGTH_MASK: u32 = !(STREAMED | mailbox::loops::LOOPED);

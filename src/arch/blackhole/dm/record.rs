@@ -684,7 +684,8 @@ mod tests {
 
     /// The mailbox of role 1, whose words are the ones a trace pokes.
     fn mailbox_word(k: u32) -> u32 {
-        (crate::mailbox::launch::Mailbox::of(1).base() + 0x1C + 4 * k as u64) as u32
+        (crate::arch::blackhole::mailbox::launch::Mailbox::of(1).base() + 0x1C + 4 * k as u64)
+            as u32
     }
 
     #[test]
@@ -733,7 +734,8 @@ mod tests {
             expand(rec, |e| super::super::Entry::decode(usable, e).map(|_| ()))
         };
         // The last word of role 2's mailbox: in, and one word past it: out.
-        let last = (crate::mailbox::launch::Mailbox::of(2).base() + crate::mailbox::MAILBOX_SIZE
+        let last = (crate::arch::blackhole::mailbox::launch::Mailbox::of(2).base()
+            + crate::arch::blackhole::mailbox::MAILBOX_SIZE
             - 4) as u32;
         assert!(decode(&poke_run(last, &[7])).is_ok());
         assert!(decode(&poke_run(last + 4, &[7])).is_err());
@@ -930,7 +932,10 @@ mod tests {
     fn l1_of(values: &[u32]) -> impl FnMut(u32) -> u32 {
         let mut words = std::collections::HashMap::new();
         for (r, &v) in values.iter().enumerate() {
-            words.insert(IDX + 16 + crate::dm::face_index(0, r) as u32 * 4, v);
+            words.insert(
+                IDX + 16 + crate::arch::blackhole::dm::face_index(0, r) as u32 * 4,
+                v,
+            );
         }
         move |at| *words.get(&at).unwrap_or_else(|| panic!("read of {at:#x}"))
     }
@@ -970,11 +975,12 @@ mod tests {
                 for h in 0..2usize {
                     let from = off as u64
                         + TILE_DATA
-                        + 4 * crate::dm::face_index((v % 32) as usize, 16 * h) as u64;
+                        + 4 * crate::arch::blackhole::dm::face_index((v % 32) as usize, 16 * h)
+                            as u64;
                     let to = STAGE as u64
                         + j as u64 * TILE_SLOT
                         + TILE_DATA
-                        + 4 * crate::dm::face_index(r, 16 * h) as u64;
+                        + 4 * crate::arch::blackhole::dm::face_index(r, 16 * h) as u64;
                     want.push([op::READ, ch, 0, from as u32, to as u32, 64, 0, 0]);
                 }
             }
@@ -1013,7 +1019,7 @@ mod tests {
             } else {
                 assert_eq!(
                     (got, issued),
-                    (Err(crate::dm::error::DOMAIN), 0),
+                    (Err(crate::arch::blackhole::dm::error::DOMAIN), 0),
                     "{values:?}"
                 );
             }
@@ -1030,7 +1036,7 @@ mod tests {
 
     #[test]
     fn select_rows_refuses_what_it_should() {
-        use crate::dm::error::{DIRECTION, LENGTH, RANGE};
+        use crate::arch::blackhole::dm::error::{DIRECTION, LENGTH, RANGE};
         let table = t(3, 4);
         let ok = select(table, 64, 3, 1, 3);
         let run = |rec: &[[u32; 8]]| expand_reads(rec, |_| 0, |_| Ok(()));
@@ -1119,11 +1125,17 @@ mod tests {
         // A zero extent, a wrong length, and a plain entry are all refused.
         let mut zero = rec;
         zero[0][4] = 0;
-        assert_eq!(expand(&zero, |_| Ok(())), Err(crate::dm::error::LENGTH));
-        assert_eq!(expand(&rec[..2], |_| Ok(())), Err(crate::dm::error::OP));
+        assert_eq!(
+            expand(&zero, |_| Ok(())),
+            Err(crate::arch::blackhole::dm::error::LENGTH)
+        );
+        assert_eq!(
+            expand(&rec[..2], |_| Ok(())),
+            Err(crate::arch::blackhole::dm::error::OP)
+        );
         assert_eq!(
             expand(&[[op::READ, 0, 0, 0, 0, 0, 0, 0]], |_| Ok(())),
-            Err(crate::dm::error::OP)
+            Err(crate::arch::blackhole::dm::error::OP)
         );
         // `emit`'s error stops the expansion.
         assert_eq!(expand(&rec, |_| Err(42)), Err(42));

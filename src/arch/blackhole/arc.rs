@@ -23,7 +23,7 @@
 //! module this host binds — with tag numbers from UMD's `TelemetryTag`
 //! (`umd/device/types/telemetry.hpp`), the only published enumeration of them.
 
-use crate::noc::NocCoord;
+use crate::arch::blackhole::noc::NocCoord;
 
 /// The ARC tile's coordinate.
 ///
@@ -118,7 +118,7 @@ pub mod tag {
     /// `blackhole_tt_device.cpp:143-146`). Only the population count is used here,
     /// for the reason on [`Tensix::from_enabled_column_mask`][tensix].
     ///
-    /// [tensix]: crate::noc::grid::Tensix::from_enabled_column_mask
+    /// [tensix]: crate::arch::blackhole::noc::grid::Tensix::from_enabled_column_mask
     pub const ENABLED_TENSIX_COL: u16 = 34;
 
     /// Bitmask of *enabled* GDDR channels, one bit per channel.

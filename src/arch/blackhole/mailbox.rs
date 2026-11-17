@@ -17,7 +17,7 @@ pub const MAILBOX_BASE: u64 = 0x0010_0000;
 
 /// Offsets of the words the firmware runtime itself writes, from whichever base
 /// the image was linked with: [`MAILBOX_BASE`] for Tensix images,
-/// [`crate::eth::MAILBOX_BASE`] for the Ethernet one.
+/// [`crate::arch::blackhole::eth::MAILBOX_BASE`] for the Ethernet one.
 pub mod offset {
     pub const STATUS: u64 = 0x00;
     pub const HEARTBEAT: u64 = 0x04;
@@ -91,9 +91,9 @@ pub const GENERATION: u64 = MAILBOX_BASE + 0x38;
 pub const ACK: u64 = MAILBOX_BASE + 0x3C;
 
 /// The program's first word: an L1 address in the program cache
-/// (`crate::l1::PROGRAM_CACHE`), placed there by the host and named, with
+/// (`crate::arch::blackhole::l1::PROGRAM_CACHE`), placed there by the host and named, with
 /// [`PROGRAM_LEN`], by whoever starts the run -- the host, or the data mover's
-/// `KERNEL` entry (`crate::dm::op::KERNEL`). There is no fixed slot: the runner
+/// `KERNEL` entry (`crate::arch::blackhole::dm::op::KERNEL`). There is no fixed slot: the runner
 /// refuses a zero address, or one outside the cache region. This is tt-metal's
 /// `kernel_text_offset`: the launch message names the text, it does not carry
 /// it.
@@ -197,7 +197,7 @@ pub mod loops {
 /// for a profiled list (`trace`): the mover records two events per list entry
 /// or record, never per expanded move, and each role three per run, so a full
 /// list of records with a kernel apiece fits. Programs live above it in
-/// [`crate::l1::PROGRAM_CACHE`], named by their launch message, not staged in a
+/// [`crate::arch::blackhole::l1::PROGRAM_CACHE`], named by their launch message, not staged in a
 /// mailbox (tt-metal's `kernel_text_offset`).
 pub const TRACE_BUFFER: u64 = 0x0014_0000;
 /// Bytes in [`TRACE_BUFFER`].
@@ -221,12 +221,12 @@ pub mod trace {
     /// about to be stored).
     pub const ACKED: u32 = 5;
 
-    /// The data mover (`crate::dm`) began a list.
+    /// The data mover (`crate::arch::blackhole::dm`) began a list.
     pub const LIST_BEGIN: u32 = 16;
     /// The data mover finished a list, every move in it landed.
     pub const LIST_END: u32 = 17;
     /// The mover began a list entry or op record; the detail is its op
-    /// (`crate::dm::op`) or record kind (`crate::dm::record`).
+    /// (`crate::arch::blackhole::dm::op`) or record kind (`crate::arch::blackhole::dm::record`).
     pub const ENTRY_BEGIN: u32 = 18;
     /// The mover finished the entry or record it last began. Moves it issued
     /// may still be in flight: only a `KERNEL`, `WAIT` or `COMPUTE` entry, and
@@ -239,7 +239,7 @@ pub mod trace {
     /// posted.
     pub const ROLES_DONE: u32 = 21;
     /// Requests of the list just ended waited for room under the in-flight
-    /// cap (`crate::noc::niu::InFlight`); the detail is the cycles they
+    /// cap (`crate::arch::blackhole::noc::niu::InFlight`); the detail is the cycles they
     /// waited in all, saturated at [`DETAIL_MAX`]. One per list, after its
     /// `LIST_END`, and only when something waited.
     pub const THROTTLE: u32 = 22;
@@ -290,7 +290,7 @@ pub mod trace {
 }
 
 /// Most instructions a role program may hold. The runner also checks that the
-/// named range is inside [`crate::l1::PROGRAM_CACHE`].
+/// named range is inside [`crate::arch::blackhole::l1::PROGRAM_CACHE`].
 pub const MAX_WORDS: u32 = 8192;
 
 /// Where the firmware copies `Dst` rows for the host to read.

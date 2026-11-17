@@ -486,9 +486,15 @@ mod tests {
     #[test]
     fn a_tiles_l1_layout_fits_the_architecture() {
         // The mailbox and the data arena are placed inside L1 rather than past it.
-        assert!(crate::mailbox::MAILBOX_BASE + crate::mailbox::MAILBOX_SIZE <= Bh::L1_SIZE);
-        assert!(crate::l1::DATA.end <= crate::l1::PROGRAM_CACHE.base);
-        assert_eq!(crate::l1::PROGRAM_CACHE.end, Bh::L1_SIZE);
+        assert!(
+            crate::arch::blackhole::mailbox::MAILBOX_BASE
+                + crate::arch::blackhole::mailbox::MAILBOX_SIZE
+                <= Bh::L1_SIZE
+        );
+        assert!(
+            crate::arch::blackhole::l1::DATA.end <= crate::arch::blackhole::l1::PROGRAM_CACHE.base
+        );
+        assert_eq!(crate::arch::blackhole::l1::PROGRAM_CACHE.end, Bh::L1_SIZE);
     }
 
     type Qsr = quasar::Quasar;

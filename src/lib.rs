@@ -12,19 +12,17 @@
 //! The Quasar encodings are a separate table in [`isa::quasar`]. Their source is
 //! tt-metal's Quasar LLK `assembly.yaml`, because the Blackhole documentation tree
 //! has no Quasar pages.
+//!
+//! The root holds only what both architectures share: [`arch`] (the traits and one
+//! module per architecture), [`isa`] and [`mod@cfg`] (a generated table per
+//! architecture), and [`tensix`] (the hart vocabulary). Everything with one
+//! architecture's protocol in it — its NoC, its DRAM, its L1 layout, its mailboxes,
+//! its movers, its ARC and Ethernet — lives under that architecture's module.
 
 #![no_std]
 #![forbid(unsafe_code)]
 
-pub mod arc;
 pub mod arch;
 pub mod cfg;
-pub mod dataflow;
-pub mod dm;
-pub mod dram;
-pub mod eth;
 pub mod isa;
-pub mod l1;
-pub mod mailbox;
-pub mod noc;
 pub mod tensix;

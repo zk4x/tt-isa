@@ -12,14 +12,14 @@
 //! manager builds a grid of `8 - popcount(harvested)` DRAM channels
 //! (`blackhole_coordinate_manager.cpp:577-581`), and every consumer — the
 //! allocator, the firmware's bank table, host transfers — names a channel in
-//! that compacted space. [`Dram::channel`] takes the same index, and the
+//! that compacted space. [`Dram::channel`](crate::arch::blackhole::dram::Dram::channel) takes the same index, and the
 //! translated coordinate it resolves to is a function of *both* the index and
 //! the harvesting mask: UMD permutes the eight virtual endpoint slots so that no
 //! surviving channel lands on the fused bank's
 //! (`blackhole_coordinate_manager.cpp:320-417`).
 
-use crate::noc::NocCoord;
-use crate::noc::niu::Niu;
+use crate::arch::blackhole::noc::NocCoord;
+use crate::arch::blackhole::noc::niu::Niu;
 
 /// Channels on a full Blackhole (UMD `blackhole::NUM_DRAM_BANKS`).
 pub const CHANNELS: u8 = 8;
@@ -48,7 +48,7 @@ pub const ALIGN: u64 = 64;
 /// logical channels exist.
 ///
 /// The mask is the one thing a chip has to be asked for (`ENABLED_GDDR` tag 36,
-/// read through [`crate::arc`]); a host that has done that hands it down with
+/// read through [`crate::arch::blackhole::arc`]); a host that has done that hands it down with
 /// [`Dram::from_enabled_mask`], which is also the shape the data mover receives
 /// in its `USABLE` mailbox. [`Dram::FULL`] is ttsim's chip.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]

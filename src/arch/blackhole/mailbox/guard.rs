@@ -23,13 +23,13 @@
 //! an earlier process (L1 survives on silicon) can never turn a later ordinary
 //! run into a guarded one.
 
-use crate::mailbox::launch::Mailbox;
+use crate::arch::blackhole::mailbox::launch::Mailbox;
 
 /// Offset of the guard block from a role mailbox's base.
 pub const OFFSET: u64 = 0x100;
 /// Written to the arming word by the host to guard the next run.
 pub const ARMED: u32 = 0x4755_4152;
-/// The role's [`STATUS`](crate::mailbox::STATUS) while a guarded program has
+/// The role's [`STATUS`](crate::arch::blackhole::mailbox::STATUS) while a guarded program has
 /// not completed within its deadline.
 pub const BLOCKED: u32 = 0x5747_b10c;
 /// The panic code of a runner that gave up after the grace period.
@@ -244,7 +244,7 @@ pub const fn snapshot_value(snapshot: u32, index: u32) -> u32 {
     (snapshot >> (4 * index)) & 0xf
 }
 
-const _: () = assert!(OFFSET % 16 == 0 && OFFSET > crate::mailbox::MAILBOX_SIZE);
+const _: () = assert!(OFFSET % 16 == 0 && OFFSET > crate::arch::blackhole::mailbox::MAILBOX_SIZE);
 const _: () = assert!(Guard::BYTES + OFFSET < 0x2000);
 const _: () = assert!(Guard::BYTES % 16 == 0);
 

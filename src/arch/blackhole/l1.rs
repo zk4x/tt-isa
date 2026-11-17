@@ -6,8 +6,8 @@
 //! never name an address in the data arena: the caller declares what it needs and
 //! the compiler places it there.
 
+use crate::arch::blackhole::{dm, mailbox};
 use crate::arch::{Arch, blackhole::Blackhole};
-use crate::{dm, mailbox};
 
 /// A byte range of L1, `[base, end)`.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -68,7 +68,7 @@ pub const PROGRAM_CACHE: Region = Region {
     end: Blackhole::L1_SIZE,
 };
 
-const _: () = assert!(DATA.base % crate::dram::ALIGN == 0);
+const _: () = assert!(DATA.base % crate::arch::blackhole::dram::ALIGN == 0);
 const _: () = assert!(roles::BASE[0] == dm::IMAGE_BASE + dm::IMAGE_MAX);
 const _: () = assert!(NC_IMAGE.end <= DATA.base);
 const _: () = assert!(DATA.end <= PROGRAM_CACHE.base);

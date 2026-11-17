@@ -176,8 +176,11 @@ mod tests {
             (DATA, DATA + 0x1000),
         ];
         for (i, a) in regions.iter().enumerate() {
-            assert!(a.0 >= crate::dm::IMAGE_BASE + crate::dm::IMAGE_MAX);
-            assert!(a.1 <= crate::mailbox::MAILBOX_BASE);
+            assert!(
+                a.0 >= crate::arch::blackhole::dm::IMAGE_BASE
+                    + crate::arch::blackhole::dm::IMAGE_MAX
+            );
+            assert!(a.1 <= crate::arch::blackhole::mailbox::MAILBOX_BASE);
             for b in &regions[i + 1..] {
                 assert!(a.1 <= b.0 || b.1 <= a.0, "{a:x?} overlaps {b:x?}");
             }

@@ -8,26 +8,28 @@
 //! (later, the compute roles) hands it one descriptor at a time.
 //!
 //! The protocol, host side:
-//! 1. wait until [`DONE`] equals the last sequence number submitted;
+//! 1. wait until [`DONE`](crate::arch::blackhole::dm::DONE) equals the last sequence number submitted;
 //! 2. write the descriptor words;
-//! 3. write the next sequence number to [`SEQ`].
+//! 3. write the next sequence number to [`SEQ`](crate::arch::blackhole::dm::SEQ).
 //!
-//! The mover sees `SEQ` change, performs the copy in [`crate::noc::niu`] requests
+//! The mover sees `SEQ` change, performs the copy in [`crate::arch::blackhole::noc::niu`] requests
 //! of at most 16 KiB, waits for them all to complete, and writes `SEQ` to
-//! [`DONE`]. On a refused descriptor it writes the reason to [`ERROR`] and
+//! [`DONE`](crate::arch::blackhole::dm::DONE). On a refused descriptor it writes the reason to
+//! [`ERROR`](crate::arch::blackhole::dm::ERROR) and
 //! `SEQ` to `DONE` without moving anything, so the host never waits forever.
 
 use crate::arch::Arch;
 use crate::arch::blackhole::Blackhole;
-use crate::dram::{Dram, DramRange};
+use crate::arch::blackhole::dram::{Dram, DramRange};
 
 pub mod encoded;
 pub mod record;
 
 /// The mover's mailbox: the slot after the four launch mailboxes
-/// ([`crate::mailbox::launch`]).
-pub const MAILBOX_BASE: u64 = crate::mailbox::launch::BASE + 4 * crate::mailbox::launch::STRIDE;
-const _: () = assert!(MAILBOX_BASE + 0x100 <= crate::mailbox::TRACE_BUFFER);
+/// ([`crate::arch::blackhole::mailbox::launch`]).
+pub const MAILBOX_BASE: u64 = crate::arch::blackhole::mailbox::launch::BASE
+    + 4 * crate::arch::blackhole::mailbox::launch::STRIDE;
+const _: () = assert!(MAILBOX_BASE + 0x100 <= crate::arch::blackhole::mailbox::TRACE_BUFFER);
 const _: () = assert!(MAILBOX_BASE % 16 == 0);
 
 /// Where the mover image is linked and loaded.
@@ -42,14 +44,14 @@ const _: () = assert!(MAILBOX_BASE % 16 == 0);
 /// `hw/inc/api/compute/matmul.h:24-27`), and UMD reserves the first 128 bytes
 /// and uses `0x1000` as its safe L1 address (`tests/test_utils/test_api_common.hpp:135-137`).
 pub const IMAGE_BASE: u64 = 0x1_000;
-/// The image may not reach the first role image ([`crate::l1::roles`]): the
+/// The image may not reach the first role image ([`crate::arch::blackhole::l1::roles`]): the
 /// three role images are packed against NC's slot with reset-PC overrides, so
 /// B's slot is everything below them rather than only what lies under T0's
 /// default reset PC.
-pub const IMAGE_MAX: u64 = crate::l1::roles::BASE[0] - IMAGE_BASE;
+pub const IMAGE_MAX: u64 = crate::arch::blackhole::l1::roles::BASE[0] - IMAGE_BASE;
 
 // The runtime's own words (status, heartbeat, panic code) sit at the start of
-// the mailbox, as in every image (`crate::mailbox::offset`); the descriptor
+// the mailbox, as in every image (`crate::arch::blackhole::mailbox::offset`); the descriptor
 // follows them.
 
 /// Host -> mover: the sequence number of the descriptor to run. Never 0.
@@ -75,12 +77,12 @@ pub const LEN: u64 = MAILBOX_BASE + 0x40;
 pub const MY_X: u64 = MAILBOX_BASE + 0x44;
 pub const MY_Y: u64 = MAILBOX_BASE + 0x48;
 /// The chip's `ENABLED_GDDR` word, as the host read it from the ARC
-/// ([`crate::dram::Dram::from_enabled_mask`]). Written once, before start: the
+/// ([`crate::arch::blackhole::dram::Dram::from_enabled_mask`]). Written once, before start: the
 /// mover can only name channels the chip said it has, and channel numbers are
 /// the chip's compacted logical ones.
 pub const USABLE: u64 = MAILBOX_BASE + 0x4C;
 /// Host -> mover: non-zero, record each list's entries and records through
-/// the tile's timestamper (`crate::mailbox::trace`), which the host has
+/// the tile's timestamper (`crate::arch::blackhole::mailbox::trace`), which the host has
 /// configured. Read at the start of every list, so the host may turn it on or
 /// off between lists. Zero on the simulator, which does not model the event
 /// stream (divergence row 54).
@@ -97,14 +99,14 @@ pub mod trace_mode {
     pub const LISTS: u32 = 2;
 }
 /// Mover -> host: how many of the mover's NoC requests had to wait for room
-/// under the in-flight cap (`crate::noc::niu::InFlight`), since the host last
+/// under the in-flight cap (`crate::arch::blackhole::noc::niu::InFlight`), since the host last
 /// zeroed it. Written only when one did, so the normal path never touches it.
 pub const THROTTLE_STALLS: u64 = MAILBOX_BASE + 0x54;
 /// Mover -> host: the tile-counter cycles those requests waited, in total
 /// (wrapping).
 pub const THROTTLE_CYCLES: u64 = MAILBOX_BASE + 0x58;
 /// Host -> mover: the in-flight cap to use, 0 for
-/// `crate::noc::niu::MAX_IN_FLIGHT`. Read at the start of every list. Lower
+/// `crate::arch::blackhole::noc::niu::MAX_IN_FLIGHT`. Read at the start of every list. Lower
 /// caps are for the gates that force the throttle.
 pub const IN_FLIGHT_CAP: u64 = MAILBOX_BASE + 0x5C;
 /// The NoC transaction ID RISCV B's requests carry (`PACKET_TAG` bits 10..14),
@@ -149,7 +151,7 @@ const _: () = assert!(QUEUE_SLOTS + QUEUE_LEN as u64 * 4 <= WRITE_NOC);
 /// link's bandwidth for the whole row (`silicon_bench_memory::
 /// gddr_aggregate_nocs`, 4 tiles: 86 GB/s against 320). Barriers stay on
 /// NoC #0. Each request goes out of the endpoint its channel prefers for the
-/// NIU (`crate::dram::DramChannel::preferred`), and the two NoCs' preferred
+/// NIU (`crate::arch::blackhole::dram::DramChannel::preferred`), and the two NoCs' preferred
 /// endpoints differ on every channel, so no endpoint ever sees both.
 pub const WRITE_NOC: u64 = MAILBOX_BASE + 0xE0;
 /// Completed trace chunks (wrapping), including nested retained streams.
@@ -219,12 +221,12 @@ pub mod op {
     pub const PAIR_CALL: u32 = 0x41;
     /// Buffer action: `[CB, stream, action, capacity, 0, 0, 0, 0]`, `stream`
     /// 0 for the input credits, 1 for the output's, 2 for a transfer's
-    /// ([`crate::dataflow::Stream`]).
+    /// ([`crate::arch::blackhole::dataflow::Stream`]).
     pub const CB: u32 = 0x42;
     /// NC descriptor: run immutable writer entries from B's list ring.
     pub const SHARED: u32 = 0x43;
     /// B waits on a counter: `[RELEASED, target_u16, which, 0, ...]`
-    /// ([`crate::dataflow::Release`]). `which` 0 waits for `target` output
+    /// ([`crate::arch::blackhole::dataflow::Release`]). `which` 0 waits for `target` output
     /// batches written out and released by NC; 1 for `target` output batches
     /// packed by T2 (their pack retired, whatever NC is still writing); 2 for
     /// `target` transfer batches written out and released by NC.
@@ -276,8 +278,8 @@ pub mod op {
     /// l1, a2, l2]`. The mover waits for every move before it; then, for each
     /// role `t` whose `at` is non-zero, writes `at` and `lt` to its mailbox's
     /// `PROGRAM_ADDR` and `PROGRAM_LEN` -- a program resident in the program
-    /// cache (`crate::l1::PROGRAM_CACHE`) -- and then `generation` to all three
-    /// `GENERATION`s (`crate::mailbox::launch`), and waits until each has
+    /// cache (`crate::arch::blackhole::l1::PROGRAM_CACHE`) -- and then `generation` to all three
+    /// `GENERATION`s (`crate::arch::blackhole::mailbox::launch`), and waits until each has
     /// acknowledged it, or reports [`super::error::ROLE`] if one panics. With
     /// every `at` zero the roles run what the host staged. So a whole op, of
     /// any number of block shapes, is one list and one host round trip. Only in
@@ -317,7 +319,7 @@ pub mod op {
     /// call is refused. Only in a list entry.
     pub const CALL: u32 = 10;
     /// Write one word of a role's mailbox: `[POKE, address, value, 0, ...]`,
-    /// the address a word of `crate::mailbox::launch`'s three mailboxes. A
+    /// the address a word of `crate::arch::blackhole::mailbox::launch`'s three mailboxes. A
     /// trace's role descriptors, which the host writes for an ordinary list
     /// and cannot write during a replay. Only in a list entry.
     pub const POKE: u32 = 11;
@@ -339,7 +341,7 @@ pub mod op {
     pub const KERNEL_WAIT: u32 = 15;
     /// Host memory -> L1, the card's own DMA: `[HOST_READ, host_lo,
     /// host_hi, 0, l1, len, 0, 0]`. `host` is a NoC address at the
-    /// host-connected PCIe tile ([`crate::noc::niu::PCIE_HOST`]): the driver's
+    /// host-connected PCIe tile ([`crate::arch::blackhole::noc::niu::PCIE_HOST`]): the driver's
     /// for memory it pinned for the card (`PIN_PAGES` with `NOC_DMA`). Only
     /// the PCIe tile's two plain windows to the host are accepted
     /// ([`super::host_window`]); `host` and `l1` congruent mod 64, as a GDDR
@@ -436,12 +438,13 @@ pub struct Mover {
 /// inside one of the three role mailboxes. Shared so the host's check, the entry decode
 /// and the firmware's run of a record agree on what is pokeable.
 pub const fn is_role_mailbox_word(address: u32) -> bool {
-    let base = crate::mailbox::launch::BASE;
-    let end = base + 3 * crate::mailbox::launch::STRIDE;
+    let base = crate::arch::blackhole::mailbox::launch::BASE;
+    let end = base + 3 * crate::arch::blackhole::mailbox::launch::STRIDE;
     address % 4 == 0
         && (address as u64) >= base
         && (address as u64) < end
-        && (address as u64 - base) % crate::mailbox::launch::STRIDE < crate::mailbox::MAILBOX_SIZE
+        && (address as u64 - base) % crate::arch::blackhole::mailbox::launch::STRIDE
+            < crate::arch::blackhole::mailbox::MAILBOX_SIZE
 }
 
 impl Mover {
@@ -518,7 +521,7 @@ impl Mover {
 /// NC's own slot, from its default reset PC (`0x1_2000`) to the mover's list
 /// (`0x1_4000`), is 8 KiB, and the mover image is twice that. So the image
 /// lives in the free L1 between B's mover area and the data arena
-/// ([`crate::l1::NC_IMAGE`]), its list ring, scratch and trace chunk in the
+/// ([`crate::arch::blackhole::l1::NC_IMAGE`]), its list ring, scratch and trace chunk in the
 /// mailbox region's free stretch below the role mailboxes -- the program
 /// cache keeps all of the top of L1, which a long column sum needs
 /// (`step21_one_launch`) -- and NC's reset PC holds a two-instruction jump to
@@ -541,12 +544,14 @@ pub mod nc {
         IMAGE_BASE >= super::TRACE_CHUNK + super::TRACE_CHUNK_ENTRIES as u64 * super::ENTRY_BYTES
     );
     /// NC's list ring, as [`super::LIST`] is B's: in the mailbox region, past
-    /// the single-core mailbox's `Dst` dump (`crate::mailbox::DUMP`) and
-    /// before the role mailboxes (`crate::mailbox::launch::BASE`).
-    pub const LIST: u64 = crate::mailbox::MAILBOX_BASE + 0x4000;
+    /// the single-core mailbox's `Dst` dump (`crate::arch::blackhole::mailbox::DUMP`) and
+    /// before the role mailboxes (`crate::arch::blackhole::mailbox::launch::BASE`).
+    pub const LIST: u64 = crate::arch::blackhole::mailbox::MAILBOX_BASE + 0x4000;
     const _: () = assert!(
-        LIST >= crate::mailbox::DUMP
-            + (crate::mailbox::DUMP_MAX_ROWS * crate::mailbox::DUMP_ROW_WORDS * 4) as u64
+        LIST >= crate::arch::blackhole::mailbox::DUMP
+            + (crate::arch::blackhole::mailbox::DUMP_MAX_ROWS
+                * crate::arch::blackhole::mailbox::DUMP_ROW_WORDS
+                * 4) as u64
     );
     /// NC's transpose scratch slot, as [`super::SCRATCH`] is B's.
     pub const SCRATCH: u64 = LIST + super::LIST_MAX as u64 * super::ENTRY_BYTES;
@@ -557,8 +562,8 @@ pub mod nc {
     /// NC's mover mailbox: B's layout ([`super::SEQ`] and on, offset by
     /// `MAILBOX_BASE - super::MAILBOX_BASE`), one page after B's.
     pub const MAILBOX_BASE: u64 = super::MAILBOX_BASE + 0x1000;
-    const _: () = assert!(MAILBOX_BASE + 0x100 <= crate::mailbox::TRACE_BUFFER);
-    const _: () = assert!(END <= crate::mailbox::launch::BASE);
+    const _: () = assert!(MAILBOX_BASE + 0x100 <= crate::arch::blackhole::mailbox::TRACE_BUFFER);
+    const _: () = assert!(END <= crate::arch::blackhole::mailbox::launch::BASE);
     const _: () = assert!(STUB_AT + 8 <= super::LIST);
 
     /// The two instructions at [`STUB_AT`]: `lui t0, %hi(target)` and
@@ -574,7 +579,7 @@ pub mod nc {
 
 /// One FP32 32x32 tile as it is stored on the device: the 16-byte header
 /// (zero, as `tt_layout` writes it), 1024 datums in face order, and padding to
-/// a multiple of [`crate::dram::ALIGN`] -- so every slot is 64-byte aligned
+/// a multiple of [`crate::arch::blackhole::dram::ALIGN`] -- so every slot is 64-byte aligned
 /// wherever it sits, and any slot may be copied to any other under the C64
 /// read rule (divergence row 64).
 pub const TILE_SLOT: u64 = 4160;
@@ -582,7 +587,7 @@ pub const TILE_SLOT: u64 = 4160;
 pub const BF16_TILE_SLOT: u64 = 2112;
 /// Where a tile's datums start within its slot.
 pub const TILE_DATA: u64 = 16;
-const _: () = assert!(TILE_SLOT % crate::dram::ALIGN == 0);
+const _: () = assert!(TILE_SLOT % crate::arch::blackhole::dram::ALIGN == 0);
 const _: () = assert!(TILE_DATA + 4096 <= TILE_SLOT);
 
 /// The datum index of tile position `(row, col)` in the face order `tt_layout`
@@ -625,11 +630,11 @@ pub enum Entry {
     },
     Released {
         target: u16,
-        which: crate::dataflow::Release,
+        which: crate::arch::blackhole::dataflow::Release,
     },
     Buffer {
-        stream: crate::dataflow::Stream,
-        action: crate::dataflow::Action,
+        stream: crate::arch::blackhole::dataflow::Stream,
+        action: crate::arch::blackhole::dataflow::Action,
         capacity: u16,
     },
     PairCall {
@@ -717,8 +722,8 @@ impl Entry {
                 return Err(error::OP);
             }
             if slot % 16 != 0
-                || (slot as u64) < crate::l1::DATA.base
-                || slot as u64 + TILE_SLOT > crate::l1::DATA.end
+                || (slot as u64) < crate::arch::blackhole::l1::DATA.base
+                || slot as u64 + TILE_SLOT > crate::arch::blackhole::l1::DATA.end
             {
                 return Err(error::ALIGNMENT);
             }
@@ -743,8 +748,8 @@ impl Entry {
                 let end = at as u64 + (w[3] - 1) as u64 * stride as u64 + width as u64;
                 if at % width != 0
                     || stride % width != 0
-                    || (at as u64) < crate::l1::DATA.base
-                    || end > crate::l1::DATA.end
+                    || (at as u64) < crate::arch::blackhole::l1::DATA.base
+                    || end > crate::arch::blackhole::l1::DATA.end
                 {
                     return Err(error::ALIGNMENT);
                 }
@@ -775,8 +780,8 @@ impl Entry {
                 (w[3], if w[7] == 2 { BF16_TILE_SLOT } else { TILE_SLOT }),
             ] {
                 if at % 64 != 0
-                    || (at as u64) < crate::l1::DATA.base
-                    || at as u64 + len > crate::l1::DATA.end
+                    || (at as u64) < crate::arch::blackhole::l1::DATA.base
+                    || at as u64 + len > crate::arch::blackhole::l1::DATA.end
                 {
                     return Err(error::ALIGNMENT);
                 }
@@ -792,7 +797,7 @@ impl Entry {
             });
         }
         if w[0] == op::RELEASED {
-            let which = crate::dataflow::Release::decode(w[2]).ok_or(error::OP)?;
+            let which = crate::arch::blackhole::dataflow::Release::decode(w[2]).ok_or(error::OP)?;
             if w[1] > u16::MAX as u32 || w[3..].iter().any(|&word| word != 0) {
                 return Err(error::OP);
             }
@@ -802,8 +807,8 @@ impl Entry {
             });
         }
         if w[0] == op::CB {
-            let action = crate::dataflow::Action::decode(w[2]).ok_or(error::OP)?;
-            let stream = crate::dataflow::Stream::decode(w[1]).ok_or(error::OP)?;
+            let action = crate::arch::blackhole::dataflow::Action::decode(w[2]).ok_or(error::OP)?;
+            let stream = crate::arch::blackhole::dataflow::Stream::decode(w[1]).ok_or(error::OP)?;
             if w[3] == 0 || w[3] >= 0x8000 || w[4..].iter().any(|&word| word != 0) {
                 return Err(error::OP);
             }
@@ -819,11 +824,11 @@ impl Entry {
             }
             for stream in [&w[1..4], &w[4..7]] {
                 let stream_end = stream[1] as u64 + stream[2] as u64 * ENTRY_BYTES;
-                if stream[0] >= crate::dram::CHANNELS as u32
+                if stream[0] >= crate::arch::blackhole::dram::CHANNELS as u32
                     || usable & (1 << stream[0]) == 0
                     || stream[1] % ENTRY_BYTES as u32 != 0
                     || stream[2] == 0
-                    || stream_end > crate::dram::CHANNEL_BYTES
+                    || stream_end > crate::arch::blackhole::dram::CHANNEL_BYTES
                 {
                     return Err(error::RANGE);
                 }
@@ -871,7 +876,7 @@ impl Entry {
             if w[1] == 0 {
                 return Err(error::GENERATION);
             }
-            let cache = crate::l1::PROGRAM_CACHE;
+            let cache = crate::arch::blackhole::l1::PROGRAM_CACHE;
             let mut programs = [(0, 0); 3];
             for (t, p) in programs.iter_mut().enumerate() {
                 let (at, len) = (w[2 + 2 * t], w[3 + 2 * t]);
@@ -881,10 +886,10 @@ impl Entry {
                 // The length word may carry `mailbox::loops::LOOPED` (a loop
                 // header leads the program), which the runner reads; the
                 // bounds are the words'.
-                let words = len & crate::dataflow::LENGTH_MASK;
+                let words = len & crate::arch::blackhole::dataflow::LENGTH_MASK;
                 let bytes = words as u64 * 4;
                 if at % 16 != 0
-                    || words > crate::mailbox::MAX_WORDS
+                    || words > crate::arch::blackhole::mailbox::MAX_WORDS
                     || !cache.contains(at as u64, bytes)
                 {
                     return Err(error::PROGRAM);
@@ -919,11 +924,11 @@ impl Entry {
         }
         if w[0] == op::CALL {
             // Entries are 32 bytes, read 32-byte aligned; a channel's offset
-            // fits the word (`crate::dram`).
+            // fits the word (`crate::arch::blackhole::dram`).
             if w[3] == 0 || w[2] % ENTRY_BYTES as u32 != 0 || w[6] != 0 || w[7] != 0 {
                 return Err(error::OP);
             }
-            if w[1] >= crate::dram::CHANNELS as u32 || usable & (1 << w[1]) == 0 {
+            if w[1] >= crate::arch::blackhole::dram::CHANNELS as u32 || usable & (1 << w[1]) == 0 {
                 return Err(error::RANGE);
             }
             return Ok(Entry::Call {
@@ -954,7 +959,11 @@ impl Entry {
             }
             let in_l1 = (l1 as u64 + len as u64) <= Blackhole::L1_SIZE;
             let one_word = (w[1] as u64) + len as u64 <= 1 << 32;
-            if host % crate::dram::ALIGN != l1 as u64 % crate::dram::ALIGN || !in_l1 || !one_word {
+            if host % crate::arch::blackhole::dram::ALIGN
+                != l1 as u64 % crate::arch::blackhole::dram::ALIGN
+                || !in_l1
+                || !one_word
+            {
                 return Err(error::ALIGNMENT);
             }
             return Ok(Entry::Host {
@@ -1075,7 +1084,7 @@ impl Descriptor {
     /// The entry's word 2 is reserved and must be zero: it carried a DRAM
     /// endpoint port while this workspace chose its own endpoints, and a
     /// nonzero value now means an encoder from before the move to the chip's
-    /// preferred endpoint ([`crate::dram::DramChannel::preferred`]).
+    /// preferred endpoint ([`crate::arch::blackhole::dram::DramChannel::preferred`]).
     pub fn decode(
         usable: u32,
         op: u32,
@@ -1102,7 +1111,7 @@ impl Descriptor {
             .and_then(|c| c.range(offset as u64, len as u64))
             .ok_or(error::RANGE)?;
         let modulus = if op == op::READ {
-            crate::dram::ALIGN
+            crate::arch::blackhole::dram::ALIGN
         } else {
             16
         };
@@ -1160,7 +1169,7 @@ mod tests {
     #[test]
     fn resident_index_selection_checks_every_slot_and_geometry() {
         use super::*;
-        let at = crate::l1::DATA.base as u32;
+        let at = crate::arch::blackhole::l1::DATA.base as u32;
         for bytes in [2, 4] {
             let valid = [
                 op::INDEX_PICK,
@@ -1193,7 +1202,7 @@ mod tests {
                 let mut invalid = valid;
                 invalid[field] += 1;
                 assert_eq!(Entry::decode(0xff, invalid), Err(error::ALIGNMENT));
-                invalid[field] = crate::l1::DATA.end as u32 - 64;
+                invalid[field] = crate::arch::blackhole::l1::DATA.end as u32 - 64;
                 assert_eq!(Entry::decode(0xff, invalid), Err(error::ALIGNMENT));
             }
         }
@@ -1204,7 +1213,7 @@ mod tests {
     #[test]
     fn local_word_copies_are_checked_and_reader_owned() {
         use super::*;
-        let at = crate::l1::DATA.base as u32;
+        let at = crate::arch::blackhole::l1::DATA.base as u32;
         let entry = [op::COPY_WORDS, at, at + 4096, 16, 4, 4, 0, 0];
         assert!(matches!(
             Entry::decode(0xff, entry),
@@ -1214,7 +1223,7 @@ mod tests {
         assert!(!Mover::NC.permits(op::COPY_WORDS));
         for (index, value) in [
             (1, at + 1),
-            (2, crate::l1::DATA.end as u32),
+            (2, crate::arch::blackhole::l1::DATA.end as u32),
             (3, 0),
             (3, 1025),
             (4, 3),
@@ -1286,7 +1295,7 @@ mod tests {
     #[test]
     fn launch_and_kernel_wait_decode_as_kernel_halves() {
         use super::*;
-        let at = crate::l1::PROGRAM_CACHE.base as u32;
+        let at = crate::arch::blackhole::l1::PROGRAM_CACHE.base as u32;
         let launch = [op::LAUNCH, 7, at, 4, 0, 0, at + 64, 8];
         assert_eq!(
             Entry::decode(0xFF, launch),
@@ -1539,7 +1548,7 @@ mod tests {
         bad_half[1] += 1;
         assert!(Entry::decode(ALL, bad_half).is_err());
         let mut bad_half = copy_half;
-        bad_half[2] = crate::l1::DATA.end as u32 - 2;
+        bad_half[2] = crate::arch::blackhole::l1::DATA.end as u32 - 2;
         assert!(Entry::decode(ALL, bad_half).is_err());
         let mut bad = fill;
         bad[2] = 0x2000;
@@ -1566,7 +1575,7 @@ mod tests {
             })
         );
         // Resident programs: inside the cache, aligned, no longer than a slot.
-        let at = crate::l1::PROGRAM_CACHE.base as u32;
+        let at = crate::arch::blackhole::l1::PROGRAM_CACHE.base as u32;
         assert_eq!(
             Entry::decode(ALL, [op::KERNEL, 7, at, 10, 0, 0, at + 64, 3]),
             Ok(Entry::Kernel {
@@ -1575,7 +1584,7 @@ mod tests {
             })
         );
         // A looped program's length word passes through, flag and all.
-        let looped = 10 | crate::mailbox::loops::LOOPED;
+        let looped = 10 | crate::arch::blackhole::mailbox::loops::LOOPED;
         assert_eq!(
             Entry::decode(ALL, [op::KERNEL, 7, at, looped, 0, 0, 0, 0]),
             Ok(Entry::Kernel {
@@ -1586,7 +1595,16 @@ mod tests {
         for bad in [
             [op::KERNEL, 7, 0x2_0000, 10, 0, 0, 0, 0],
             [op::KERNEL, 7, at + 4, 10, 0, 0, 0, 0],
-            [op::KERNEL, 7, at, crate::mailbox::MAX_WORDS + 1, 0, 0, 0, 0],
+            [
+                op::KERNEL,
+                7,
+                at,
+                crate::arch::blackhole::mailbox::MAX_WORDS + 1,
+                0,
+                0,
+                0,
+                0,
+            ],
             [op::KERNEL, 7, Blackhole::L1_SIZE as u32 - 16, 8, 0, 0, 0, 0],
         ] {
             assert_eq!(Entry::decode(ALL, bad), Err(error::PROGRAM), "{bad:x?}");
