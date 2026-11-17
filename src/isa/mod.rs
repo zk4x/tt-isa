@@ -411,6 +411,15 @@ pub enum EncodeError {
         value: u32,
         width: u8,
     },
+    /// The call names a core this architecture's tiles do not have.
+    NoSuchCore { core: &'static str },
+    /// The call names a Tensix thread this architecture does not have.
+    NoSuchThread { thread: u32 },
+    /// The `(core, thread)` pair is one the hardware does not allow.
+    ///
+    /// These are the cells of `PushTensixInstruction.md:5-9` that hang the
+    /// RISC-V unrecoverably: T0/T1/T2 storing to another thread's buffer.
+    IllegalPush { core: &'static str, thread: u32 },
 }
 
 impl core::fmt::Display for EncodeError {
@@ -425,6 +434,18 @@ impl core::fmt::Display for EncodeError {
                 f,
                 "{instruction}: {field} = {value} does not fit in {width} bits"
             ),
+            EncodeError::NoSuchCore { core } => {
+                write!(f, "this architecture has no {core} core")
+            }
+            EncodeError::NoSuchThread { thread } => {
+                write!(f, "this architecture has no Tensix thread {thread}")
+            }
+            EncodeError::IllegalPush { core, thread } => {
+                write!(
+                    f,
+                    "{core} cannot reach Tensix thread {thread}: the store hangs the RISC-V"
+                )
+            }
         }
     }
 }

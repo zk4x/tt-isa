@@ -123,6 +123,10 @@ impl EncodeError {
                 value,
                 bits: width as u32,
             },
+            // The generated layer's only refusal is a field that does not fit; a
+            // core or thread this architecture does not have is refused before an
+            // instruction is encoded.
+            _ => panic!("backend has no spelling for an architecture refusal"),
         }
     }
 }

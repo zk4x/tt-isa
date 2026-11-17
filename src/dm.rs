@@ -17,6 +17,8 @@
 //! [`DONE`]. On a refused descriptor it writes the reason to [`ERROR`] and
 //! `SEQ` to `DONE` without moving anything, so the host never waits forever.
 
+use crate::arch::Arch;
+use crate::arch::blackhole::Blackhole;
 use crate::dram::{Dram, DramRange};
 
 pub mod encoded;
@@ -463,12 +465,20 @@ impl Mover {
                     && op != op::CHECK_FLAGS
                     && !matches!(record::direction(op), Some(record::Direction::Write))
             }
-            _ => {
+            crate::tensix::Core::T0
+            | crate::tensix::Core::T1
+            | crate::tensix::Core::T2
+            | crate::tensix::Core::NC => {
                 op == op::WRITE
                     || op == op::CHECK_FLAGS
                     || op == op::WAIT
                     || op == op::CB
                     || matches!(record::direction(op), Some(record::Direction::Write))
+            }
+            // The two movers of a Blackhole tile are B and NC; no other core has
+            // one, so no other core can be the subject of this question.
+            crate::tensix::Core::Dm0 | crate::tensix::Core::Dm1 => {
+                panic!("a DM core is Quasar's; Blackhole's movers are B and NC")
             }
         }
     }
@@ -518,7 +528,11 @@ impl Mover {
 /// instruction RAM (`BabyRISCV/README.md:39`) -- so the image runs in place.
 pub mod nc {
     /// Where NC starts on leaving reset: the stub.
-    pub const STUB_AT: u64 = crate::tensix::Core::NC.default_reset_pc() as u64;
+    ///
+    /// [`Arch::default_reset_pc`](crate::arch::Arch::default_reset_pc) is the
+    /// source of truth; this literal is the `const` spelling of it, and
+    /// [`ncs_stub_is_at_its_reset_pc`] proves the two agree.
+    pub const STUB_AT: u64 = 0x1_2000;
     /// Where the image is linked and loaded: the first 4 KiB boundary past
     /// B's mover area (the stub's jump needs one), up to the data arena.
     pub const IMAGE_BASE: u64 = 0x1_A000;
@@ -831,7 +845,7 @@ impl Entry {
             }
             // The NoC half lands in the scratch slot, 64-aligned; check it so.
             let d = Descriptor::decode(usable, op::READ, w[1], w[2], w[3], SCRATCH as u32, w[5])?;
-            if w[4] as u64 + TILE_SLOT > crate::tensix::L1_SIZE {
+            if w[4] as u64 + TILE_SLOT > Blackhole::L1_SIZE {
                 return Err(error::ALIGNMENT);
             }
             return Ok(Entry::Move {
@@ -938,7 +952,7 @@ impl Entry {
             if len == 0 {
                 return Err(error::LENGTH);
             }
-            let in_l1 = (l1 as u64 + len as u64) <= crate::tensix::L1_SIZE;
+            let in_l1 = (l1 as u64 + len as u64) <= Blackhole::L1_SIZE;
             let one_word = (w[1] as u64) + len as u64 <= 1 << 32;
             if host % crate::dram::ALIGN != l1 as u64 % crate::dram::ALIGN || !in_l1 || !one_word {
                 return Err(error::ALIGNMENT);
@@ -956,7 +970,7 @@ impl Entry {
             if valid & !0x1f1f != 0 || w[5..].iter().any(|&v| v != 0) {
                 return Err(error::OP);
             }
-            let l1 = crate::tensix::L1_SIZE;
+            let l1 = Blackhole::L1_SIZE;
             // What it touches of the block: its valid rows' valid columns.
             let (rows, cols) = (
                 fill::extent(valid & 0xff) as u64,
@@ -989,7 +1003,7 @@ impl Entry {
             } else {
                 TILE_SLOT
             };
-            let slot = |at: u32| at % 16 == 0 && at as u64 + bytes <= crate::tensix::L1_SIZE;
+            let slot = |at: u32| at % 16 == 0 && at as u64 + bytes <= Blackhole::L1_SIZE;
             if !slot(w[3]) {
                 return Err(error::ALIGNMENT);
             }
@@ -1093,7 +1107,7 @@ impl Descriptor {
             16
         };
         let l1_end = l1 as u64 + len as u64;
-        if (offset as u64) % modulus != (l1 as u64) % modulus || l1_end > crate::tensix::L1_SIZE {
+        if (offset as u64) % modulus != (l1 as u64) % modulus || l1_end > Blackhole::L1_SIZE {
             return Err(error::ALIGNMENT);
         }
         Ok(Descriptor { op, range, l1 })
@@ -1102,6 +1116,19 @@ impl Descriptor {
 
 #[cfg(test)]
 mod tests {
+    /// The stub's literal address is NC's default reset PC, which is a per-core
+    /// lookup and so cannot be a `const`.
+    #[test]
+    fn ncs_stub_is_at_its_reset_pc() {
+        use crate::arch::{Arch, blackhole::Blackhole};
+        use crate::tensix::Core;
+
+        assert_eq!(
+            Blackhole::default_reset_pc(Core::NC),
+            Ok(super::nc::STUB_AT as u32)
+        );
+    }
+
     /// Word 4 of a `BARRIER` says whether the unit arrives (0, as every barrier did before
     /// the wait-only form) or only waits (1); anything else, or a word past it, is refused.
     #[test]
@@ -1243,7 +1270,7 @@ mod tests {
             Err(error::ALIGNMENT)
         );
         assert_eq!(
-            e(op::HOST_READ, iatu, crate::tensix::L1_SIZE as u32 - 64, 128),
+            e(op::HOST_READ, iatu, Blackhole::L1_SIZE as u32 - 64, 128),
             Err(error::ALIGNMENT)
         );
         // Across a 4 GiB boundary of the host address.
@@ -1492,7 +1519,7 @@ mod tests {
         bad_half[1] = 0x1_0000;
         assert!(Entry::decode(ALL, bad_half).is_err());
         let mut end_half = half;
-        end_half[3] = (crate::tensix::L1_SIZE - BF16_TILE_SLOT) as u32;
+        end_half[3] = (Blackhole::L1_SIZE - BF16_TILE_SLOT) as u32;
         assert!(Entry::decode(ALL, end_half).is_ok());
         end_half[3] += 16;
         assert!(Entry::decode(ALL, end_half).is_err());
@@ -1518,7 +1545,7 @@ mod tests {
         bad[2] = 0x2000;
         assert_eq!(Entry::decode(ALL, bad), Err(error::OP), "a region past 32");
         let mut bad = fill;
-        bad[3] = crate::tensix::L1_SIZE as u32 - 64;
+        bad[3] = Blackhole::L1_SIZE as u32 - 64;
         assert_eq!(Entry::decode(ALL, bad), Err(error::ALIGNMENT));
         let mut bad = fill;
         bad[5] = 1;
@@ -1560,16 +1587,7 @@ mod tests {
             [op::KERNEL, 7, 0x2_0000, 10, 0, 0, 0, 0],
             [op::KERNEL, 7, at + 4, 10, 0, 0, 0, 0],
             [op::KERNEL, 7, at, crate::mailbox::MAX_WORDS + 1, 0, 0, 0, 0],
-            [
-                op::KERNEL,
-                7,
-                crate::tensix::L1_SIZE as u32 - 16,
-                8,
-                0,
-                0,
-                0,
-                0,
-            ],
+            [op::KERNEL, 7, Blackhole::L1_SIZE as u32 - 16, 8, 0, 0, 0, 0],
         ] {
             assert_eq!(Entry::decode(ALL, bad), Err(error::PROGRAM), "{bad:x?}");
         }
@@ -1618,15 +1636,7 @@ mod tests {
         );
         // L1 ends at 1.5 MiB.
         assert_eq!(
-            dec(
-                ALL,
-                op::READ,
-                0,
-                0,
-                0,
-                crate::tensix::L1_SIZE as u32 - 64,
-                128
-            ),
+            dec(ALL, op::READ, 0, 0, 0, Blackhole::L1_SIZE as u32 - 64, 128),
             Err(error::ALIGNMENT)
         );
     }

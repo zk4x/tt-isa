@@ -9,7 +9,7 @@
 //!
 //! `BackendConfiguration.md` describes two separate configuration variables,
 //! mapped one after the other into the address space of RISCV B / T0 / T1 / T2
-//! starting at [`tensix::TENSIX_CFG_BASE`](crate::tensix::TENSIX_CFG_BASE):
+//! starting at [`Arch::TENSIX_CFG_BASE`](crate::arch::Arch::TENSIX_CFG_BASE):
 //!
 //! ```text
 //! uint32_t Config[2][CFG_STATE_SIZE * 4];
@@ -36,7 +36,15 @@
 
 pub mod generated;
 
-use crate::tensix::TENSIX_CFG_BASE;
+use crate::arch::Arch;
+use crate::arch::blackhole::Blackhole;
+
+/// The backend configuration's base address.
+///
+/// A name for [`Arch::TENSIX_CFG_BASE`], which the address arithmetic below reads
+/// a dozen times. The field table in [`generated`] is Blackhole's `cfg_defines.h`,
+/// so this is Blackhole's value.
+const TENSIX_CFG_BASE: u64 = Blackhole::TENSIX_CFG_BASE;
 
 pub use generated::{CFG_STATE_SIZE, THD_STATE_SIZE};
 

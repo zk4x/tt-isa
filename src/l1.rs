@@ -6,7 +6,8 @@
 //! never name an address in the data arena: the caller declares what it needs and
 //! the compiler places it there.
 
-use crate::{dm, mailbox, tensix};
+use crate::arch::{Arch, blackhole::Blackhole};
+use crate::{dm, mailbox};
 
 /// A byte range of L1, `[base, end)`.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -30,12 +31,15 @@ impl Region {
 /// image is above the low L1 words and reached by the jump at its hardwired
 /// reset PC.
 pub mod roles {
-    use crate::tensix::Core;
 
     /// One role image's slot.
     pub const SLOT: u64 = 0x2800;
     /// The end of the last slot: NC's default reset PC, where its stub lives.
-    pub const END: u64 = Core::NC.default_reset_pc() as u64;
+    ///
+    /// The value is `Arch::default_reset_pc(Core::NC)` on Blackhole, spelled as a
+    /// literal because this is a `const` position and the per-core lookup is not
+    /// allowed to be one; [`the_role_slots_end_at_ncs_reset_pc`] proves they agree.
+    pub const END: u64 = 0x1_2000;
     /// The load address (and link address) of the T0, T1 and T2 role images.
     pub const BASE: [u64; 3] = [END - 3 * SLOT, END - 2 * SLOT, END - SLOT];
     const _: () = assert!(BASE[0] % 32 == 0);
@@ -61,11 +65,29 @@ pub const NC_IMAGE: Region = Region {
 pub const PROGRAM_CACHE: Region = Region {
     name: "program cache",
     base: mailbox::TRACE_BUFFER + mailbox::TRACE_BUFFER_BYTES,
-    end: tensix::L1_SIZE,
+    end: Blackhole::L1_SIZE,
 };
 
 const _: () = assert!(DATA.base % crate::dram::ALIGN == 0);
 const _: () = assert!(roles::BASE[0] == dm::IMAGE_BASE + dm::IMAGE_MAX);
 const _: () = assert!(NC_IMAGE.end <= DATA.base);
 const _: () = assert!(DATA.end <= PROGRAM_CACHE.base);
-const _: () = assert!(PROGRAM_CACHE.end == tensix::L1_SIZE);
+const _: () = assert!(PROGRAM_CACHE.end == Blackhole::L1_SIZE);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tensix::Core;
+
+    /// The role slots end where NC starts, which is a per-core lookup and so
+    /// cannot be a `const`: the literal in [`roles::END`] is checked against the
+    /// architecture here instead.
+    #[test]
+    fn the_role_slots_end_at_ncs_reset_pc() {
+        assert_eq!(
+            Blackhole::default_reset_pc(Core::NC),
+            Ok(roles::END as u32),
+            "roles::END must be NC's default reset PC"
+        );
+    }
+}

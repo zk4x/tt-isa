@@ -17,6 +17,7 @@
 #![forbid(unsafe_code)]
 
 pub mod arc;
+pub mod arch;
 pub mod backend;
 pub mod cfg;
 pub mod dataflow;

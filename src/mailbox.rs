@@ -11,6 +11,8 @@
 /// Byte offset of the mailbox within a tile's L1.
 pub mod guard;
 
+use crate::arch::{Arch, blackhole::Blackhole};
+
 pub const MAILBOX_BASE: u64 = 0x0010_0000;
 
 /// Offsets of the words the firmware runtime itself writes, from whichever base
@@ -199,7 +201,7 @@ pub mod loops {
 /// mailbox (tt-metal's `kernel_text_offset`).
 pub const TRACE_BUFFER: u64 = 0x0014_0000;
 /// Bytes in [`TRACE_BUFFER`].
-pub const TRACE_BUFFER_BYTES: u64 = 1024 * crate::tensix::timestamper::EVENT_BYTES;
+pub const TRACE_BUFFER_BYTES: u64 = 1024 * crate::tensix::TIMESTAMP_EVENT_BYTES;
 
 /// What the firmware traces. A token is 29 bits: the event in bits 0..8, its
 /// source in bits 8..12 (a Tensix thread's role runner, or the data mover),
@@ -309,9 +311,8 @@ pub const fn dump_offset(row: u32, column: u32) -> u64 {
 // Compile-time rather than a test: if the mailbox ever moved past the end of L1,
 // every access to it would be out of bounds, and that should stop the build rather
 // than fail a test run.
-const _: () = assert!(MAILBOX_BASE + MAILBOX_SIZE <= crate::tensix::L1_SIZE);
-const _: () =
-    assert!(dump_offset(DUMP_MAX_ROWS - 1, DUMP_ROW_WORDS - 1) + 4 <= crate::tensix::L1_SIZE);
+const _: () = assert!(MAILBOX_BASE + MAILBOX_SIZE <= Blackhole::L1_SIZE);
+const _: () = assert!(dump_offset(DUMP_MAX_ROWS - 1, DUMP_ROW_WORDS - 1) + 4 <= Blackhole::L1_SIZE);
 // The launch-message words have to stay inside the mailbox the firmware owns.
 const _: () = assert!(DUMP_ROW_FIRST + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(TRACE + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
@@ -322,7 +323,7 @@ const _: () = assert!(ENABLES + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(ARGS + 4 <= MAILBOX_BASE + MAILBOX_SIZE);
 const _: () = assert!(UNWEDGE + 4 <= MOP_CFG_VALID);
 const _: () = assert!(MOP_CFG + 9 * 4 <= MAILBOX_BASE + MAILBOX_SIZE);
-const _: () = assert!(TRACE_BUFFER + TRACE_BUFFER_BYTES <= crate::tensix::L1_SIZE);
+const _: () = assert!(TRACE_BUFFER + TRACE_BUFFER_BYTES <= Blackhole::L1_SIZE);
 const _: () = assert!(TRACE_BUFFER % 16 == 0);
 // The barrier word is the host's, in the free part of the mailbox page.
 const _: () = assert!(BARRIER % 4 == 0);
@@ -339,6 +340,9 @@ const _: () = assert!(BARRIER + 4 <= DUMP);
 /// reports through its own mailbox, laid out like the single-core one above:
 /// the same offsets, from a per-thread base.
 pub mod launch {
+    use crate::arch::Arch;
+    use crate::arch::blackhole::Blackhole;
+
     /// First role launch mailbox, clear of the single-core mailbox and its dump.
     pub const BASE: u64 = 0x0011_0000;
     /// Distance between launch mailboxes: room for the message and the dump.
@@ -457,7 +461,7 @@ pub mod launch {
     // The last role's dump must stay inside L1.
     const _: () = assert!(
         Mailbox::of(2).dump_offset(super::DUMP_MAX_ROWS - 1, super::DUMP_ROW_WORDS - 1) + 4
-            <= crate::tensix::L1_SIZE
+            <= Blackhole::L1_SIZE
     );
     // The launch mailboxes end before the trace buffer begins.
     const _: () = assert!(BASE + 4 * STRIDE <= super::TRACE_BUFFER);
@@ -502,12 +506,15 @@ mod tests {
 
     #[test]
     fn mailbox_clears_every_default_reset_pc() {
-        for core in crate::tensix::Core::ALL {
+        use crate::arch::Arch;
+        use crate::arch::blackhole::Blackhole;
+
+        for core in crate::tensix::Core::BLACKHOLE {
+            let pc = Blackhole::default_reset_pc(core).expect("a Blackhole core");
             assert!(
-                (core.default_reset_pc() as u64) < MAILBOX_BASE,
-                "{} starts at {:#x}, which collides with the mailbox",
+                (pc as u64) < MAILBOX_BASE,
+                "{} starts at {pc:#x}, which collides with the mailbox",
                 core.name(),
-                core.default_reset_pc()
             );
         }
     }

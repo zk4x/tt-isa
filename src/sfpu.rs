@@ -13,9 +13,10 @@
 //! is a guess about the encoding, and nothing in the generated layer is a guess
 //! about the hardware.
 
+use crate::arch::Arch;
+use crate::arch::blackhole::Blackhole;
 use crate::isa::generated::encode;
 use crate::isa::{self};
-use crate::tensix;
 
 pub use crate::isa::Instruction;
 
@@ -171,6 +172,10 @@ impl EncodeError {
                 value,
                 bits: width as u32,
             },
+            // The generated layer's only refusal is a field that does not fit; a
+            // core or thread this architecture does not have is refused before an
+            // instruction is encoded.
+            _ => panic!("sfpu has no spelling for an architecture refusal"),
         }
     }
 }
@@ -471,7 +476,7 @@ pub const fn load_f32(vd: u32, bits: u32) -> Result<[Instruction; 2], EncodeErro
 /// a word access is the correct one.
 pub const fn dst32_address(row: u32, column: u32) -> u64 {
     debug_assert!(row < 512 && column < 16);
-    tensix::DST_BASE + ((row * 16 + column) as u64) * 4
+    Blackhole::DST_BASE + ((row * 16 + column) as u64) * 4
 }
 
 /// Convert a word read from `Dst` through the RISCV mapping into an IEEE754 FP32
@@ -726,14 +731,14 @@ mod tests {
 
     #[test]
     fn dst_addresses_are_word_indexed_from_the_mapping_base() {
-        assert_eq!(dst32_address(0, 0), tensix::DST_BASE);
-        assert_eq!(dst32_address(0, 1), tensix::DST_BASE + 4);
-        assert_eq!(dst32_address(1, 0), tensix::DST_BASE + 64);
+        assert_eq!(dst32_address(0, 0), Blackhole::DST_BASE);
+        assert_eq!(dst32_address(0, 1), Blackhole::DST_BASE + 4);
+        assert_eq!(dst32_address(1, 0), Blackhole::DST_BASE + 64);
         // Inverse of Dst.md's `Addr = (Addr - 0xFFBD8000) / 4;
         // Value = Dst32b[Addr / 16][Addr % 16]`.
         for (row, col) in [(0u32, 0u32), (3, 15), (7, 2), (511, 15)] {
             let a = dst32_address(row, col);
-            let idx = ((a - tensix::DST_BASE) / 4) as u32;
+            let idx = ((a - Blackhole::DST_BASE) / 4) as u32;
             assert_eq!((idx / 16, idx % 16), (row, col));
         }
     }
@@ -756,7 +761,7 @@ mod tests {
         // registers at reset: Row = (Addr & ~3) + Lane / 8, Column = (Lane & 7) * 2.
         // Lane 0 therefore lands at Dst[0][0], which is what the gate reads back.
         let lane = 0u32;
-        assert_eq!(dst32_address(lane / 8, (lane & 7) * 2), tensix::DST_BASE);
+        assert_eq!(dst32_address(lane / 8, (lane & 7) * 2), Blackhole::DST_BASE);
         let lane = 9u32;
         assert_eq!(dst32_address(lane / 8, (lane & 7) * 2), dst32_address(1, 2));
     }

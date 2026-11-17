@@ -39,6 +39,8 @@
 //! (its decode is amortised over its requests anyway).
 
 use super::{Descriptor, MAILBOX_BASE, TXN_B, error, op};
+use crate::arch::Arch;
+use crate::arch::blackhole::Blackhole;
 use crate::dram::{CHANNELS, Dram};
 use crate::noc::niu::{
     CMD_RD, DramMove, Endpoint, MAX_REQUEST_BYTES, MMIO_START, Niu, RESP_MARKED, STATIC_VC_1, TxnId,
@@ -239,7 +241,7 @@ pub fn guard(e: &[u32; 8], me_hi: u32, endpoint_ok: impl FnOnce(u32) -> bool) ->
     // test has already refused.
     let room = MMIO_START.wrapping_sub(len);
     // The destination is L1, which `Descriptor::decode` bounds by `L1_SIZE`, not by `MMIO_START` as `DramMove` does.
-    let l1_room = (crate::tensix::L1_SIZE as u32).wrapping_sub(len);
+    let l1_room = (Blackhole::L1_SIZE as u32).wrapping_sub(len);
     (len.wrapping_sub(1) < MAX_REQUEST_BYTES)
         & (targ <= room)
         & (ret <= l1_room)
@@ -567,7 +569,7 @@ mod tests {
             ("a reserved word set", forged(e, 6, 1)),
             (
                 "destination past L1",
-                forged(e, 3, crate::tensix::L1_SIZE as u32 - 64 + 128),
+                forged(e, 3, Blackhole::L1_SIZE as u32 - 64 + 128),
             ),
         ] {
             assert!(
@@ -607,9 +609,10 @@ mod tests {
 mod fuzz {
     extern crate std;
     use super::*;
+    use crate::arch::Arch;
+    use crate::arch::blackhole::Blackhole;
     use crate::dm::Mover;
     use crate::noc::niu::Command;
-    use crate::tensix::L1_SIZE;
 
     struct Rng(u64);
     impl Rng {
@@ -687,7 +690,7 @@ mod fuzz {
             CHANNEL - 64,
             r_any,
         ]);
-        let top = (L1_SIZE as u32).wrapping_sub(len) / 64 * 64 + off % 64;
+        let top = (Blackhole::L1_SIZE as u32).wrapping_sub(len) / 64 * 64 + off % 64;
         let l1 = r.pick(&[
             off % 64 + r_page,
             off % 64,
@@ -795,7 +798,7 @@ mod fuzz {
         for _ in 0..r.below(3) {
             let k = r.pick(&[1usize, 2, 3, 4, 6, 7]);
             let (any, small) = (r.next() as u32, r.below(1 << 13) as u32);
-            let l1_end = (L1_SIZE as u32).wrapping_sub(e[7]);
+            let l1_end = (Blackhole::L1_SIZE as u32).wrapping_sub(e[7]);
             e[k] = r.pick(&[
                 0,
                 any,
@@ -839,7 +842,7 @@ mod fuzz {
                     "target past the channel: {e:x?}"
                 );
                 assert!(
-                    ret as u64 + len as u64 <= L1_SIZE,
+                    ret as u64 + len as u64 <= Blackhole::L1_SIZE,
                     "destination past L1: {usable:#x} {me:?} {e:x?}"
                 );
                 assert_eq!((targ ^ ret) & 63, 0, "{e:x?}");
