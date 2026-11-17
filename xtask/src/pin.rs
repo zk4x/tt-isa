@@ -23,6 +23,18 @@ pub const TT_METAL_REV: &str = "81989dcdb8f9b340c932ae7a71a346f4f08703eb";
 pub const CFG_DEFINES_SHA256: &str =
     "bc2636abc3ea04e6ca322923e6f2713b242857d021d8ef39b9180a14bcb1a5b8";
 
+/// The tt-metal commit whose Quasar `cfg_defines.h` the configuration table is
+/// generated from.
+///
+/// `QUASAR_REV` cannot serve: at that revision the header (`tt_2xx/quasar`) does not
+/// exist yet. Quasar's register map lives under `tt_metal/hw/inc/internal/tt-2xx/`,
+/// which arrived later.
+pub const TT_METAL_QUASAR_REV: &str = "ba9340e3a45ac5ba51c752a49341f2def28d0514";
+
+/// SHA-256 of that Quasar header.
+pub const CFG_DEFINES_QUASAR_SHA256: &str =
+    "9f094ce671b79f6aead51bd19dabe3b8ae27dcd154ec2f890387a468249816ee";
+
 /// The tt-metal commit whose Quasar LLK `assembly.yaml` the Quasar instruction
 /// table is generated from.
 ///

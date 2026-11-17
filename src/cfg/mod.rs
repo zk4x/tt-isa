@@ -1,6 +1,6 @@
 //! Tensix backend configuration fields.
 //!
-//! The field table in [`generated`] is produced by `cargo xtask gen-cfg` from
+//! The field table in [`blackhole`] is produced by `cargo xtask gen-cfg` from
 //! tt-metal's `cfg_defines.h` at the commit `PINS.toml` records — the same commit
 //! `BackendConfiguration.md:17` cites. It is **generated, never transcribed**:
 //! there are 820 fields, and hand-copying them is a guaranteed bug source.
@@ -34,7 +34,8 @@
 //! entirely. [`ThreadConfigField`] therefore has no write address at all, and
 //! `SETC16`/`WRCFG` wrappers can take the type they actually accept.
 
-pub mod generated;
+pub mod blackhole;
+pub mod quasar;
 
 use crate::arch::Arch;
 use crate::arch::blackhole::Blackhole;
@@ -42,11 +43,11 @@ use crate::arch::blackhole::Blackhole;
 /// The backend configuration's base address.
 ///
 /// A name for [`Arch::TENSIX_CFG_BASE`], which the address arithmetic below reads
-/// a dozen times. The field table in [`generated`] is Blackhole's `cfg_defines.h`,
+/// a dozen times. The field table in [`blackhole`] is Blackhole's `cfg_defines.h`,
 /// so this is Blackhole's value.
 const TENSIX_CFG_BASE: u64 = Blackhole::TENSIX_CFG_BASE;
 
-pub use generated::{CFG_STATE_SIZE, THD_STATE_SIZE};
+pub use blackhole::{CFG_STATE_SIZE, THD_STATE_SIZE};
 
 /// `u32` words in one bank of `Config`.
 pub const CONFIG_WORDS_PER_BANK: u32 = CFG_STATE_SIZE * 4;
@@ -67,7 +68,7 @@ pub enum ConfigBank {
 
 /// A bitfield within the thread-agnostic `Config` variable.
 ///
-/// Construct only via [`generated`]; the fields are private so that a
+/// Construct only via [`blackhole`]; the fields are private so that a
 /// hand-written `ConfigField` cannot quietly enter the table.
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub struct ConfigField {
@@ -254,7 +255,7 @@ impl ConfigSpan {
 
 #[cfg(test)]
 mod tests {
-    use super::generated::{alu, thcon, thread};
+    use super::blackhole::{alu, thcon, thread};
     use super::*;
 
     #[test]
@@ -262,6 +263,43 @@ mod tests {
         assert_eq!(CFG_STATE_SIZE, 56);
         assert_eq!(THD_STATE_SIZE, 68);
         assert_eq!(CONFIG_WORDS_PER_BANK, 224);
+    }
+
+    /// Quasar's header is the same format with a different shape: three sections,
+    /// no `ThreadConfig` at all, and `CFG_STATE_SIZE` 94 (`tt-2xx/quasar/
+    /// cfg_defines.h`, pinned at `TT_METAL_QUASAR_REV`).
+    ///
+    /// This is the check that the generator reads a second header rather than only
+    /// the one it was written for: the counts come from the parse, and a section
+    /// base that drifted would put a field outside `Config`.
+    #[test]
+    fn the_quasar_table_is_the_pinned_headers_shape() {
+        use super::quasar;
+
+        assert_eq!(quasar::CFG_STATE_SIZE, 94);
+        assert_eq!(quasar::alu::CFGREG_BASE, 0);
+        assert_eq!(quasar::thcon::CFGREG_BASE, 12);
+        assert_eq!(quasar::global::CFGREG_BASE, 80);
+        // The pinned header has 1123 fields; the multi-word aggregates are spans,
+        // and there is no `ThreadConfig` section at all.
+        let total = quasar::ALL_CONFIG_FIELDS.len()
+            + quasar::ALL_THREAD_CONFIG_FIELDS.len()
+            + quasar::ALL_CONFIG_SPANS.len();
+        assert_eq!(total, 1123);
+        assert!(
+            quasar::ALL_THREAD_CONFIG_FIELDS.is_empty(),
+            "Quasar has no ThreadConfig"
+        );
+        // Every field has to land inside `Config`, or the section classification is
+        // wrong: `Config` is `CFG_STATE_SIZE * 4` words.
+        let words = quasar::CFG_STATE_SIZE * 4;
+        for (name, f) in quasar::ALL_CONFIG_FIELDS {
+            assert!(
+                u32::from(f.addr32()) < words,
+                "{name} at word {} is outside Config ({words} words)",
+                f.addr32()
+            );
+        }
     }
 
     /// The decisive check on the parse *and* the section classification.
@@ -272,14 +310,14 @@ mod tests {
     /// likely fall outside the other variable's bounds.
     #[test]
     fn every_field_is_in_bounds_for_its_variable() {
-        for (name, f) in generated::ALL_CONFIG_FIELDS {
+        for (name, f) in blackhole::ALL_CONFIG_FIELDS {
             assert!(
                 (f.addr32() as u32) < CONFIG_WORDS_PER_BANK,
                 "{name}: Config index {} exceeds {CONFIG_WORDS_PER_BANK}",
                 f.addr32()
             );
         }
-        for (name, f) in generated::ALL_THREAD_CONFIG_FIELDS {
+        for (name, f) in blackhole::ALL_THREAD_CONFIG_FIELDS {
             assert!(
                 (f.addr32() as u32) < THD_STATE_SIZE,
                 "{name}: ThreadConfig index {} exceeds {THD_STATE_SIZE}",
@@ -294,12 +332,12 @@ mod tests {
         // aggregates rather than bitfields. (The header also carries seven
         // `<SECTION>_CFGREG_BASE_ADDR32` defines, which are section metadata and
         // are emitted as each module's `CFGREG_BASE` rather than as fields.)
-        let total = generated::ALL_CONFIG_FIELDS.len()
-            + generated::ALL_THREAD_CONFIG_FIELDS.len()
-            + generated::ALL_CONFIG_SPANS.len();
+        let total = blackhole::ALL_CONFIG_FIELDS.len()
+            + blackhole::ALL_THREAD_CONFIG_FIELDS.len()
+            + blackhole::ALL_CONFIG_SPANS.len();
         assert_eq!(total, 820);
-        assert_eq!(generated::ALL_THREAD_CONFIG_FIELDS.len(), 223);
-        assert_eq!(generated::ALL_CONFIG_SPANS.len(), 2);
+        assert_eq!(blackhole::ALL_THREAD_CONFIG_FIELDS.len(), 223);
+        assert_eq!(blackhole::ALL_CONFIG_SPANS.len(), 2);
     }
 
     /// The `Config` sections partition the bank exactly, in the order their
@@ -310,19 +348,19 @@ mod tests {
     /// but would land outside that section's range.
     #[test]
     fn config_sections_partition_the_bank() {
-        use super::generated::{global, pack0, thcon, unpack0, unpack1};
+        use super::blackhole::{global, pack0, thcon, unpack0, unpack1};
 
         /// Module name, first word index, and that section's fields.
         type Section = (&'static str, u16, &'static [(&'static str, ConfigField)]);
 
         // In ascending base order.
         let sections: [Section; 6] = [
-            ("alu", alu::CFGREG_BASE, generated::ALU_FIELDS),
-            ("pack0", pack0::CFGREG_BASE, generated::PACK0_FIELDS),
-            ("unpack0", unpack0::CFGREG_BASE, generated::UNPACK0_FIELDS),
-            ("unpack1", unpack1::CFGREG_BASE, generated::UNPACK1_FIELDS),
-            ("thcon", thcon::CFGREG_BASE, generated::THCON_FIELDS),
-            ("global", global::CFGREG_BASE, generated::GLOBAL_FIELDS),
+            ("alu", alu::CFGREG_BASE, blackhole::ALU_FIELDS),
+            ("pack0", pack0::CFGREG_BASE, blackhole::PACK0_FIELDS),
+            ("unpack0", unpack0::CFGREG_BASE, blackhole::UNPACK0_FIELDS),
+            ("unpack1", unpack1::CFGREG_BASE, blackhole::UNPACK1_FIELDS),
+            ("thcon", thcon::CFGREG_BASE, blackhole::THCON_FIELDS),
+            ("global", global::CFGREG_BASE, blackhole::GLOBAL_FIELDS),
         ];
 
         let mut previous_end = 0u16;
@@ -352,7 +390,7 @@ mod tests {
 
     #[test]
     fn masks_and_shifts_are_consistent() {
-        for (name, f) in generated::ALL_CONFIG_FIELDS {
+        for (name, f) in blackhole::ALL_CONFIG_FIELDS {
             assert_ne!(f.mask(), 0, "{name} has an empty mask");
             // The mask's lowest set bit must be the shift amount, or extract and
             // insert disagree about where the field starts.
@@ -372,7 +410,7 @@ mod tests {
                 f.mask()
             );
         }
-        for (name, f) in generated::ALL_THREAD_CONFIG_FIELDS {
+        for (name, f) in blackhole::ALL_THREAD_CONFIG_FIELDS {
             assert_ne!(f.mask(), 0, "{name} has an empty mask");
             assert_eq!(f.mask().trailing_zeros(), f.shamt() as u32, "{name}");
         }

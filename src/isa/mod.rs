@@ -1,6 +1,6 @@
 //! The Tensix instruction set, generated from the specification.
 //!
-//! [`generated`] is produced by `cargo xtask gen-isa` from `Diagrams/Src/Bits32.lua`
+//! [`blackhole`] is produced by `cargo xtask gen-isa` from `Diagrams/Src/Bits32.lua`
 //! at the revision pinned in `xtask/src/pin.rs`. It is **generated, never
 //! transcribed**: 145 encodings and 814 bit fields, and hand-copying them is a
 //! guaranteed bug source. The five SFPU encoders that predate it were hand-written,
@@ -35,7 +35,7 @@
 //! the specification already knows the answer. Every [`InstructionDef`] carries its
 //! [`Provenance`], derived from which tree embeds its diagram. See that type.
 
-pub mod generated;
+pub mod blackhole;
 pub mod quasar;
 
 /// One bit field of an instruction.
@@ -147,7 +147,7 @@ pub enum Provenance {
     SharedWithWormhole,
     /// Only a Wormhole page embeds it, and the Blackhole page of the same name
     /// embeds a *different* diagram. **This layout is Wormhole's.** Such encodings
-    /// live under `generated::encode::wormhole`, so reaching one on Blackhole has to
+    /// live under `blackhole::encode::wormhole`, so reaching one on Blackhole has to
     /// be deliberate.
     SupersededOnBlackhole { by: &'static str },
     /// Only a Wormhole page embeds it, and Blackhole has no such page at all.
@@ -535,7 +535,7 @@ impl Instruction {
 
 #[cfg(test)]
 mod tests {
-    use super::generated::{ALL, ALL_LAYOUTS, datum, defs};
+    use super::blackhole::{ALL, ALL_LAYOUTS, datum, defs};
     use super::*;
     extern crate std;
     use std::collections::BTreeMap;

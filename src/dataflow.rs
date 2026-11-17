@@ -238,7 +238,7 @@ mod tests {
     fn seed_directive_opcode_is_unused() {
         let opcode = (SEED_DIRECTIVE >> 24) as u8;
         assert!(
-            crate::isa::generated::ALL
+            crate::isa::blackhole::ALL
                 .iter()
                 .all(|def| def.opcode() != opcode)
         );

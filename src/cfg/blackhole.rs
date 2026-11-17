@@ -16,6 +16,7 @@ use super::{ConfigField, ConfigSpan, ThreadConfigField};
 
 /// `uint32_t Config[2][CFG_STATE_SIZE * 4]`
 pub const CFG_STATE_SIZE: u32 = 56;
+
 /// `struct {uint16_t Value, Padding;} ThreadConfig[3][THD_STATE_SIZE]`
 pub const THD_STATE_SIZE: u32 = 68;
 

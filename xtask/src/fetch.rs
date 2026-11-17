@@ -118,6 +118,52 @@ pub fn cfg_defines(force: bool) -> Result<(), String> {
     Ok(())
 }
 
+/// Ensure the pinned Quasar `cfg_defines.h` is present and matches its pin.
+pub fn quasar_cfg_defines_if_needed() -> Result<(), String> {
+    let path = workspace_root().join("vendor").join("cfg_defines_quasar.h");
+    if path.exists() {
+        let bytes = std::fs::read(&path).map_err(|e| format!("reading {}: {e}", path.display()))?;
+        if sha256(&bytes)? == pin::CFG_DEFINES_QUASAR_SHA256 {
+            return Ok(());
+        }
+    }
+    quasar_cfg_defines(true)
+}
+
+/// Download the pinned Quasar `cfg_defines.h` into `vendor/`.
+pub fn quasar_cfg_defines(force: bool) -> Result<(), String> {
+    let dest = workspace_root().join("vendor").join("cfg_defines_quasar.h");
+    if dest.exists() && !force {
+        let bytes = std::fs::read(&dest).map_err(|e| format!("reading {}: {e}", dest.display()))?;
+        let got = sha256(&bytes)?;
+        if got == pin::CFG_DEFINES_QUASAR_SHA256 {
+            println!("{} is already present and matches the pin", dest.display());
+            return Ok(());
+        }
+        return Err(format!(
+            "{} hashes {got}, not the pinned {}.\nRe-run with --force to replace it.",
+            dest.display(),
+            pin::CFG_DEFINES_QUASAR_SHA256
+        ));
+    }
+    let url = format!(
+        "https://raw.githubusercontent.com/tenstorrent/tt-metal/{}/tt_metal/hw/inc/internal/tt-2xx/quasar/cfg_defines.h",
+        pin::TT_METAL_QUASAR_REV
+    );
+    download(&url, &dest)?;
+    let bytes = std::fs::read(&dest).map_err(|e| format!("reading {}: {e}", dest.display()))?;
+    let got = sha256(&bytes)?;
+    if got != pin::CFG_DEFINES_QUASAR_SHA256 {
+        let _ = std::fs::remove_file(&dest);
+        return Err(format!(
+            "{} hashes {got}, not the pinned {}: the download is corrupted",
+            dest.display(),
+            pin::CFG_DEFINES_QUASAR_SHA256
+        ));
+    }
+    Ok(())
+}
+
 fn verify(path: &Path) -> Result<(), String> {
     let bytes = std::fs::read(path).map_err(|e| format!("reading {}: {e}", path.display()))?;
     let got = sha256(&bytes)?;

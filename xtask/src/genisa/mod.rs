@@ -1,7 +1,7 @@
 // Copyright (C) 2025 zk4x
 // SPDX-License-Identifier: Apache-2.0
 
-//! `Diagrams/Src/Bits32.lua` -> `tt_isa::isa::generated`.
+//! `Diagrams/Src/Bits32.lua` -> `tt_isa::isa::blackhole`.
 //!
 //! The specification describes the instruction set twice: as a drawing script, and
 //! as a `TT_*(…)` macro template on each instruction's page. Only the drawing is
@@ -118,7 +118,7 @@ pub fn load() -> Result<Sources, String> {
     })
 }
 
-/// Regenerate `src/isa/generated.rs`.
+/// Regenerate `src/isa/blackhole.rs`.
 pub fn generate(check_only: bool) -> Result<(), String> {
     let sources = load()?;
     let rendered = render::render(&render::Input {
@@ -131,7 +131,7 @@ pub fn generate(check_only: bool) -> Result<(), String> {
     let root = util::workspace_root();
     let generated = util::rustfmt(&rendered, &root)?;
     util::commit(
-        &root.join("src/isa/generated.rs"),
+        &root.join("src/isa/blackhole.rs"),
         &generated,
         check_only,
         "Bits32.lua",

@@ -27,7 +27,7 @@
 //! composed into a word before it is written.
 
 use crate::cfg::{ConfigField, ConfigSpan, ThreadConfigField};
-use crate::isa::generated::encode;
+use crate::isa::blackhole::encode;
 use crate::isa::{self};
 
 pub use crate::isa::Instruction;
@@ -44,7 +44,7 @@ pub const CONFIG_INDEX_LIMIT: u32 = crate::cfg::CONFIG_WORDS_PER_BANK;
 ///
 /// `BackendConfiguration.md:40`: writing anything here, except via `RMWCIB`, zeroes
 /// `Config[i][0 .. GLOBAL_CFGREG_BASE_ADDR32]`.
-pub const STATE_RESET_EN_ADDR32: u16 = crate::cfg::generated::alu::STATE_RESET_EN.addr32();
+pub const STATE_RESET_EN_ADDR32: u16 = crate::cfg::blackhole::alu::STATE_RESET_EN.addr32();
 
 /// `ThreadConfig` entries, and the exclusive upper bound on a `SETC16` `CfgIndex`
 /// (`SETC16.md`: `if (CfgIndex >= THD_STATE_SIZE) UndefinedBehavior()`).
@@ -233,7 +233,7 @@ pub fn write_prng_seed(gpr: u32, seed: u32) -> Result<[Instruction; 4], EncodeEr
     let halves = set_gpr(gpr, seed)?;
     let write = write_word(
         gpr,
-        crate::cfg::generated::global::PRNG_SEED_Seed_Val.addr32(),
+        crate::cfg::blackhole::global::PRNG_SEED_Seed_Val.addr32(),
     )?;
     Ok([halves[0], halves[1], write, nop()])
 }
@@ -672,8 +672,8 @@ pub const fn wait_for_matrix(before: Before) -> Result<Instruction, EncodeError>
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cfg::generated::{alu, thcon, thread};
-    use crate::isa::generated::defs;
+    use crate::cfg::blackhole::{alu, thcon, thread};
+    use crate::isa::blackhole::defs;
 
     #[test]
     fn diagnostic_seed_sequence_checks_the_register_and_scheduling_bubble() {

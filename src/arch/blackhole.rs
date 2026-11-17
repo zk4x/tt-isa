@@ -175,7 +175,7 @@ impl Arch for Blackhole {
     }
 
     fn dst_access_fmt(thread: u32) -> Result<ConfigField, EncodeError> {
-        use crate::cfg::generated::alu;
+        use crate::cfg::blackhole::alu;
         match thread {
             0 => Ok(alu::RISC_DEST_ACCESS_CTRL_SEC0_fmt),
             1 => Ok(alu::RISC_DEST_ACCESS_CTRL_SEC1_fmt),

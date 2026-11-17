@@ -15,7 +15,7 @@
 
 use crate::arch::Arch;
 use crate::arch::blackhole::Blackhole;
-use crate::isa::generated::encode;
+use crate::isa::blackhole::encode;
 use crate::isa::{self};
 
 pub use crate::isa::Instruction;
@@ -358,7 +358,7 @@ pub const fn nop() -> Instruction {
 /// This is the Blackhole encoding, with `AddrMod` three bits wide at bit 13 rather
 /// than Wormhole's two at bit 14. That is no longer a fact to remember: the two are
 /// separate entries in the generated table, and the Wormhole one is only reachable
-/// as `isa::generated::defs::wormhole::SFPSTORE`.
+/// as `isa::blackhole::defs::wormhole::SFPSTORE`.
 pub const fn store(
     vd: u32,
     format: u32,
@@ -680,7 +680,7 @@ mod tests {
     /// decided rather than assumed.
     #[test]
     fn the_cases_automatic_stalling_misses_are_the_documented_ones() {
-        use crate::isa::generated::encode;
+        use crate::isa::blackhole::encode;
 
         // Nothing this module's own wrappers emit is on the list, which is why the
         // step 4 firmware pushes SFPMUL straight into SFPSTORE with no SFPNOP.

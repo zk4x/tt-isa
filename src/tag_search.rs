@@ -19,7 +19,7 @@
 //! Silicon status: `UNVERIFIED`. Nothing here has executed on a Blackhole card;
 //! ttsim does not implement the block (divergence row 92).
 
-use crate::cfg::generated::global as g;
+use crate::cfg::blackhole::global as g;
 use crate::cfg::{ConfigBank, ConfigField};
 
 /// The layout of the RISCV B probe's staged script and results

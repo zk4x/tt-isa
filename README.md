@@ -41,7 +41,7 @@ cargo add tt-isa
 ```
 
 ```rust
-use tt_isa::isa::generated::encode;
+use tt_isa::isa::blackhole::encode;
 
 // `MOVA2D` with `Move8Rows`: the word a kernel pushes to the instruction FIFO.
 let word = encode::Mova2D::ZERO.move8_rows(1).encode().unwrap().word();
@@ -64,8 +64,8 @@ assert_eq!(word, 0x3700_0001);
 
 | Module | What it holds |
 |---|---|
-| `isa` | The Tensix instruction set. `isa::generated` is produced by `cargo xtask gen-isa`; each encoding carries a `Provenance` (Blackhole, shared, Wormhole-only `UNVERIFIED`, measured, or Quasar). Wormhole forms are in `isa::generated::defs::wormhole`. `isa::quasar` is produced separately by `cargo xtask gen-quasar` from tt-metal's Quasar LLK `assembly.yaml`. |
-| `cfg` | Backend-configuration fields. `cfg::generated` is produced by `cargo xtask gen-cfg` from `cfg_defines.h`. |
+| `isa` | The Tensix instruction set. `isa::blackhole` is produced by `cargo xtask gen-isa`; each encoding carries a `Provenance` (Blackhole, shared, Wormhole-only `UNVERIFIED`, measured, or Quasar). Wormhole forms are in `isa::blackhole::defs::wormhole`. `isa::quasar` is produced separately by `cargo xtask gen-quasar` from tt-metal's Quasar LLK `assembly.yaml`. |
+| `cfg` | Backend-configuration fields, one table per architecture: `cfg::blackhole` and `cfg::quasar`, both produced by `cargo xtask gen-cfg` from their pinned `cfg_defines.h`. |
 | `backend`, `sfpu`, `sync` | Hand-written layers over the encodings: checked config reads/mutations/writes and unit waits, SFPU encodings, Tensix semaphores. |
 | `noc` | NoC coordinate spaces (typed per NoC), NIU registers, `noc::grid::Tensix` (the surviving columns), `noc::probe` (the probe image's protocol) and `noc::read_loop` (the mover's read loop). |
 | `tensix` | Tile memory map, baby RISC-V cores (`Core`), reset PCs, soft reset. |
@@ -99,8 +99,9 @@ settling interval does restart it.
 
 ## Gotchas
 
-- Never edit `src/isa/generated.rs`, `src/isa/quasar.rs` or
-  `src/cfg/generated.rs`. Regenerate with `cargo xtask gen-isa` / `gen-quasar` /
+- Never edit `src/isa/blackhole.rs`, `src/isa/quasar.rs`,
+  `src/cfg/blackhole.rs` or `src/cfg/quasar.rs`. Regenerate with
+  `cargo xtask gen-isa` / `gen-quasar` /
   `gen-cfg` in this repository (`xtask` is not in the published package, which
   ships the generated Rust and needs nothing else); the generators fetch their
   pinned input into `vendor/` themselves, and `--check` fails instead of

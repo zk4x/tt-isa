@@ -1,7 +1,7 @@
 // Copyright (C) 2025 zk4x
 // SPDX-License-Identifier: Apache-2.0
 
-//! The three generated tables: `src/isa/generated.rs`, `src/cfg/generated.rs`
+//! The three generated tables: `src/isa/blackhole.rs`, `src/cfg/blackhole.rs`
 //! and `src/isa/quasar.rs`.
 //!
 //! All are committed rather than produced by a build script, so that `tt-isa`
@@ -28,8 +28,8 @@ usage: cargo xtask <task>
 tasks:
   gen-isa [--check]   regenerate the instruction table from the pinned Bits32.lua;
                       --check fails instead of rewriting when the file is out of date
-  gen-cfg [--check]   regenerate the configuration-field table from the pinned
-                      cfg_defines.h; --check as above
+  gen-cfg [--check]   regenerate both configuration-field tables (Blackhole's and
+                      Quasar's) from their pinned cfg_defines.h; --check as above
   gen-quasar [--check]
                       regenerate the Quasar instruction table from the pinned
                       tt-metal Quasar LLK assembly.yaml; --check as above
@@ -46,7 +46,7 @@ fn main() -> ExitCode {
     let check = args.any(|a| a == "--check");
     let result = match task.as_deref() {
         Some("gen-isa") => genisa::generate(check),
-        Some("gen-cfg") => gencfg::generate(check),
+        Some("gen-cfg") => gencfg::generate(check).and_then(|()| gencfg::generate_quasar(check)),
         Some("gen-quasar") => quasar::generate(check),
         Some("fetch-spec") => fetch::spec(true),
         Some("fetch-cfg") => fetch::cfg_defines(true),
