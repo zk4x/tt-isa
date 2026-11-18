@@ -38,12 +38,20 @@ impl Cfg for Fields {
     const PRNG_SEED_Seed_Val: ConfigField = crate::cfg::quasar::global::PRNG_SEED_Seed_Val;
 }
 
+/// Stall resources, semaphores and the hand-offs built on them.
+pub mod backend;
+/// The two DRAM channels and their endpoints.
+pub mod dram;
+/// How a hart issues a Tensix instruction and a mover issues a NoC transaction.
+pub mod issue;
 /// The fixed regions of a tile's 4 MiB L1.
 pub mod l1;
 /// The L1 contract between host and firmware.
 pub mod mailbox;
 /// NoC coordinates, the one NIU's register block and the fixed grid.
 pub mod noc;
+/// The SFPU's register-file formats and immediate encodings.
+pub mod sfpu;
 
 /// Where a hart's reset bit lives, as another core or the host sees it.
 const TILE_RESET: u64 = 0x0301_79B0;
