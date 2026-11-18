@@ -54,6 +54,10 @@ pub const LREG_ZERO: u32 = 9;
 /// `LReg.md:13` for the value).
 pub const LREG_ONE: u32 = 10;
 
+/// The `LReg` holding a constant `-1` (all ones) in every lane
+/// (`p_sfpu::LCONST_neg1`, `ckernel_instr_params.h:388`).
+pub const LREG_NEG_ONE: u32 = 11;
+
 /// `SFPMAD`: lanewise `LReg[vd] = ±(LReg[va] * LReg[vb]) ± LReg[vc]`.
 pub const fn mad(
     va: u32,
